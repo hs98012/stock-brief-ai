@@ -1,0 +1,73 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-stock_brief}
+      POSTGRES_USER: ${POSTGRES_USER:-stock_brief}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-for-local-development}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://stock_brief:change-me-for-local-development@postgres:5432/stock_brief}
+      DB_POOL_RECYCLE_SECONDS: ${DB_POOL_RECYCLE_SECONDS:-300}
+      DATA_DIR: /data
+      MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-52428800}
+      OCR_MIN_NATIVE_TEXT_CHARS: ${OCR_MIN_NATIVE_TEXT_CHARS:-80}
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-ollama}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-bge-m3}
+      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-1024}
+      GENERATION_PROVIDER: ${GENERATION_PROVIDER:-ollama}
+      GENERATION_MODEL: ${GENERATION_MODEL:-gemma3:4b}
+      GENERATION_TEMPERATURE: ${GENERATION_TEMPERATURE:-0}
+      OLLAMA_GENERATION_TIMEOUT_SECONDS: ${OLLAMA_GENERATION_TIMEOUT_SECONDS:-600}
+      ANALYSIS_LLM_PROVIDER: ${ANALYSIS_LLM_PROVIDER:-gemini}
+      ANALYSIS_LLM_FALLBACK_PROVIDER: ${ANALYSIS_LLM_FALLBACK_PROVIDER:-none}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.7-flash}
+      GEMINI_TIMEOUT_SECONDS: ${GEMINI_TIMEOUT_SECONDS:-30}
+      GEMINI_MAX_ATTEMPTS: ${GEMINI_MAX_ATTEMPTS:-2}
+      GEMINI_RETRY_BASE_DELAY_SECONDS: ${GEMINI_RETRY_BASE_DELAY_SECONDS:-1}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - uploads_data:/data
+    ports:
+      - "${BACKEND_HOST_PORT:-8001}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8001}
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8001}
+    ports:
+      - "${FRONTEND_HOST_PORT:-3000}:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  uploads_data:

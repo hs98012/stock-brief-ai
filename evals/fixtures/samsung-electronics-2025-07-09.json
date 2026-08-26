@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "document": {
+    "filename": "250709_산업 코멘트_삼성전자_FF.pdf",
+    "company_name": "삼성전자",
+    "published_at": "2025-07-09",
+    "document_type": "broker_report"
+  },
+  "cases": [
+    {
+      "id": "summary-positive",
+      "question": "이 보고서를 읽고 주식 초보자 관점에서 호재와 악재를 각각 최대 3개까지 요약해줘.",
+      "expected_topic": "하반기 개선|밸류 갭 축소|악재 해소",
+      "expected_polarity": "positive",
+      "expected_pages": [1],
+      "notes": "기본 분석에서 본문 1페이지의 기업 직접 연결 긍정 요인이 최소 하나 선택되는지 확인한다."
+    },
+    {
+      "id": "second-quarter-miss",
+      "question": "삼성전자의 2분기 잠정 실적이 시장 기대를 밑돈 근거와 이유를 설명해줘.",
+      "expected_topic": "2분기|2Q25|시장 기대치 하회",
+      "expected_polarity": "negative",
+      "expected_pages": [1],
+      "notes": "매출 74조원과 영업이익 4.6조원 및 기대치 하회 설명은 PDF 1페이지 본문에 있다."
+    },
+    {
+      "id": "improvement-outlook",
+      "question": "보고서가 제시한 하반기 실적 개선 전망이나 긍정 요인은 무엇이야?",
+      "expected_topic": "하반기 개선|실적 모멘텀|적자 축소",
+      "expected_polarity": "positive",
+      "expected_pages": [1],
+      "notes": "하반기 실적 모멘텀과 파운드리 적자 축소 전망은 PDF 1페이지의 리포트 해석이다."
+    },
+    {
+      "id": "hbm-foundry-risk",
+      "question": "HBM 출하와 파운드리에서 확인되는 실적 위험 요인을 설명해줘.",
+      "expected_topic": "HBM|파운드리|재고 평가 충당금",
+      "expected_polarity": "negative",
+      "expected_pages": [1],
+      "notes": "HBM 출하 저조와 파운드리 재고 평가 충당금은 PDF 1페이지 본문에 명시돼 있다."
+    },
+    {
+      "id": "carbon-reduction-insufficient",
+      "question": "이 보고서에서 삼성전자의 2030년 탄소배출 감축 목표와 달성률을 설명해줘.",
+      "expected_topic": "탄소배출 감축",
+      "expected_polarity": "insufficient",
+      "expected_pages": [],
+      "notes": "6페이지 전체를 확인했으나 탄소배출 감축 목표나 달성률 근거가 없다."
+    }
+  ]
+}

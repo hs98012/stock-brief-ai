@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "document": {
+    "filename": "20260814_company_333834000.pdf",
+    "company_name": "삼성전자",
+    "published_at": "2026-08-14",
+    "document_type": "broker_report"
+  },
+  "cases": [
+    {
+      "id": "dram-hbm-pricing-positive",
+      "question": "DRAM 수급과 HBM 가격 인상이 삼성전자 실적에 주는 긍정 요인을 설명해줘.",
+      "expected_topic": "DRAM 수급|HBM 가격 인상|DRAM ASP",
+      "expected_polarity": "positive",
+      "expected_pages": [1],
+      "notes": "PDF 1페이지는 DRAM 공급 부족과 HBM 가격 인상이 DRAM 평균판매가격 상승을 이끈다고 설명한다."
+    },
+    {
+      "id": "foundry-loss-negative",
+      "question": "삼성전자 파운드리·LSI 부문의 적자와 수익성 부담을 설명해줘.",
+      "expected_topic": "Foundry/LS|파운드리 적자|영업이익",
+      "expected_polarity": "negative",
+      "expected_pages": [3],
+      "notes": "PDF 3페이지의 부문별 추정 표에서 Foundry/LS의 영업이익과 영업이익률이 음수로 제시된다. 행 제목과 지표명이 있어 해석 가능한 표 근거다."
+    },
+    {
+      "id": "industrial-accident-insufficient",
+      "question": "이 보고서에서 삼성전자의 산업재해 사망사고 예방 목표와 성과를 설명해줘.",
+      "expected_topic": "산업재해 사망사고|예방 목표",
+      "expected_polarity": "insufficient",
+      "expected_pages": [],
+      "notes": "전체 문서에 산업재해 사망사고 예방 목표나 성과를 뒷받침하는 근거가 없다. ESG 페이지에는 탄소 지표가 있으므로 탄소 질문을 근거 부족 case로 사용하지 않는다."
+    }
+  ]
+}

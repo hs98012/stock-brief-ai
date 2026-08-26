@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "document": {
+    "filename": "20260630_company_438746000.pdf",
+    "company_name": "삼성전자",
+    "published_at": "2026-06-29",
+    "document_type": "broker_report"
+  },
+  "cases": [
+    {
+      "id": "memory-bottleneck-positive",
+      "question": "메모리 반도체 공급 병목이 삼성전자 실적에 주는 긍정 요인을 설명해줘.",
+      "expected_topic": "메모리 반도체 병목|수익성 급상승|메모리 가격",
+      "expected_polarity": "positive",
+      "expected_pages": [1],
+      "notes": "PDF 1페이지는 메모리 공급 병목과 가격 환경이 메모리 업체 수익성에 미치는 영향을 설명한다."
+    },
+    {
+      "id": "second-quarter-cost-burden",
+      "question": "2분기 영업이익이 기존 예상을 밑도는 이유와 연간 실적 부담을 설명해줘.",
+      "expected_topic": "성과급 충당금|예상을 하회|영업이익 전망",
+      "expected_polarity": "negative",
+      "expected_pages": [1],
+      "notes": "PDF 1페이지는 성과급 충당금과 세트 완제품 수익성 저하 때문에 2분기 영업이익 및 연간 전망을 낮춘다."
+    },
+    {
+      "id": "workforce-diversity-insufficient",
+      "question": "이 보고서에서 삼성전자의 임직원 여성 비율과 다양성 목표를 설명해줘.",
+      "expected_topic": "임직원 여성 비율|다양성 목표",
+      "expected_polarity": "insufficient",
+      "expected_pages": [],
+      "notes": "전체 문서에 임직원 여성 비율이나 다양성 목표를 뒷받침하는 근거가 없다."
+    }
+  ]
+}

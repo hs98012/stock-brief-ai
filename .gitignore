@@ -1,0 +1,17 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+postgres_data/
+backend/data/raw/*
+backend/data/pages/*
+!backend/data/raw/.gitkeep
+!backend/data/raw/README.md
+!backend/data/pages/.gitkeep
+.coverage
+evals/results/
+.DS_Store

@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "document": {
+    "filename": "20260805_company_622985000.pdf",
+    "company_name": "삼성전자",
+    "published_at": "2026-07-31",
+    "document_type": "broker_report"
+  },
+  "cases": [
+    {
+      "id": "hbm4-share-positive",
+      "question": "HBM4 판매와 HBM 시장 점유율에서 확인되는 긍정 요인을 설명해줘.",
+      "expected_topic": "HBM4|HBM 시장 점유율|매출 증대",
+      "expected_polarity": "positive",
+      "expected_pages": [1],
+      "notes": "PDF 1페이지는 3분기부터 HBM4 판매가 시작되고 고객 확대와 함께 HBM 점유율 상승을 전망한다."
+    },
+    {
+      "id": "demand-price-resistance-risk",
+      "question": "메모리 가격 상승과 AI 데이터센터 투자에서 보고서가 언급한 수요 위험은 무엇이야?",
+      "expected_topic": "가격 저항|FCF 악화|AIDC Capex 감소",
+      "expected_polarity": "negative",
+      "expected_pages": [1],
+      "notes": "PDF 1페이지는 북미 CSP의 현금흐름 악화 가능성과 메모리 가격 상승에 따른 고객의 가격 저항을 시장 우려로 열거한다."
+    },
+    {
+      "id": "carbon-reduction-insufficient",
+      "question": "이 보고서에서 삼성전자의 2030년 탄소배출 감축 목표와 달성률을 설명해줘.",
+      "expected_topic": "탄소배출 감축",
+      "expected_polarity": "insufficient",
+      "expected_pages": [],
+      "notes": "전체 문서에 2030년 탄소배출 감축 목표나 달성률 근거가 없다."
+    }
+  ]
+}
