@@ -16,6 +16,22 @@ MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_BYTES", str(50 * 1024 * 1024)))
 DATA_DIR = Path(os.getenv("DATA_DIR", Path(__file__).resolve().parents[1] / "data"))
 
 
+def resolve_document_pdf(storage_path: str) -> Path:
+    """Resolve only an uploaded PDF contained by the persistent raw directory."""
+    raw_root = (DATA_DIR / "raw").resolve()
+    candidate = Path(storage_path).resolve()
+    try:
+        candidate.relative_to(raw_root)
+    except ValueError as exc:
+        raise ValueError("허용된 업로드 경로 밖의 파일입니다.") from exc
+    if candidate.suffix.casefold() != ".pdf" or not candidate.is_file():
+        raise FileNotFoundError("원본 PDF 파일을 찾을 수 없습니다.")
+    with candidate.open("rb") as stream:
+        if stream.read(5) != b"%PDF-":
+            raise ValueError("저장된 파일이 유효한 PDF가 아닙니다.")
+    return candidate
+
+
 def _read_upload(file: UploadFile) -> bytes:
     if not file.filename or Path(file.filename).suffix.lower() != ".pdf":
         raise HTTPException(415, "PDF 파일만 업로드할 수 있습니다.")
@@ -64,4 +80,3 @@ def ingest_document(db: Session, file: UploadFile, company_name: str, stock_code
             failed.status = DocumentStatus.failed; failed.error_reason = "문서 처리 중 오류가 발생했습니다."; db.commit()
         raise HTTPException(500, "문서 처리 중 오류가 발생했습니다.")
     return document, False
-

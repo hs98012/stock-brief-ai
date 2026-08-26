@@ -3,8 +3,9 @@ from uuid import UUID
 
 import os
 
-from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from .database import get_db
@@ -19,6 +20,7 @@ from .schemas import (AnalysisRequest, AnalysisResult, DocumentList, DocumentMet
     SearchRequest, SearchResponse)
 from .search import SearchFilters, hybrid_search
 from .service import ingest_document
+from . import service
 
 app = FastAPI(
     title="Stock Brief AI API",
@@ -56,6 +58,25 @@ def get_document(document_id: UUID, db: Session = Depends(get_db)) -> Document:
     if not document:
         raise HTTPException(404, "문서를 찾을 수 없습니다.")
     return document
+
+
+@app.get("/api/v1/documents/{document_id}/file", tags=["documents"], summary="업로드된 원본 PDF 보기")
+def get_document_file(document_id: UUID, page_number: int | None = Query(default=None, ge=1),
+    db: Session = Depends(get_db)) -> FileResponse:
+    document = db.get(Document, document_id)
+    if not document:
+        raise HTTPException(404, "문서를 찾을 수 없습니다.")
+    if page_number is not None and (document.total_pages is None or page_number > document.total_pages):
+        raise HTTPException(404, "요청한 PDF 페이지를 찾을 수 없습니다.")
+    try:
+        path = service.resolve_document_pdf(document.storage_path)
+    except (FileNotFoundError, ValueError) as exc:
+        raise HTTPException(404, "안전하게 제공할 수 있는 원본 PDF를 찾을 수 없습니다.") from exc
+    return FileResponse(path, media_type="application/pdf", headers={
+        "Content-Disposition": "inline",
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "private, no-store",
+    })
 
 
 @app.patch("/api/v1/documents/{document_id}/metadata", response_model=DocumentSummary, tags=["documents"], summary="문서 메타데이터 수정")

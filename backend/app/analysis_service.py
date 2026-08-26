@@ -8,8 +8,9 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from .embeddings import EmbeddingProvider
+from .citation_display import citation_display
 from .generation import GenerationConfigurationError, GenerationOutputError, GenerationProvider
-from .models import AnalysisRun, Document, DocumentType
+from .models import AnalysisRun, Document, DocumentType, Page
 from .analysis_retrieval import collect_analysis_evidence
 from .schemas import AnalysisCitation, AnalysisItem, AnalysisRequest, AnalysisResult, GeneratedAnalysis, GeneratedItem
 
@@ -300,10 +301,23 @@ def analyze_document(
                     negatives.append(fallback)
                     generation_items_changed = True
         used_ids = list(dict.fromkeys(chunk_id for item in positives + negatives for chunk_id in item.evidence_chunk_ids))
-        citations = [AnalysisCitation(chunk_id=chunk_id, filename=allowed[chunk_id]["document_name"],
-            company_name=allowed[chunk_id]["company_name"], published_at=allowed[chunk_id]["published_at"],
-            issuer=allowed[chunk_id]["publisher"], document_type=allowed[chunk_id]["document_type"],
-            page_number=allowed[chunk_id]["page_number"], quote=allowed[chunk_id]["quote"]) for chunk_id in used_ids]
+        claim_hints = {chunk_id: f"{item.title} {item.reason}" for item in positives + negatives
+            for chunk_id in item.evidence_chunk_ids}
+        needed_pages = {allowed[chunk_id]["page_number"] for chunk_id in used_ids}
+        page_texts = {page.page_number: page.final_text for page in db.query(Page).filter(
+            Page.document_id == document.id, Page.page_number.in_(needed_pages)).all()}
+        citations = []
+        for chunk_id in used_ids:
+            row = allowed[chunk_id]
+            display = citation_display(row["quote"], row["page_number"],
+                page_texts.get(row["page_number"]), claim_hints.get(chunk_id, ""))
+            citations.append(AnalysisCitation(chunk_id=chunk_id, filename=row["document_name"],
+                company_name=row["company_name"], published_at=row["published_at"],
+                issuer=row["publisher"], document_type=row["document_type"],
+                page_number=row["page_number"], quote=row["quote"], display_kind=display.kind,
+                citation_type=display.kind,
+                display_quote=display.display_quote, table_labels=display.table_labels,
+                display_note=display.note, table_facts=display.table_facts))
         insufficient = generated.insufficient_evidence_note
         if len(positives) < 3 or len(negatives) < 3:
             insufficient = INSUFFICIENT_NOTE

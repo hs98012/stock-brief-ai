@@ -74,6 +74,6 @@ export default function Home() {
       <section className="panel"><h2 className="section-title">2. 근거 기반 질문</h2><label className="label mt-4">질문<textarea className="field min-h-36 resize-y" value={question} onChange={(event) => setQuestion(event.target.value)} /></label>
         <button className="primary-button mt-5" type="button" disabled={loading || !question.trim()} onClick={runAnalysis}>{loading ? "분석 중…" : "분석하기"}</button><p className="mt-4 text-sm leading-6 text-slate-500">임베딩이 생성된 문서만 분석할 수 있습니다. Ollama에서 bge-m3와 gemma3:4b가 실행 가능해야 합니다.</p>
       </section>
-    </div><AnalysisState loading={loading} error={error} /><AnalysisResultView result={result} />
+    </div><AnalysisState loading={loading} error={error} /><AnalysisResultView result={result} documentId={selectedId} />
   </div></main>;
 }

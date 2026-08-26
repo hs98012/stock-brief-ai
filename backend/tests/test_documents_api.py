@@ -1,6 +1,8 @@
 from fastapi.testclient import TestClient
+from pathlib import Path
+from uuid import UUID, uuid4
 
-from app.models import Chunk, Page
+from app.models import Chunk, Document, Page
 from .helpers import make_pdf, metadata
 
 
@@ -35,3 +37,27 @@ def test_rejects_wrong_extension_and_corrupt_pdf(client: TestClient) -> None:
     assert corrupt.status_code == 400
     assert "PDF" in wrong.json()["detail"] and "PDF" in corrupt.json()["detail"]
 
+
+def test_inline_pdf_file_endpoint_and_page_validation(client: TestClient) -> None:
+    pdf = make_pdf("A readable first page. " * 5, "A readable second page. " * 5)
+    uploaded = client.post("/api/v1/documents", data=metadata(),
+        files={"file": ("report.pdf", pdf, "application/pdf")}).json()
+    document_id = uploaded["document_id"]
+    response = client.get(f"/api/v1/documents/{document_id}/file?page_number=2")
+    assert response.status_code == 200 and response.headers["content-type"] == "application/pdf"
+    assert response.headers["content-disposition"] == "inline" and response.content.startswith(b"%PDF-")
+    assert client.get(f"/api/v1/documents/{document_id}/file?page_number=0").status_code == 422
+    assert client.get(f"/api/v1/documents/{document_id}/file?page_number=3").status_code == 404
+    assert client.get(f"/api/v1/documents/{uuid4()}/file?page_number=1").status_code == 404
+
+
+def test_pdf_file_endpoint_rejects_storage_path_outside_raw(client: TestClient, db) -> None:
+    pdf = make_pdf("Path containment test. " * 8)
+    uploaded = client.post("/api/v1/documents", data=metadata(),
+        files={"file": ("report.pdf", pdf, "application/pdf")}).json()
+    document = db.get(Document, UUID(uploaded["document_id"]))
+    outside = Path(document.storage_path).parents[1] / "outside.pdf"
+    outside.write_bytes(pdf)
+    document.storage_path = str(outside); db.commit()
+    response = client.get(f"/api/v1/documents/{document.id}/file?page_number=1")
+    assert response.status_code == 404 and "안전하게" in response.json()["detail"]

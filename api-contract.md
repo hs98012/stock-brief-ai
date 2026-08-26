@@ -37,6 +37,7 @@
 
 - `GET /api/v1/documents`: 생성 시각 역순으로 `{ "items": [...] }`를 반환한다.
 - `GET /api/v1/documents/{document_id}`: 메타데이터, 상태, 오류 사유와 페이지 수를 반환한다.
+- `GET /api/v1/documents/{document_id}/file?page_number={page}`: 영속 볼륨의 해당 문서 원본 PDF만 `application/pdf`, `Content-Disposition: inline`으로 반환한다. `page_number`는 1 이상이며 문서 페이지 수 이하여야 한다. 브라우저 링크는 `#page={page}` fragment를 함께 사용한다. 저장 경로가 허용된 `data/raw` 밖을 가리키거나 PDF가 없거나 서명이 잘못되면 파일 내용을 노출하지 않고 `404`를 반환한다.
 - `GET /api/v1/documents/{document_id}/pages/{page_number}`: `document_id`, 1부터 시작하는 `page_number`, `final_text`, `text_source`, 페이지 단위 `ocr_error`를 반환한다.
 
 없는 문서·페이지는 `404`, 1보다 작은 페이지 번호는 `422`다. 저장 경로와 SHA-256은 내부 정보이므로 조회 응답에 노출하지 않는다.
@@ -163,11 +164,26 @@ Ollama 서버에 연결할 수 없거나 `bge-m3` 모델이 없거나 차원이 
     "issuer": "발행기관",
     "document_type": "broker_report",
     "page_number": 1,
-    "quote": "DB에서 그대로 복원한 원문"
+    "quote": "DB에서 그대로 복원한 원문",
+    "display_kind": "text 또는 table",
+    "citation_type": "text 또는 table",
+    "display_quote": "화면 표시 전용 줄바꿈 정규화 발췌 또는 null",
+    "table_labels": [],
+    "display_note": null,
+    "table_facts": {
+      "table_title": null,
+      "metric": "원문에서 확인한 지표",
+      "row_label": "원문에서 확인한 행",
+      "unit": "원문 단위",
+      "values": [{"period": "원문 기간", "value": "원문 수치"}],
+      "interpretation": "표시 수치만 출처 귀속 방식으로 설명하거나 null"
+    }
   }],
   "insufficient_evidence_note": "근거가 부족해 추가 항목을 제시하지 않았습니다.",
   "disclaimer": "투자 권유나 매수·매도·보유 추천이 아니라는 안내"
 }
 ```
+
+`quote`는 DB 원문 연속 문자열이며 변경하지 않는다. `display_quote`는 한글 단어 중간 줄바꿈과 의미 없는 단독 OCR 줄만 제거한 화면 표시용 값이다. 표 중심 citation은 `citation_type: table`이며 숫자 덩어리를 `display_quote`로 반환하지 않는다. 같은 DB 페이지에서 지표·행·단위·기간 헤더·수치 위치를 모두 대조하고 해당 수치가 citation quote에도 존재할 때만 `table_facts`를 반환한다. 표 제목은 OCR 결과에서 정확히 확인될 때만 포함하며 추정해 보정하지 않는다. 구조가 모호하면 `table_facts`는 `null`이고 `display_note`로 원문 PDF 페이지 확인을 안내한다.
 
 모델 출력은 provider의 JSON Schema와 서버의 Pydantic Schema로 이중 검증한다. 앞뒤 공백과 JSON 코드블록은 제거한 뒤 역직렬화하지만 임의 분석 결과를 만들지 않는다. 검색 후보에 없는 chunk ID가 하나라도 있거나 JSON 파싱에 실패하면 결과를 노출하지 않고 `502`를 반환하며 실패 사유를 기록한다. citation 없는 호재·악재는 제거한다. Gemini HTTP 429·503·504, timeout과 네트워크 오류만 최대 `GEMINI_MAX_ATTEMPTS`회 지수 백오프로 재시도한다. 재시도 소진 뒤 fallback 설정이 `ollama`일 때만 Ollama를 한 번 호출한다. 키 누락, HTTP 401·403·404, 안전 차단, JSON/Schema/citation 오류에는 재시도하거나 fallback하지 않는다. 요청·응답 필드는 provider 변경과 무관하게 유지되며, 최종 provider/model과 fallback 여부는 내부 분석 기록에만 저장된다.

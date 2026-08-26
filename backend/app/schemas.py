@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -106,9 +107,29 @@ class AnalysisItem(GeneratedItem):
     interpretation_label: str
 
 
+class TableFactValue(BaseModel):
+    period: str
+    value: str
+
+
+class TableFacts(BaseModel):
+    table_title: str | None = None
+    metric: str
+    row_label: str
+    unit: str
+    values: list[TableFactValue]
+    interpretation: str | None = None
+
+
 class AnalysisCitation(BaseModel):
     chunk_id: UUID; filename: str; company_name: str; published_at: date; issuer: str
     document_type: DocumentType; page_number: int; quote: str
+    display_kind: Literal["text", "table"] = "text"
+    citation_type: Literal["text", "table"] = "text"
+    display_quote: str | None = None
+    table_labels: list[str] = Field(default_factory=list)
+    display_note: str | None = None
+    table_facts: TableFacts | None = None
 
 
 class AnalysisResult(BaseModel):

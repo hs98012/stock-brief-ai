@@ -12,6 +12,9 @@
 8. 모델의 모든 `evidence_chunk_ids`를 검색 허용 목록과 대조한다. 하나라도 허용되지 않으면 전체 결과를 실패 처리한다.
 9. 인용문은 모델 출력이 아니라 DB의 `final_text[char_start:char_end]`에서 복원한 quote만 사용한다.
 10. citation 없는 호재·악재는 제거하며 항목 수가 3개 미만이면 부족 안내를 표시한다.
+11. 원본 `quote`와 표시용 `display_quote`를 구분한다. 표시용 정규화가 수치·단위·문장 의미를 바꾸지 않는지 검사한다.
+12. 표 중심 citation에 제목·단위·기간 헤더가 없으면 숫자 나열을 숨기고 실제 PDF 페이지 링크를 제공한다. 표시한 표 라벨은 모두 원문 문자열에 존재해야 한다.
+13. `table_facts`는 같은 페이지에서 지표·행·단위·기간·값의 열 정렬을 확인하고 값이 원본 citation에도 존재할 때만 만든다. 증감률이나 합계를 계산하지 않으며 OCR 표 제목이 모호하면 제목을 생략한다.
 
 ## 금융 표현
 
@@ -38,6 +41,8 @@
 3차 테스트는 FakeEmbeddingProvider와 mock Ollama HTTP만 사용해 외부 호출을 차단하고, 동일 provider/model/dimensions skip, 서버 미실행, 모델 미설치, 차원 오류, `HBM`·`파운드리`·`목표주가` BM25 검색, 의미 유사도, RRF 순위, 전체 출처 필드, 사전 메타데이터 필터를 확인한다. PostgreSQL 통합 검증에서는 안전 migration, `vector(1024)`, cosine HNSW 인덱스와 `<=>` 연산을 확인한다.
 
 4차 테스트는 mock GenerationProvider와 mock Ollama HTTP를 사용한다. JSON Schema, 허용되지 않은 근거 ID의 전체 거부, citation 없는 항목 제거, 근거 부족 시 미충족 항목 미생성, Ollama/모델 503, 메타데이터 검증과 프론트 로딩·성공·근거 부족·오류 렌더링을 확인한다. 실제 PDF, 모델 출력 또는 외부 호출은 테스트 fixture에 저장하지 않는다.
+
+원본 PDF 제공 테스트는 inline PDF 응답, 페이지 범위, 없는 문서와 허용된 raw 디렉터리 밖 storage path 차단을 확인한다. citation 표시 테스트는 한글 단어 중간 줄바꿈 복원, 단독 OCR 잡음 제거, 숫자 표 조각 숨김과 `#page=` 링크를 확인한다.
 
 Gemini 생성 테스트는 공식 SDK client를 mock하며 실제 API 키나 네트워크를 사용하지 않는다. 성공 시 Ollama 미호출, fallback `none`, timeout·네트워크·HTTP 429·503·504의 최대 2회 Gemini 시도 후 1회 Ollama fallback, 키·HTTP 401·403·404·안전 차단·JSON/Schema/citation 오류의 재시도 및 fallback 금지를 각각 검증한다. 내부 trace의 최종 provider/model, fallback 여부, attempt 수와 상태를 확인한다. 키, 전체 프롬프트와 문서 전문은 로그에 남기지 않는다.
 

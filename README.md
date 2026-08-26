@@ -110,6 +110,8 @@ curl -X POST http://localhost:8001/api/v1/documents \
 
 DART 공시는 `document_type=dart_filing`을 사용한다. 최대 크기 기본값은 50 MiB이며 `.env`의 `MAX_UPLOAD_BYTES`로 조정한다. 로컬 Docker 밖에서 `backend/data/raw/`에 파일을 둘 수도 있지만 PDF와 생성 페이지 이미지는 `.gitignore` 대상이다. API 목록/상세/페이지 확인:
 
+분석 출처 카드의 `원문 PDF N페이지 보기`는 `GET /api/v1/documents/{document_id}/file?page_number=N#page=N`을 새 탭으로 연다. endpoint는 해당 문서의 `data/raw` 내부 실제 PDF만 inline으로 제공하며, 존재하지 않는 문서·범위 밖 페이지·경로 이탈 파일은 `404` 또는 입력 검증 오류로 거부한다.
+
 ```bash
 curl http://localhost:8001/api/v1/documents
 curl http://localhost:8001/api/v1/documents/DOCUMENT_UUID
@@ -195,7 +197,7 @@ curl -X POST http://localhost:8001/api/v1/analyses \
 
 HTTP 200 응답의 `generation_model`이 `.env`의 `GEMINI_MODEL`과 일치하는지 확인한다. 기존 `analysis_status`, summary·positives·negatives·citations 계약은 그대로다. 오류 로그에는 provider·model·오류 유형만 남기며 키, 전체 프롬프트와 문서 전문은 기록하지 않는다.
 
-분석 API는 사용자 질문 외에 호재·악재 관점의 한국어 보조 검색을 같은 문서 안에서 수행한다. 투자등급·면책 안내와 문맥 없는 숫자 표 조각은 제외하며, citation의 `quote`는 DB 청크에 실제 존재하는 최대 320자의 관련 원문 발췌다. 한국어 질문의 영어 항목과 같은 chunk를 재사용한 후속 항목은 사용자 응답에서 제거한다.
+분석 API는 사용자 질문 외에 호재·악재 관점의 한국어 보조 검색을 같은 문서 안에서 수행한다. 투자등급·면책 안내와 문맥 없는 숫자 표 조각은 제외하며, citation의 `quote`는 DB 청크에 실제 존재하는 최대 320자의 관련 원문 발췌다. `display_quote`는 원본을 바꾸지 않고 한글 단어 중간 줄바꿈과 단독 OCR 잡음만 정리한다. 표 중심 근거는 같은 페이지에서 지표·행·단위·기간·값을 모두 확인하고 값이 quote에도 존재할 때만 `table_facts` 핵심 수치 카드로 표시한다. 표 구조나 제목 OCR이 모호하면 값을 추측하지 않고 숫자 덩어리를 숨긴 채 원문 페이지 확인 안내를 반환한다. 한국어 질문의 영어 항목과 같은 chunk를 재사용한 후속 항목은 사용자 응답에서 제거한다.
 
 기본 호재·악재 요약처럼 특정 핵심어가 없는 범용 질문은 사용자 문구와 분리된 긍정·부정 보조 query를 실행하고 관점별 후보를 균형 있게 생성 모델에 전달한다. 유효 근거가 한 관점에 1개뿐이어도 citation과 함께 정상 결과로 반환하며, 두 관점 모두 직접 근거가 없으면 기존처럼 `확인할 수 없습니다`를 반환한다.
 
