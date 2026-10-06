@@ -1,345 +1,272 @@
 # Stock Brief AI
 
-증권사 기업분석 리포트 PDF와 DART 공시 PDF를 바탕으로 기업의 핵심 내용과 긍정·부정 요인을 초보자에게 근거와 함께 설명하기 위한 독립형 포트폴리오 프로젝트다. 모든 핵심 주장은 원본 파일명, 발행일, PDF 페이지 번호, 근거 문장을 요구한다. 투자 권유, 매수·매도 추천 및 자동매매는 범위 밖이다.
+증권사 기업분석 리포트와 공시 PDF를 바탕으로 기업의 핵심 내용과 호재·악재를 원문 근거와 함께 확인할 수 있는 RAG 기반 분석 서비스다.
 
-현재 4차 단계는 PDF 적재, 맥 호스트 Ollama `bge-m3` 하이브리드 검색과 Gemini Flash 근거 기반 분석을 제공한다. 웹에서 문서를 선택하고 메타데이터를 교정한 뒤 핵심 요약과 최대 3개의 호재·악재를 출처 카드와 함께 확인할 수 있다. 채팅, 투자 판단과 자동매매는 포함하지 않는다.
+PDF에서 텍스트와 표 데이터를 추출하고, BM25와 벡터 검색을 결합해 관련 근거를 찾는다. 검색된 근거는 원문 PDF 페이지와 함께 제공하며, 필요한 근거가 부족하거나 값과 단위를 확인하기 어려운 경우에는 답변 생성을 제한한다.
 
-## 구성
+## 주요 기능
 
-- `frontend/`: Next.js, TypeScript, Tailwind CSS 분석 화면과 상태 컴포넌트 테스트
-- `backend/`: FastAPI, Alembic, PDF/OCR 적재, Ollama 임베딩, Gemini/Ollama 생성 provider, BM25·pgvector·RRF 검색과 근거 검증
-- `db/`: PostgreSQL 16 및 pgvector
-- `docker-compose.yml`: frontend, backend, postgres 로컬 구성
-- `product.md`: MVP 화면과 사용자 흐름
-- `acceptance.md`: 완료 및 품질 기준
-- `api-contract.md`: 현재/예정 API와 evidence 응답 계약
-- `qa-rules.md`: 인용·금융 표현·안전 검증 규칙
-- `AGENTS.md`: 개발 원칙과 데이터 모델 계약
+- 증권사 리포트와 공시 PDF의 텍스트·표 데이터 추출
+- 스캔 페이지 OCR 처리
+- BM25 + pgvector cosine + RRF 기반 하이브리드 검색
+- 질문에 필요한 복수 근거 검색 및 coverage 검증
+- 표의 행·열·헤더 구조 복원과 값·단위 검증
+- 분석 결과별 원문 PDF 페이지와 인용 근거 제공
+- 근거가 부족한 경우 불완전한 답변 생성 제한
+- 개발 평가셋을 이용한 검색·근거 품질 회귀 검증
+
+## 기술 스택
+
+| 영역 | 기술 |
+| --- | --- |
+| Frontend | Next.js 16, TypeScript |
+| Backend | FastAPI, Python |
+| Database | PostgreSQL 16, pgvector |
+| Retrieval | BM25, Vector Search, RRF |
+| Embedding | bge-m3 |
+| LLM | Gemini Flash, Ollama |
+| PDF / OCR | PyMuPDF, Tesseract |
+| Infra | Docker Compose |
+
+## 처리 흐름
+
+```text
+증권 리포트 / 공시 PDF
+        |
+        v
+PDF 텍스트 추출
+        |
+        +------ 추출이 어려운 페이지 ------+
+        |                                  |
+        |                                  v
+        |                                OCR
+        |                                  |
+        +---------------+------------------+
+                        |
+                        v
+                페이지 / 표 구조 처리
+                        |
+                        v
+                    Chunk 생성
+                        |
+                        v
+             PostgreSQL + pgvector
+                        |
+             +----------+----------+
+             |                     |
+             v                     v
+           BM25               Vector Search
+             |                     |
+             +----------+----------+
+                        |
+                       RRF
+                        |
+                        v
+              Evidence Requirement
+                        |
+                        v
+               Evidence Bundle
+                        |
+                        v
+                 LLM 분석 생성
+                        |
+                        v
+             답변 + 원문 페이지 근거
+```
+
+## 개발하면서 해결한 문제
+
+### 1. 스캔 페이지와 표에서 필요한 근거가 검색되지 않는 문제
+
+초기에는 PDF에서 추출한 텍스트를 그대로 청크로 나누어 검색에 사용했다. 일반 문장은 비교적 잘 추출됐지만 스캔 페이지와 복잡한 표에서는 수치나 문장이 빠지면서 실제 PDF에 있는 근거가 검색 결과에서는 나타나지 않는 경우가 있었다.
+
+원문 PDF, 추출 결과, 생성된 청크와 검색 결과를 페이지 단위로 대조해 어느 단계에서 근거가 사라지는지 확인했다.
+
+기본 텍스트 추출이 어려운 페이지에는 OCR을 적용하고, 페이지마다 처리 결과와 오류를 별도로 기록했다. 한 페이지 처리에 실패해도 전체 문서 적재가 중단되지 않고 다음 페이지를 계속 처리하도록 구성했다.
+
+표는 일반 문장과 같은 방식으로 처리하면 행·열 관계와 단위가 사라지는 문제가 있어 별도의 표 처리 로직을 추가했다. 이후 셀, 행, 헤더와 단위를 연결해 수치가 어떤 지표와 기간에 해당하는지 확인할 수 있도록 개선했다.
+
+### 2. 의미가 비슷한 문장은 찾지만 정확한 수치 근거를 놓치는 문제
+
+벡터 검색만 사용할 경우 질문의 의미와 비슷한 문장은 찾을 수 있었지만 `2026F 영업이익`, `2Q26F`처럼 정확한 표현과 수치가 중요한 질문에서는 필요한 근거가 상위 검색 결과에 포함되지 않는 경우가 있었다.
+
+기업 리포트 질의는 의미적 유사성과 함께 정확한 기업명, 지표명, 기간 표현이 중요하다고 판단했다.
+
+따라서 BM25 키워드 검색과 pgvector cosine 기반 벡터 검색을 함께 실행하고 RRF로 순위를 결합하는 하이브리드 검색 구조로 변경했다.
+
+이를 통해 정확한 표현이 필요한 표·수치 근거와 의미적으로 연관된 서술 근거를 함께 검색할 수 있도록 했다.
+
+### 3. 하나의 질문에 필요한 근거가 여러 개인 경우 일부만 검색되는 문제
+
+단일 근거만 필요한 질문과 달리 일부 질문은 여러 페이지나 서로 다른 형태의 근거가 함께 필요했다.
+
+예를 들어 POSCO 관련 평가에서는 한 페이지의 전망 서술과 다른 페이지의 `2Q26F 영업이익 424십억원` 표 수치가 함께 있어야 질문을 충분히 설명할 수 있었다.
+
+검색 결과에 관련 문장이 하나 포함됐다는 이유만으로 답변을 생성하면 필요한 근거 일부가 빠진 상태에서도 완성된 답변처럼 보일 수 있었다.
+
+이를 해결하기 위해 질문별로 필요한 근거 조건을 정의하는 `evidence_requirements.py`와 검색된 근거를 묶어 충족 여부를 확인하는 `evidence_bundle.py`를 추가했다.
+
+복수 근거가 필요한 평가 케이스의 coverage@5는 `0/1`에서 `1/1`로 개선됐다.
+
+### 4. 검색된 숫자의 값은 맞지만 단위를 신뢰할 수 없는 문제
+
+표에서 숫자를 찾았더라도 해당 숫자의 단위가 어느 행이나 열에 적용되는지 명확하지 않은 경우가 있었다.
+
+SK하이닉스 문서에서는 행·열 구조 자체는 복원했지만 서로 다른 단위가 혼합된 표에서 특정 수치의 단위를 안정적으로 연결할 수 없었다.
+
+이 경우 수치를 추측해서 답변하지 않고 근거 사용을 보류하도록 했다.
+
+`structured_cells.py`와 `paddle_tables.py`에서 셀·행·헤더 단위 연결과 검증을 보완했으며, 값뿐 아니라 해당 값의 지표, 기간, 단위를 함께 확인할 수 있을 때만 표 근거로 사용하도록 했다.
+
+### 5. 일부 근거만으로 답변이 완성된 것처럼 생성되는 문제
+
+초기 평가에서는 필요한 근거를 모두 확보하지 못했는데도 모델이 답변을 완성하는 false-complete 사례가 있었다.
+
+현대차와 기아 사례를 원문과 대조하면서 검색 결과 존재 여부만으로는 답변 가능 여부를 판단할 수 없다는 것을 확인했다.
+
+질문별 필수 근거와 실제 검색된 evidence bundle을 비교하고, 요구사항을 충족하지 못하면 해당 내용을 생성하지 않도록 검증 단계를 추가했다.
+
+개발 평가셋 기준 false-complete 사례는 `2건 → 0건`으로 줄었다.
+
+## 최근 품질 개선 결과
+
+현재는 단순히 검색 결과가 존재하는지를 보는 것이 아니라 실제 PDF 원문에서 필요한 근거를 다시 확인할 수 있는지를 기준으로 평가하고 있다.
+
+| 평가 항목 | 이전 | 현재 |
+| --- | ---: | ---: |
+| 재처리 대상 근거 검증 | 9/10 | 10/10 |
+| 활성 대조군 | 2/2 | 2/2 |
+| 참고 합계 | 11/12 | 12/12 |
+| 복합 근거 coverage@5 | 0/1 | 1/1 |
+| False-complete | 2 | 0 |
+
+모든 문서를 성공으로 처리하는 것을 목표로 하지 않는다. 값이나 단위를 원문에서 확실하게 확인할 수 없는 경우에는 답변에 사용하지 않는 것을 우선한다.
+
+현재 SK하이닉스 혼합 단위 표는 구조 복원까지는 가능하지만 unit association을 안정적으로 검증하지 못해 보류 상태로 두고 있다.
+
+## 평가 방식
+
+평가용 질문마다 실제 PDF를 확인해 기대 근거를 미리 정의한다.
+
+검증 과정에서는 다음 항목을 확인한다.
+
+- 필요한 내용이 검색 후보에 포함되는지
+- 필요한 페이지가 Top-K에 포함되는지
+- 복수 근거가 필요한 경우 모든 조건을 충족하는지
+- 표 수치의 지표·기간·값·단위를 확인할 수 있는지
+- 생성된 내용이 실제 검색 근거와 연결되는지
+- 근거가 부족한 질문에서 내용을 임의로 생성하지 않는지
+
+실패 원인은 검색과 생성 단계를 구분해 확인한다.
+
+```text
+retrieval_candidate_excluded
+검색 단계에서 필요한 근거가 후보에 포함되지 않은 경우
+
+retrieval_wrong_perspective
+근거는 검색됐지만 질문에서 필요한 관점으로 분류되지 않은 경우
+
+generation_not_selected
+필요한 근거가 모델에 전달됐지만 답변 생성에 사용되지 않은 경우
+
+output_validation_removed
+모델이 선택한 내용이 근거 검증 과정에서 제거된 경우
+```
+
+검색 결과와 최종 답변만 비교하지 않고 어느 단계에서 근거가 누락됐는지를 확인할 수 있도록 평가 구조를 만들었다.
+
+## 주요 모듈
+
+### `evidence_requirements.py`
+
+질문에 답하기 위해 필요한 근거 조건을 정의하고 실제 검색 결과가 이를 충족하는지 확인한다.
+
+### `evidence_bundle.py`
+
+서로 다른 페이지나 형태의 근거를 하나의 evidence bundle로 구성하고 coverage를 계산한다.
+
+### `structured_cells.py`
+
+표에서 추출한 셀을 행·열 및 주변 헤더와 연결해 구조화한다.
+
+### `paddle_tables.py`
+
+표 추출 결과를 처리하고 수치와 단위가 올바르게 연결됐는지 검증한다.
+
+## 프로젝트 구조
+
+```text
+stock-brief-ai/
+├── frontend/              # Next.js 분석 화면
+├── backend/
+│   ├── app/               # API, 검색, PDF/OCR, evidence 검증
+│   └── tests/
+├── db/                    # PostgreSQL / pgvector
+├── evals/                 # 평가 fixture 및 결과
+├── scripts/               # 평가 및 검증 스크립트
+├── docker-compose.yml
+├── api-contract.md
+├── acceptance.md
+├── qa-rules.md
+└── README.md
+```
 
 ## 로컬 실행
 
-요구 사항은 Docker와 Docker Compose다.
+Docker와 Docker Compose가 필요하다.
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-- 웹: <http://localhost:3000>
-- API health: <http://localhost:8001/health>
-- API 문서: <http://localhost:8001/docs>
-- PostgreSQL: `localhost:5432`
+실행 후 다음 주소에서 확인할 수 있다.
 
-`.env`의 `FRONTEND_HOST_PORT`, `BACKEND_HOST_PORT`, `POSTGRES_HOST_PORT`로 호스트 포트를 바꿀 수 있다. backend 기본값은 기존 8000 서비스와 충돌하지 않도록 `8001`이다. `.env`는 Git에서 제외된다. PostgreSQL과 업로드 파일은 각각 named volume에 보존된다. 종료는 `docker compose down`으로 하며 모든 DB·업로드 데이터를 함께 제거하려는 경우에만 데이터 손실을 인지한 뒤 `docker compose down -v`를 사용한다.
-
-임베딩은 맥 호스트 Ollama를 유지하고 분석 생성만 Gemini Flash를 사용한다. 실제 키는 루트 `.env`의 `GEMINI_API_KEY`에만 둔다.
-
-```dotenv
-EMBEDDING_PROVIDER=ollama
-OLLAMA_BASE_URL=http://host.docker.internal:11434
-EMBEDDING_MODEL=bge-m3
-EMBEDDING_DIMENSIONS=1024
-GENERATION_PROVIDER=ollama
-GENERATION_MODEL=gemma3:4b
-GENERATION_TEMPERATURE=0
-OLLAMA_GENERATION_TIMEOUT_SECONDS=600
-ANALYSIS_LLM_PROVIDER=gemini
-ANALYSIS_LLM_FALLBACK_PROVIDER=none
-GEMINI_API_KEY=
-GEMINI_MODEL=gemini-3.7-flash
-GEMINI_TIMEOUT_SECONDS=30
-GEMINI_MAX_ATTEMPTS=2
-GEMINI_RETRY_BASE_DELAY_SECONDS=1
-DB_POOL_RECYCLE_SECONDS=300
+```text
+Frontend    http://localhost:3000
+Backend     http://localhost:8001
+API Docs    http://localhost:8001/docs
+PostgreSQL  localhost:5432
 ```
 
-`ANALYSIS_LLM_PROVIDER=gemini`가 기본이다. Gemini는 HTTP 429·503·504, 네트워크 연결 오류와 client timeout만 `GEMINI_MAX_ATTEMPTS` 횟수까지 재시도한다. 재시도 간격은 `GEMINI_RETRY_BASE_DELAY_SECONDS`를 시작값으로 하는 지수 백오프다. `ANALYSIS_LLM_FALLBACK_PROVIDER=none`이면 재시도 소진 후 오류를 반환한다. `ollama`로 설정하면 재시도 소진 뒤 기존 `gemma3:4b`를 정확히 한 번 호출한다. 키 누락, HTTP 401·403·404, 안전 차단, JSON/Schema/citation 검증 실패에는 재시도하거나 fallback하지 않는다.
-
-분석 실행 기록에는 최종 provider/model과 fallback 사용 여부가 저장된다. 재시도 횟수, HTTP 상태, fallback 여부와 지연 시간은 내부 평가 trace 및 구조화 로그에만 남고 일반 분석 API 응답이나 UI에는 노출되지 않는다. 로그에는 API 키, 전체 프롬프트, PDF 원문을 기록하지 않는다.
-
-## Ollama 설치 전후 실행
-
-Ollama 설치 전에도 다음 명령으로 서비스가 기동되며 PDF 적재와 BM25-only 검색을 사용할 수 있다.
-
-```bash
-docker compose up --build
-```
-
-벡터 검색을 사용하려면 macOS에 Ollama를 설치·실행한 뒤 호스트 터미널에서 다음을 실행한다. 기본 분석 생성은 `.env`의 Gemini 설정을 사용한다.
+임베딩은 Ollama의 `bge-m3`를 사용한다.
 
 ```bash
 ollama pull bge-m3
-ollama list
-docker compose up --build
 ```
 
-`ANALYSIS_LLM_FALLBACK_PROVIDER=ollama`를 사용할 때만 `ollama pull gemma3:4b`를 추가로 실행한다.
+분석 생성에는 Gemini 또는 Ollama provider를 선택할 수 있다. API 키 등 실제 환경값은 `.env`에만 저장하며 저장소에는 포함하지 않는다.
 
-backend 컨테이너는 `http://host.docker.internal:11434`로 맥 호스트 Ollama에 연결한다. 별도 Ollama 컨테이너는 생성하지 않는다.
+## 품질 검증
 
-Ollama 설치 전에는 UI와 적재·BM25 기능을 확인할 수 있지만 벡터 임베딩에는 `bge-m3`가 필요하다. 기본 분석 생성에는 Gemini API 키가 필요하며, `gemma3:4b`는 Ollama fallback을 명시적으로 켰을 때만 필요하다.
-
-pgvector 활성화 확인:
+전체 테스트와 정적 검증은 다음 스크립트로 실행한다.
 
 ```bash
-docker compose exec postgres psql -U stock_brief -d stock_brief -c "SELECT extname FROM pg_extension WHERE extname = 'vector';"
+./scripts/check.sh
 ```
 
-## 마이그레이션
-
-backend 컨테이너는 시작할 때 자동으로 `alembic upgrade head`를 실행한다. 수동 실행과 현재 revision 확인은 다음과 같다.
-
-```bash
-docker compose run --rm backend alembic upgrade head
-docker compose run --rm backend alembic current
-```
-
-## 실제 PDF 적재 테스트
-
-저작권과 이용 권한을 확인한 PDF를 저장소에 커밋하지 말고 API로 직접 전송한다.
-
-```bash
-curl -X POST http://localhost:8001/api/v1/documents \
-  -F 'file=@/absolute/path/to/report.pdf;type=application/pdf' \
-  -F 'company_name=기업명' \
-  -F 'stock_code=종목코드' \
-  -F 'document_type=broker_report' \
-  -F 'issuer=발행기관' \
-  -F 'published_at=2026-08-23'
-```
-
-DART 공시는 `document_type=dart_filing`을 사용한다. 최대 크기 기본값은 50 MiB이며 `.env`의 `MAX_UPLOAD_BYTES`로 조정한다. 로컬 Docker 밖에서 `backend/data/raw/`에 파일을 둘 수도 있지만 PDF와 생성 페이지 이미지는 `.gitignore` 대상이다. API 목록/상세/페이지 확인:
-
-분석 출처 카드의 `원문 PDF N페이지 보기`는 `GET /api/v1/documents/{document_id}/file?page_number=N#page=N`을 새 탭으로 연다. endpoint는 해당 문서의 `data/raw` 내부 실제 PDF만 inline으로 제공하며, 존재하지 않는 문서·범위 밖 페이지·경로 이탈 파일은 `404` 또는 입력 검증 오류로 거부한다.
-
-```bash
-curl http://localhost:8001/api/v1/documents
-curl http://localhost:8001/api/v1/documents/DOCUMENT_UUID
-curl http://localhost:8001/api/v1/documents/DOCUMENT_UUID/pages/1
-```
-
-## 하이브리드 검색 수동 검증
-
-다음 순서로 실제 사용 권한이 있는 문서를 검증한다.
-
-1. 위 업로드 API로 PDF를 적재하고 응답의 `document_id`를 기록한다.
-2. 호스트에서 `ollama pull bge-m3`와 `ollama list`를 실행하고 임베딩을 생성한다.
-
-```bash
-curl -X POST http://localhost:8001/api/v1/documents/DOCUMENT_UUID/embeddings
-curl http://localhost:8001/api/v1/documents/DOCUMENT_UUID/embedding-status
-```
-
-3. 하이브리드 검색을 호출한다.
-
-```bash
-curl -X POST http://localhost:8001/api/v1/search \
-  -H 'Content-Type: application/json' \
-  -d '{"query":"삼성전자 HBM 악재","top_k":5}'
-```
-
-4. 각 결과의 `document_name`, `published_at`, `publisher`, `document_type`, `page_number`, `quote`를 실제 PDF와 대조한다. 검색 결과가 없으면 `no_evidence`와 빈 배열이어야 하며 이를 생성형 문장으로 보완하지 않는다.
-
-## 메타데이터 교정과 최종 분석 검증
-
-업로드 응답의 `DOCUMENT_UUID`를 사용한다. Swagger(<http://localhost:8001/docs>)에서 `PATCH /api/v1/documents/{document_id}/metadata`를 열어 다음 실제 테스트 문서 메타데이터 예시를 적용할 수 있다.
-
-```json
-{
-  "company_name": "삼성전자",
-  "stock_code": "005930",
-  "document_type": "broker_report",
-  "issuer": "한화리서치",
-  "published_at": "2025-07-09"
-}
-```
-
-같은 요청을 curl로 호출하는 방법:
-
-```bash
-curl -X PATCH http://localhost:8001/api/v1/documents/DOCUMENT_UUID/metadata \
-  -H 'Content-Type: application/json' \
-  -d '{"company_name":"삼성전자","stock_code":"005930","document_type":"broker_report","issuer":"한화리서치","published_at":"2025-07-09"}'
-```
-
-그 뒤 임베딩을 만들고 분석 API 또는 브라우저를 사용한다.
-
-```bash
-curl -X POST http://localhost:8001/api/v1/documents/DOCUMENT_UUID/embeddings
-curl -X POST http://localhost:8001/api/v1/analyses \
-  -H 'Content-Type: application/json' \
-  -d '{"document_id":"DOCUMENT_UUID","question":"삼성전자 HBM 악재","top_k":10}'
-```
-
-실제 수동 검증 순서는 다음과 같다.
-
-1. 사용 권한이 있는 PDF를 업로드한다.
-2. 기업명·6자리 종목코드·문서 유형·발행기관·발행일을 교정한다.
-3. 문서 임베딩 생성 API를 호출한다.
-4. 브라우저 <http://localhost:3000>에서 문서를 선택한다.
-5. 기본 질문 또는 `삼성전자 HBM 악재`로 분석을 실행한다.
-6. 모든 호재·악재의 파일명, 발행기관, 발행일, PDF 페이지와 DB 원문 인용문을 실제 PDF와 대조한다.
-
-임베딩 미생성은 `409`, Gemini 키·인증·모델 설정 오류는 안전한 설정 오류로 반환한다. 근거가 부족하면 항목을 채우지 않고 부족 안내를 표시한다. 생성 결과, 실제 PDF와 API 키는 저장소에 커밋하지 않는다.
-
-`OLLAMA_GENERATION_TIMEOUT_SECONDS`는 로컬 모델의 첫 생성과 연속 평가 부하를 고려한 제한이며 기본값은 600초다. 평가 CLI의 요청 제한은 이보다 30초 긴 630초다. 분석 오류는 연결 실패·Ollama HTTP 오류·응답 envelope 오류·모델 JSON 파싱/Schema 오류를 구분한다. HTTP 오류가 발생하면 backend 로그에 상태 코드와 최대 1,000자의 응답 일부가 기록되지만 프롬프트, 비밀값 또는 PDF 전체 원문은 기록하지 않는다.
-
-`GENERATION_TEMPERATURE` 기본값은 `0`이다. 같은 모델·문서·질문으로 품질을 반복 비교할 때 출력 변동을 줄이기 위한 설정이며 Gemini와 Ollama 생성 설정에 동일하게 전달된다. 재현성 평가에서는 이 값을 유지한다.
-
-Gemini 실제 호출 최소 확인:
-
-```bash
-docker compose up --build -d
-curl -X POST http://localhost:8001/api/v1/analyses \
-  -H 'Content-Type: application/json' \
-  -d '{"document_id":"DOCUMENT_UUID"}'
-```
-
-HTTP 200 응답의 `generation_model`이 `.env`의 `GEMINI_MODEL`과 일치하는지 확인한다. 기존 `analysis_status`, summary·positives·negatives·citations 계약은 그대로다. 오류 로그에는 provider·model·오류 유형만 남기며 키, 전체 프롬프트와 문서 전문은 기록하지 않는다.
-
-분석 API는 사용자 질문 외에 호재·악재 관점의 한국어 보조 검색을 같은 문서 안에서 수행한다. 투자등급·면책 안내와 문맥 없는 숫자 표 조각은 제외하며, citation의 `quote`는 DB 청크에 실제 존재하는 최대 320자의 관련 원문 발췌다. `display_quote`는 원본을 바꾸지 않고 한글 단어 중간 줄바꿈과 단독 OCR 잡음만 정리한다. 표 중심 근거는 같은 페이지에서 지표·행·단위·기간·값을 모두 확인하고 값이 quote에도 존재할 때만 `table_facts` 핵심 수치 카드로 표시한다. 표 구조나 제목 OCR이 모호하면 값을 추측하지 않고 숫자 덩어리를 숨긴 채 원문 페이지 확인 안내를 반환한다. 한국어 질문의 영어 항목과 같은 chunk를 재사용한 후속 항목은 사용자 응답에서 제거한다.
-
-기본 호재·악재 요약처럼 특정 핵심어가 없는 범용 질문은 사용자 문구와 분리된 긍정·부정 보조 query를 실행하고 관점별 후보를 균형 있게 생성 모델에 전달한다. 유효 근거가 한 관점에 1개뿐이어도 citation과 함께 정상 결과로 반환하며, 두 관점 모두 직접 근거가 없으면 기존처럼 `확인할 수 없습니다`를 반환한다.
-
-범용 질문에서 모델이 한쪽 polarity를 생략하더라도 해당 관점에 검증된 별도 DB 후보가 있으면 서버가 원문 chunk ID를 그대로 연결한 중립적 리포트 해석 항목을 하나 복원한다. 후보가 없으면 항목을 만들지 않으며, 같은 청크를 호재·악재에 중복 사용하지 않는다. 인용 발췌는 DB의 연속 문자열만 사용하고 `be`처럼 의미 없는 짧은 OCR 단독 줄을 경계로 인접 문장 확장을 멈춘다. 표의 음수 수치를 근거로 쓰는 경우에는 같은 PDF 페이지의 연속 원문에서 표 제목, 기간 헤더와 영업이익 지표를 함께 복원할 수 있을 때만 표시한다. 검증된 카드가 있는데 모델 요약이 비어 있거나 금지 문체이면 서버는 검증된 항목 제목만 사용해 `보고서는 … 언급합니다` 형식의 중립 요약을 표시한다.
-
-## 다중 문서 RAG 평가
-
-버전 관리 가능한 fixture는 `evals/fixtures/*.json`에 둔다. fixture에는 document UUID 대신 원본 파일명, 기업명, 발행일과 문서 유형을 저장한다. 평가 실행 시 `GET /api/v1/documents` 결과에서 네 필드가 모두 일치하는 문서를 찾는다. 일치 문서가 없으면 해당 fixture는 실패가 아니라 `SKIP`이다.
-
-현재 평가셋은 삼성전자 증권사 리포트 5개, 총 17개 case로 구성된다. 한화투자증권 2025-07-09 리포트의 기존 5개 case는 그대로 유지하며, 현대차증권 2026-06-29·2026-07-31 및 미래에셋증권 2026-08-10·2026-08-14 리포트에 각각 3개 case가 있다. 새 문서별 case는 실제 원문에서 확인한 긍정 요인, 위험·실적 부담, 문서에 근거가 없는 질문을 하나 이상 포함한다.
-
-### Provider별 실제 기준선
-
-서로 다른 provider 결과를 합산하지 않는다.
-
-| 실행일 | Provider / model | 설정 | Pass | Fail | Skip | 비고 |
-|---|---|---|---:|---:|---:|---|
-| 2026-08-24 | Ollama / `gemma3:4b` | 로컬 Ollama | 14 | 3 | 0 | fallback provider 별도 기준선 |
-| 2026-08-25 | Gemini / `gemini-3.7-flash` | fallback `none`, timeout 30초 | 5 | 12 | 0 | 통과 5건은 retrieval 근거 부족 사례로 생성 미호출. 생성 필요 12건은 provider request 오류 |
-
-Gemini 실패 12건은 evaluation의 `request_error`이며 retrieval/generation 선택 또는 output validation 실패로 통과 처리하지 않았다. 실제 실행에서 HTTP 503 6건, HTTP 504 5건, client timeout 1건이었다. 짧은 Interactions API 구조화 요청은 임시 120초 제한에서 성공했지만 전체 evidence 분석은 120초에도 timeout이었고, 후속 진단에서는 HTTP 429가 확인됐다. 따라서 이 기준선은 분석 품질 점수가 아니라 현재 quota·latency 조건에서의 provider 가용성 기준선이다. fixture 기대값은 변경하지 않았다.
-
-기본 실행은 콘솔에 결과만 출력하며 파일을 만들지 않는다.
+RAG 평가셋은 다음 명령으로 실행한다.
 
 ```bash
 python3 scripts/evaluate.py
 ```
 
-특정 fixture 또는 UUID를 명시할 수도 있다. UUID는 fixture에 저장하지 않는다.
+평가 fixture에는 실제 문서 UUID를 저장하지 않고 파일명, 기업명, 발행일과 문서 유형을 기준으로 문서를 찾는다.
 
-```bash
-python3 scripts/evaluate.py --fixtures evals/fixtures/samsung-electronics-2025-07-09.json \
-  --document-id DOCUMENT_UUID
+검색과 생성 결과는 실제 PDF 원문 페이지와 대조해 평가한다.
 
-python3 scripts/evaluate.py \
-  --document-id samsung-electronics-2025-07-09=DOCUMENT_UUID
-```
+## 상세 문서
 
-결과 파일은 명시적으로 `--output`을 준 경우에만 생성된다. `evals/results/`는 Git에서 제외된다.
+README에는 프로젝트의 전체 흐름과 주요 문제 해결 과정을 정리하고, 세부 구현 내용은 별도 문서로 분리했다.
 
-```bash
-python3 scripts/evaluate.py --output evals/results/local-ollama.json
-```
+- `api-contract.md` — API 요청·응답 구조
+- `acceptance.md` — 기능 및 품질 완료 기준
+- `qa-rules.md` — 인용, 근거 및 분석 결과 검증 규칙
+- `product.md` — 서비스 화면과 사용자 흐름
+- `AGENTS.md` — 개발 과정에서 사용하는 프로젝트 규칙
 
-각 case는 분석 API 성공, 한국어 출력, 기대 polarity 항목, citation 연결, 기대 PDF 페이지, 주제 키워드, 투자등급·면책·문맥 없는 숫자/% 나열의 부재를 검사한다. `insufficient` case는 호재·악재와 citation을 억지로 만들지 않았을 때만 통과한다. 제목 완전 일치는 요구하지 않는다.
+## 현재 상태
 
-실패 시 콘솔의 `stage`는 원인을 다음처럼 분리한다.
+PDF 적재, OCR, 하이브리드 검색, 표 근거 처리, evidence 검증과 분석 결과 생성까지 구현돼 있다.
 
-- `retrieval_candidate_excluded`: 기대 페이지·주제의 관련 청크가 분석 후보에 없음
-- `retrieval_wrong_perspective`: 관련 청크는 있지만 기대 polarity 후보로 분류되지 않음
-- `generation_not_selected`: 올바른 후보가 모델에 전달됐지만 모델이 해당 chunk ID를 선택하지 않음
-- `output_validation_removed`: 모델은 선택했지만 기존 안전·근거 검증을 통과하지 못함
-
-진단 정보는 분석 실행 기록의 내부 trace에 저장되고 OpenAPI에서 숨긴 평가 전용 경로로만 CLI가 읽는다. 일반 분석 API 응답과 웹 UI에는 노출되지 않는다.
-
-새 문서 fixture 템플릿:
-
-```json
-{
-  "schema_version": 1,
-  "document": {
-    "filename": "원본 파일명.pdf",
-    "company_name": "기업명",
-    "published_at": "2026-08-24",
-    "document_type": "broker_report"
-  },
-  "cases": [
-    {
-      "id": "unique-case-id",
-      "question": "원문으로 확인할 질문",
-      "expected_topic": "핵심어1|핵심어2",
-      "expected_polarity": "positive",
-      "expected_pages": [1],
-      "notes": "PDF 원문을 직접 확인한 기대 근거와 판정 의도"
-    }
-  ]
-}
-```
-
-추가 PDF의 등록 절차:
-
-1. 사용 권한이 있는 PDF를 업로드하되 저장소에는 추가하지 않는다.
-2. 메타데이터 PATCH API로 기업명·종목코드·문서 유형·발행기관·발행일을 교정한다.
-3. 문서 임베딩 생성 API를 호출한다.
-4. `GET /api/v1/documents`로 파일명·기업명·발행일·문서 유형을 확인한다.
-5. PDF 원문 페이지를 직접 확인하고 위 템플릿으로 문서별 질문, polarity와 기대 페이지 fixture를 추가한다.
-6. `python3 scripts/evaluate.py`로 현재 DB에 있는 모든 fixture 문서를 한 번에 평가한다. 아직 업로드하지 않은 문서는 `SKIP`으로 집계된다.
-
-CI와 단위 테스트는 실제 Gemini API나 Ollama를 호출하지 않는다. fixture schema, 메타데이터 문서 매칭과 판정기는 고정된 fake 분석 응답으로 검증한다. 실제 품질 평가는 선택한 provider를 설정한 로컬 환경에서 위 CLI로 별도 수행한다.
-
-긴 Ollama 생성 중에는 retrieval transaction을 먼저 종료해 DB 연결을 pool에 돌려준다. PostgreSQL engine은 `pool_pre_ping`을 사용하고 `DB_POOL_RECYCLE_SECONDS` 기본값 300초를 적용한다. 생성 완료 후 `analysis_runs` 저장에서 연결이 한 번 끊기면 현재 session을 rollback하고 새 session으로 같은 검증 결과만 한 번 다시 저장하며, Ollama 생성은 반복하지 않는다.
-
-일반 검색 API는 HNSW 인덱스를 유지한다. 다중 query expansion을 연속 실행하는 분석 경로는 로컬 ARM Docker 환경에서 관찰된 pgvector HNSW backend-process 종료를 피하기 위해 선택 문서 범위의 exact cosine scan을 사용한다. 임베딩, cosine 거리, BM25 후보, 필터와 RRF 결합 규칙은 동일하다.
-
-## 로컬 검증
-
-Docker 밖에서 전체 검증을 실행하려면 Python 3.12+, Node.js 22+, backend 개발 의존성과 frontend 패키지가 필요하다.
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r backend/requirements-dev.txt
-npm --prefix frontend install
-./scripts/check.sh
-```
-
-`scripts/check.sh`는 backend test, frontend 상태 test, frontend lint, frontend production build 순서로 실행된다.
-
-## 변경 파일 목록
-
-- 루트: `.gitignore`, `.env.example`, `README.md`, `product.md`, `acceptance.md`, `api-contract.md`, `qa-rules.md`, `AGENTS.md`, `docker-compose.yml`
-- backend 2차: Alembic 설정 및 최초 migration, SQLAlchemy 모델·DB session, 문서 API schema/service, PDF/OCR 파이프라인, 청킹·인용 복원 함수, 업로드 데이터 안내
-- backend 3차: 1024차원 vector/HNSW 안전 migration, Ollama provider·상태 서비스, BM25 tokenizer, cosine 검색, RRF 및 검색 API
-- backend 4차: nullable 종목코드·`analysis_runs` migration, 메타데이터 PATCH, Ollama JSON Schema 생성 provider, 문서 범위 검색·근거 허용 목록·citation 복원 분석 서비스와 API
-- backend 테스트: 기존 회귀 테스트와 생성 HTTP mock, JSON Schema, 잘못된 근거 ID 거부, citation 없는 항목 제거, 근거 부족, 503, 메타데이터 검증
-- frontend: 실제 FastAPI 문서 선택·메타데이터 수정·질문·분석 화면, 출처 카드, 로딩·성공·근거 부족·오류 컴포넌트 테스트
-- DB/검증: `db/init.sql`, `scripts/check.sh`, `scripts/evaluate.py`, `evals/fixtures/`
-
-## 검증 결과
-
-2026-08-23 4차 로컬 검증 결과:
-
-- backend pytest: 33개 통과
-- frontend Vitest: 상태 렌더링 4개 통과
-- frontend production build 및 ESLint: 통과
-- 최종 `./scripts/check.sh`: 성공
-- `npm audit`: 개발 의존성 설치 시 critical 1건이 보고되었으며 기능 검증 후 별도 의존성 점검이 필요하다. 자동 `--force` 수정은 적용하지 않았다.
-- Docker backend 4차 이미지: `/health` HTTP 200, `{\"status\":\"ok\"}` 확인
-- Docker frontend 이미지의 기존 기동 이력은 유지하며, 4차 분석 화면은 production build와 상태 컴포넌트 테스트로 검증
-- PostgreSQL 16 컨테이너: healthcheck 정상, `vector` extension 활성화 확인
-- Alembic: 실제 PostgreSQL에 `20260823_0004 (head)` 적용, nullable `documents.stock_code`와 `analysis_runs` 테이블 확인
-- 안전 migration: 기존 non-null embedding 0개를 확인한 뒤 차원 변경; non-null이면 migration을 중단하는 테스트 통과
-- Ollama: Docker backend에서 맥 호스트 Ollama의 `bge-m3` 감지 및 검색어 로컬 임베딩 요청 확인
-- 유료 API 차단: backend 이미지에 OpenAI SDK가 설치되지 않았고 OpenAI 키 설정도 없음
-- OCR 런타임: Docker 이미지에서 Poppler와 Tesseract 언어팩 `kor`, `eng` 확인
-- `docker compose config`: 성공
-
-1차 검증에서 확인된 기존 WordPress의 8000 포트 점유를 피하기 위해 backend 기본 호스트 포트를 8001로 변경했다.
-
-## 다음 단계
-
-1. 실제 사용 권한이 있는 한국어 문서 골든셋으로 검색 recall과 근거 충실도를 평가한다.
-2. PostgreSQL에 분석 항목·citation을 정규화해 장기 보존할 필요가 있는지 검토한다.
-3. `gemma3:4b` 구조화 출력의 실패율·금지 표현·문서 시점 구분을 별도 평가한다.
-4. 현재 보고된 frontend 개발 의존성 취약점의 영향 범위를 확인하고 호환 가능한 버전으로 갱신한다.
+현재는 새로운 기능을 추가하기보다 처음 보는 기업 리포트에서도 동일한 기준으로 근거를 찾을 수 있는지 평가하면서 검색과 표 처리 품질을 개선하고 있다.
