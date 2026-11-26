@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "created_at": "2026-11-25",
+  "status": "confirmed_by_user",
+  "confirmed_by": "hs98012",
+  "confirmed_at": "2026-11-26",
+  "dev_cases_file": "evals/audit-cases.json",
+  "dev_cases_sha256": "50874005814a50fd48fbe0908dfadb72bfe15d356092dbe8872fbcfab36c5601",
+  "criteria": {
+    "exact_numeric_period": "질문이 특정 수치·단위·기간 토큰의 값을 요구한다.",
+    "semantic": "질문이 이유·위험·근거 설명을 요구한다.",
+    "tie_break": "둘 다 요구하면 주된 요구를 기준으로 하고 reason에 적는다."
+  },
+  "labels": [
+    {"case_id": "old-miss", "answerable": true, "query_type": "semantic", "reason": "시장 기대를 밑돈 근거와 이유 설명"},
+    {"case_id": "old-risk", "answerable": true, "query_type": "semantic", "reason": "HBM·파운드리 위험 요인 설명"},
+    {"case_id": "old-none", "answerable": false, "query_type": "exact_numeric_period", "reason": "2030년 목표와 달성률 값 요구. 답 없음 케이스라 retrieval 지표에서는 제외"},
+    {"case_id": "lg-fact", "answerable": true, "query_type": "semantic", "reason": "2Q26 기간 토큰이 있지만 요구는 영업이익 증가 근거 설명"},
+    {"case_id": "lg-period", "answerable": true, "query_type": "exact_numeric_period", "reason": "2Q26 실적과 2026F 전망 값·단위 요구"},
+    {"case_id": "lg-table", "answerable": true, "query_type": "exact_numeric_period", "reason": "표 1의 CNS 지분가치 값과 단위 요구"},
+    {"case_id": "db-scan", "answerable": true, "query_type": "exact_numeric_period", "reason": "순이익 예상치·컨센서스·상회율 값 요구"},
+    {"case_id": "db-table", "answerable": true, "query_type": "exact_numeric_period", "reason": "1Q26·2Q26F 보험손익 값과 단위 요구"},
+    {"case_id": "posco-multi", "answerable": true, "query_type": "semantic", "reason": "복합 질문. 개선 이유 설명과 2Q26F 값을 함께 요구하며, 질문이 이유 설명을 먼저 요구하므로 semantic으로 분류"},
+    {"case_id": "posco-forecast", "answerable": true, "query_type": "exact_numeric_period", "reason": "2Q26 영업이익 전망치와 시장 예상치 구분 요구"},
+    {"case_id": "db-none", "answerable": false, "query_type": "exact_numeric_period", "reason": "확정 매출액 값 요구. 답 없음 케이스라 retrieval 지표에서는 제외"}
+  ]
+}

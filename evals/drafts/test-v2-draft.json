@@ -1,0 +1,423 @@
+{
+  "purpose": "test-v2 draft. Only cases a user marks approved after comparing against the source PDF may enter evals/test-v2-*.json. Do not run retrieval on these cases before sealing.",
+  "created_at": "2026-11-25",
+  "drafted_by": "Claude (from PyMuPDF native text of test-v2/*.pdf)",
+  "review_instructions": "케이스마다 PDF 원문 해당 페이지와 문구·수치·단위·기간을 대조한 뒤 review.status를 approved 또는 rejected로 바꾸고 reviewer, reviewed_at, checked_pages, note를 채운다.",
+  "documents": [
+    {
+      "filename": "20261125_CJ제일제당 (097950)_하나증권.pdf",
+      "company_name": "CJ제일제당",
+      "stock_code": "097950",
+      "issuer": "하나증권",
+      "published_at": "2026-11-25",
+      "sha256": "2fa66cb2778841d2ea603a69379b1401853238777c2b64b0c2c780454126eede"
+    },
+    {
+      "filename": "20261125_솔브레인 (357780)_교보증권.pdf",
+      "company_name": "솔브레인",
+      "stock_code": "357780",
+      "issuer": "교보증권",
+      "published_at": "2026-11-25",
+      "sha256": "4dc8faad00e8156bed44568b15449cd656442201ccc8fa66ec9d6a15549be061"
+    },
+    {
+      "filename": "20261125_이수페타시스 (007660)_DS투자증권.pdf",
+      "company_name": "이수페타시스",
+      "stock_code": "007660",
+      "issuer": "DS투자증권",
+      "published_at": "2026-11-25",
+      "sha256": "42d377f08f5872933fa9073d2a0204ac8526877398305be1c10f4e0f9a4a68f4"
+    },
+    {
+      "filename": "20261125_한세실업 (105630)_유진투자증권.pdf",
+      "company_name": "한세실업",
+      "stock_code": "105630",
+      "issuer": "유진투자증권",
+      "published_at": "2026-11-25",
+      "sha256": "827057d955459ab999d4023039ea605a2e8a7ebfb82c7f3bcbb4e4422ed30a54"
+    }
+  ],
+  "cases": [
+    {
+      "id": "cj-bio",
+      "company_name": "CJ제일제당",
+      "query_type": "semantic",
+      "question": "CJ제일제당 바이오 부문의 이익이 회복되는 이유를 설명해줘.",
+      "expected_pages": [
+        1
+      ],
+      "units": [
+        {
+          "unit": "바이오 회복 이유",
+          "page_number": 1,
+          "literal_conditions": [
+            "바이오는 대형 아미노산 시황 개선 기인해 이익 가시성이 가파르게 회복되고 있다",
+            "중국산 라이신 반덤핑 관세"
+          ]
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "hs98012",
+        "reviewed_at": "2026-11-26",
+        "checked_pages": [
+          1
+        ],
+        "method": "PDF 뷰어로 원문 페이지를 열고 채팅 질문 카드에서 케이스별 승인",
+        "note": null
+      }
+    },
+    {
+      "id": "cj-domestic",
+      "company_name": "CJ제일제당",
+      "query_type": "exact_numeric_period",
+      "question": "CJ제일제당의 3분기 국내 가공 매출은 전년 대비 몇 % 증가했어?",
+      "expected_pages": [
+        1
+      ],
+      "units": [
+        {
+          "unit": "3분기 국내 가공 매출 YoY",
+          "page_number": 1,
+          "literal_conditions": [
+            "3분기 국내 가공 매출은 YoY 4% 증가했다"
+          ]
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "hs98012",
+        "reviewed_at": "2026-11-26",
+        "checked_pages": [
+          1
+        ],
+        "method": "PDF 뷰어로 원문 페이지를 열고 채팅 질문 카드에서 케이스별 승인",
+        "note": null
+      }
+    },
+    {
+      "id": "cj-2028-op",
+      "company_name": "CJ제일제당",
+      "query_type": "exact_numeric_period",
+      "question": "CJ제일제당의 2028F 영업이익 추정치를 단위와 함께 알려줘.",
+      "expected_pages": [
+        3
+      ],
+      "units": [
+        {
+          "unit": "2028F 영업이익",
+          "page_number": 3,
+          "table": {
+            "row_label": "영업이익",
+            "metric": "영업이익",
+            "period": "2028F",
+            "unit": "십억원",
+            "value": "1,444.7",
+            "status": "forecast"
+          }
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "hs98012",
+        "reviewed_at": "2026-11-26",
+        "checked_pages": [
+          3
+        ],
+        "method": "PDF 뷰어로 원문 페이지를 열고 채팅 질문 카드에서 케이스별 승인",
+        "note": null
+      }
+    },
+    {
+      "id": "sb-growth",
+      "company_name": "솔브레인",
+      "query_type": "semantic",
+      "question": "솔브레인의 성장에 중요한 요인으로 보고서가 꼽은 것을 설명해줘.",
+      "expected_pages": [
+        1
+      ],
+      "units": [
+        {
+          "unit": "성장 요인 3가지",
+          "page_number": 1,
+          "literal_conditions": [
+            "1) 고객사들의 웨이퍼 투입량 증대, 2) 신규 팹 증설 추이, 3) NAND 전환 투자"
+          ]
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "hs98012",
+        "reviewed_at": "2026-11-26",
+        "checked_pages": [
+          1
+        ],
+        "method": "PDF 뷰어로 원문 페이지를 열고 채팅 질문 카드에서 케이스별 승인",
+        "note": null
+      }
+    },
+    {
+      "id": "sb-tp-cut",
+      "company_name": "솔브레인",
+      "query_type": "semantic",
+      "question": "솔브레인 보고서가 목표주가를 하향한 이유를 설명해줘.",
+      "expected_pages": [
+        1
+      ],
+      "units": [
+        {
+          "unit": "목표주가 하향 이유",
+          "page_number": 1,
+          "literal_conditions": [
+            "자회사 연결 영향 등으로 수익성 개선은 아쉬운 상황"
+          ]
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "hs98012",
+        "reviewed_at": "2026-11-26",
+        "checked_pages": [
+          1
+        ],
+        "method": "PDF 뷰어로 원문 페이지를 열고 채팅 질문 카드에서 케이스별 승인",
+        "note": null
+      }
+    },
+    {
+      "id": "sb-4q-op",
+      "company_name": "솔브레인",
+      "query_type": "exact_numeric_period",
+      "question": "솔브레인의 4Q26 영업이익 전망치를 단위와 함께 알려줘.",
+      "expected_pages": [
+        2
+      ],
+      "units": [
+        {
+          "unit": "4Q26F 영업이익",
+          "page_number": 2,
+          "table": {
+            "row_label": "영업이익",
+            "metric": "영업이익",
+            "period": "264Q(F)",
+            "unit": "억원",
+            "value": "488",
+            "status": "forecast"
+          }
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "hs98012",
+        "reviewed_at": "2026-11-26",
+        "checked_pages": [
+          2
+        ],
+        "method": "PDF 뷰어로 원문 페이지를 열고 채팅 질문 카드에서 케이스별 승인",
+        "note": null
+      }
+    },
+    {
+      "id": "isu-backlog",
+      "company_name": "이수페타시스",
+      "query_type": "exact_numeric_period",
+      "question": "이수페타시스의 3Q26 수주잔고는 얼마이고 2Q26보다 얼마나 늘었어?",
+      "expected_pages": [
+        1
+      ],
+      "units": [
+        {
+          "unit": "수주잔고 2Q26→3Q26",
+          "page_number": 1,
+          "literal_conditions": [
+            "2Q26 6,222억원에서 3Q26 7,849억원으로 증가"
+          ]
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "hs98012",
+        "reviewed_at": "2026-11-26",
+        "checked_pages": [
+          1
+        ],
+        "method": "PDF 뷰어로 원문 페이지를 열고 채팅 질문 카드에서 케이스별 승인",
+        "note": null
+      }
+    },
+    {
+      "id": "isu-margin",
+      "company_name": "이수페타시스",
+      "query_type": "semantic",
+      "question": "이수페타시스 본사(페타시스)의 수익성이 전분기보다 개선된 이유를 설명해줘.",
+      "expected_pages": [
+        1
+      ],
+      "units": [
+        {
+          "unit": "수익성 개선 요인",
+          "page_number": 1,
+          "literal_conditions": [
+            "다중적층 매출 비중 증가, 판가 인상 효과, 원재료 래깅효과"
+          ]
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "hs98012",
+        "reviewed_at": "2026-11-26",
+        "checked_pages": [
+          1
+        ],
+        "method": "PDF 뷰어로 원문 페이지를 열고 채팅 질문 카드에서 케이스별 승인",
+        "note": null
+      }
+    },
+    {
+      "id": "isu-bottleneck",
+      "company_name": "이수페타시스",
+      "query_type": "semantic",
+      "question": "이수페타시스의 생산 병목 원인과 해소 전망을 설명해줘.",
+      "expected_pages": [
+        1
+      ],
+      "units": [
+        {
+          "unit": "생산 병목 원인",
+          "page_number": 1,
+          "literal_conditions": [
+            "E-glass 및 동박 공급 부족에 따른 CCL 수급 제약"
+          ]
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "hs98012",
+        "reviewed_at": "2026-11-26",
+        "checked_pages": [
+          1
+        ],
+        "method": "PDF 뷰어로 원문 페이지를 열고 채팅 질문 카드에서 케이스별 승인",
+        "note": "원인 문구만 gold. 해소 전망은 gold에 없음을 알고 승인."
+      }
+    },
+    {
+      "id": "isu-4q-op",
+      "company_name": "이수페타시스",
+      "query_type": "exact_numeric_period",
+      "question": "이수페타시스의 4Q26 연결 영업이익 전망치를 단위와 함께 알려줘.",
+      "expected_pages": [
+        1
+      ],
+      "units": [
+        {
+          "unit": "4Q26F 연결 영업이익",
+          "page_number": 1,
+          "literal_conditions": [
+            "영업이익 1,111억원"
+          ]
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "hs98012",
+        "reviewed_at": "2026-11-26",
+        "checked_pages": [
+          1
+        ],
+        "method": "PDF 뷰어로 원문 페이지를 열고 채팅 질문 카드에서 케이스별 승인",
+        "note": "1쪽 본문만 gold로 인정(2쪽 111 십억원 제외)을 알고 승인."
+      }
+    },
+    {
+      "id": "hs-3q-op",
+      "company_name": "한세실업",
+      "query_type": "exact_numeric_period",
+      "question": "한세실업의 3Q26 영업이익과 전년 대비 증감률을 알려줘.",
+      "expected_pages": [
+        1
+      ],
+      "units": [
+        {
+          "unit": "3Q26 영업이익",
+          "page_number": 1,
+          "literal_conditions": [
+            "영업이익은 2억원(-99.3%yoy)"
+          ]
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "hs98012",
+        "reviewed_at": "2026-11-26",
+        "checked_pages": [
+          1
+        ],
+        "method": "PDF 뷰어로 원문 페이지를 열고 채팅 질문 카드에서 케이스별 승인",
+        "note": null
+      }
+    },
+    {
+      "id": "hs-shock",
+      "company_name": "한세실업",
+      "query_type": "semantic",
+      "question": "한세실업의 3Q26 영업이익이 크게 부진한 원인을 설명해줘.",
+      "expected_pages": [
+        1
+      ],
+      "units": [
+        {
+          "unit": "어닝 쇼크 원인",
+          "page_number": 1,
+          "literal_conditions": [
+            "칠드런스플레이스가 11월 파산",
+            "다른 원인은 원달러 환율 하락이다"
+          ]
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "hs98012",
+        "reviewed_at": "2026-11-26",
+        "checked_pages": [
+          1
+        ],
+        "method": "PDF 뷰어로 원문 페이지를 열고 채팅 질문 카드에서 케이스별 승인",
+        "note": null
+      }
+    },
+    {
+      "id": "hs-2027-op",
+      "company_name": "한세실업",
+      "query_type": "exact_numeric_period",
+      "question": "한세실업의 2027E 영업이익 전망치를 단위와 함께 알려줘.",
+      "expected_pages": [
+        2
+      ],
+      "units": [
+        {
+          "unit": "2027E 영업이익",
+          "page_number": 2,
+          "table": {
+            "row_label": "영업이익",
+            "metric": "영업이익",
+            "period": "2027E",
+            "unit": "십억원",
+            "value": "73.9",
+            "status": "forecast"
+          }
+        }
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "hs98012",
+        "reviewed_at": "2026-11-26",
+        "checked_pages": [
+          2
+        ],
+        "method": "PDF 뷰어로 원문 페이지를 열고 채팅 질문 카드에서 케이스별 승인",
+        "note": "2쪽 표의 73.9만 gold로 인정(1쪽 요약표 74 제외)을 알고 승인."
+      }
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "purpose": "test-v2 sealed gold. User-approved cases only. Do not edit; publish a new version instead.",
+  "units": [
+    {
+      "case": "cj-bio",
+      "unit": "바이오 회복 이유",
+      "page_number": 1,
+      "literal_conditions": [
+        "바이오는 대형 아미노산 시황 개선 기인해 이익 가시성이 가파르게 회복되고 있다",
+        "중국산 라이신 반덤핑 관세"
+      ],
+      "source_scope": "native_text"
+    },
+    {
+      "case": "cj-domestic",
+      "unit": "3분기 국내 가공 매출 YoY",
+      "page_number": 1,
+      "literal_conditions": [
+        "3분기 국내 가공 매출은 YoY 4% 증가했다"
+      ],
+      "source_scope": "native_text"
+    },
+    {
+      "case": "cj-2028-op",
+      "unit": "2028F 영업이익",
+      "page_number": 3,
+      "table": {
+        "row_label": "영업이익",
+        "metric": "영업이익",
+        "period": "2028F",
+        "unit": "십억원",
+        "value": "1,444.7",
+        "status": "forecast"
+      },
+      "source_scope": "native_text"
+    },
+    {
+      "case": "sb-growth",
+      "unit": "성장 요인 3가지",
+      "page_number": 1,
+      "literal_conditions": [
+        "1) 고객사들의 웨이퍼 투입량 증대, 2) 신규 팹 증설 추이, 3) NAND 전환 투자"
+      ],
+      "source_scope": "native_text"
+    },
+    {
+      "case": "sb-tp-cut",
+      "unit": "목표주가 하향 이유",
+      "page_number": 1,
+      "literal_conditions": [
+        "자회사 연결 영향 등으로 수익성 개선은 아쉬운 상황"
+      ],
+      "source_scope": "native_text"
+    },
+    {
+      "case": "sb-4q-op",
+      "unit": "4Q26F 영업이익",
+      "page_number": 2,
+      "table": {
+        "row_label": "영업이익",
+        "metric": "영업이익",
+        "period": "264Q(F)",
+        "unit": "억원",
+        "value": "488",
+        "status": "forecast"
+      },
+      "source_scope": "native_text"
+    },
+    {
+      "case": "isu-backlog",
+      "unit": "수주잔고 2Q26→3Q26",
+      "page_number": 1,
+      "literal_conditions": [
+        "2Q26 6,222억원에서 3Q26 7,849억원으로 증가"
+      ],
+      "source_scope": "native_text"
+    },
+    {
+      "case": "isu-margin",
+      "unit": "수익성 개선 요인",
+      "page_number": 1,
+      "literal_conditions": [
+        "다중적층 매출 비중 증가, 판가 인상 효과, 원재료 래깅효과"
+      ],
+      "source_scope": "native_text"
+    },
+    {
+      "case": "isu-bottleneck",
+      "unit": "생산 병목 원인",
+      "page_number": 1,
+      "literal_conditions": [
+        "E-glass 및 동박 공급 부족에 따른 CCL 수급 제약"
+      ],
+      "source_scope": "native_text"
+    },
+    {
+      "case": "isu-4q-op",
+      "unit": "4Q26F 연결 영업이익",
+      "page_number": 1,
+      "literal_conditions": [
+        "영업이익 1,111억원"
+      ],
+      "source_scope": "native_text"
+    },
+    {
+      "case": "hs-3q-op",
+      "unit": "3Q26 영업이익",
+      "page_number": 1,
+      "literal_conditions": [
+        "영업이익은 2억원(-99.3%yoy)"
+      ],
+      "source_scope": "native_text"
+    },
+    {
+      "case": "hs-shock",
+      "unit": "어닝 쇼크 원인",
+      "page_number": 1,
+      "literal_conditions": [
+        "칠드런스플레이스가 11월 파산",
+        "다른 원인은 원달러 환율 하락이다"
+      ],
+      "source_scope": "native_text"
+    },
+    {
+      "case": "hs-2027-op",
+      "unit": "2027E 영업이익",
+      "page_number": 2,
+      "table": {
+        "row_label": "영업이익",
+        "metric": "영업이익",
+        "period": "2027E",
+        "unit": "십억원",
+        "value": "73.9",
+        "status": "forecast"
+      },
+      "source_scope": "native_text"
+    }
+  ]
+}

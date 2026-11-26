@@ -1,0 +1,158 @@
+[
+  {
+    "id": "cj-bio",
+    "company_name": "CJ제일제당",
+    "published_at": "2026-11-25",
+    "filename": "20261125_CJ제일제당 (097950)_하나증권.pdf",
+    "pdf_sha256": "2fa66cb2778841d2ea603a69379b1401853238777c2b64b0c2c780454126eede",
+    "query_type": "semantic",
+    "question": "CJ제일제당 바이오 부문의 이익이 회복되는 이유를 설명해줘.",
+    "expected_pages": [
+      1
+    ]
+  },
+  {
+    "id": "cj-domestic",
+    "company_name": "CJ제일제당",
+    "published_at": "2026-11-25",
+    "filename": "20261125_CJ제일제당 (097950)_하나증권.pdf",
+    "pdf_sha256": "2fa66cb2778841d2ea603a69379b1401853238777c2b64b0c2c780454126eede",
+    "query_type": "exact_numeric_period",
+    "question": "CJ제일제당의 3분기 국내 가공 매출은 전년 대비 몇 % 증가했어?",
+    "expected_pages": [
+      1
+    ]
+  },
+  {
+    "id": "cj-2028-op",
+    "company_name": "CJ제일제당",
+    "published_at": "2026-11-25",
+    "filename": "20261125_CJ제일제당 (097950)_하나증권.pdf",
+    "pdf_sha256": "2fa66cb2778841d2ea603a69379b1401853238777c2b64b0c2c780454126eede",
+    "query_type": "exact_numeric_period",
+    "question": "CJ제일제당의 2028F 영업이익 추정치를 단위와 함께 알려줘.",
+    "expected_pages": [
+      3
+    ]
+  },
+  {
+    "id": "sb-growth",
+    "company_name": "솔브레인",
+    "published_at": "2026-11-25",
+    "filename": "20261125_솔브레인 (357780)_교보증권.pdf",
+    "pdf_sha256": "4dc8faad00e8156bed44568b15449cd656442201ccc8fa66ec9d6a15549be061",
+    "query_type": "semantic",
+    "question": "솔브레인의 성장에 중요한 요인으로 보고서가 꼽은 것을 설명해줘.",
+    "expected_pages": [
+      1
+    ]
+  },
+  {
+    "id": "sb-tp-cut",
+    "company_name": "솔브레인",
+    "published_at": "2026-11-25",
+    "filename": "20261125_솔브레인 (357780)_교보증권.pdf",
+    "pdf_sha256": "4dc8faad00e8156bed44568b15449cd656442201ccc8fa66ec9d6a15549be061",
+    "query_type": "semantic",
+    "question": "솔브레인 보고서가 목표주가를 하향한 이유를 설명해줘.",
+    "expected_pages": [
+      1
+    ]
+  },
+  {
+    "id": "sb-4q-op",
+    "company_name": "솔브레인",
+    "published_at": "2026-11-25",
+    "filename": "20261125_솔브레인 (357780)_교보증권.pdf",
+    "pdf_sha256": "4dc8faad00e8156bed44568b15449cd656442201ccc8fa66ec9d6a15549be061",
+    "query_type": "exact_numeric_period",
+    "question": "솔브레인의 4Q26 영업이익 전망치를 단위와 함께 알려줘.",
+    "expected_pages": [
+      2
+    ]
+  },
+  {
+    "id": "isu-backlog",
+    "company_name": "이수페타시스",
+    "published_at": "2026-11-25",
+    "filename": "20261125_이수페타시스 (007660)_DS투자증권.pdf",
+    "pdf_sha256": "42d377f08f5872933fa9073d2a0204ac8526877398305be1c10f4e0f9a4a68f4",
+    "query_type": "exact_numeric_period",
+    "question": "이수페타시스의 3Q26 수주잔고는 얼마이고 2Q26보다 얼마나 늘었어?",
+    "expected_pages": [
+      1
+    ]
+  },
+  {
+    "id": "isu-margin",
+    "company_name": "이수페타시스",
+    "published_at": "2026-11-25",
+    "filename": "20261125_이수페타시스 (007660)_DS투자증권.pdf",
+    "pdf_sha256": "42d377f08f5872933fa9073d2a0204ac8526877398305be1c10f4e0f9a4a68f4",
+    "query_type": "semantic",
+    "question": "이수페타시스 본사(페타시스)의 수익성이 전분기보다 개선된 이유를 설명해줘.",
+    "expected_pages": [
+      1
+    ]
+  },
+  {
+    "id": "isu-bottleneck",
+    "company_name": "이수페타시스",
+    "published_at": "2026-11-25",
+    "filename": "20261125_이수페타시스 (007660)_DS투자증권.pdf",
+    "pdf_sha256": "42d377f08f5872933fa9073d2a0204ac8526877398305be1c10f4e0f9a4a68f4",
+    "query_type": "semantic",
+    "question": "이수페타시스의 생산 병목 원인과 해소 전망을 설명해줘.",
+    "expected_pages": [
+      1
+    ]
+  },
+  {
+    "id": "isu-4q-op",
+    "company_name": "이수페타시스",
+    "published_at": "2026-11-25",
+    "filename": "20261125_이수페타시스 (007660)_DS투자증권.pdf",
+    "pdf_sha256": "42d377f08f5872933fa9073d2a0204ac8526877398305be1c10f4e0f9a4a68f4",
+    "query_type": "exact_numeric_period",
+    "question": "이수페타시스의 4Q26 연결 영업이익 전망치를 단위와 함께 알려줘.",
+    "expected_pages": [
+      1
+    ]
+  },
+  {
+    "id": "hs-3q-op",
+    "company_name": "한세실업",
+    "published_at": "2026-11-25",
+    "filename": "20261125_한세실업 (105630)_유진투자증권.pdf",
+    "pdf_sha256": "827057d955459ab999d4023039ea605a2e8a7ebfb82c7f3bcbb4e4422ed30a54",
+    "query_type": "exact_numeric_period",
+    "question": "한세실업의 3Q26 영업이익과 전년 대비 증감률을 알려줘.",
+    "expected_pages": [
+      1
+    ]
+  },
+  {
+    "id": "hs-shock",
+    "company_name": "한세실업",
+    "published_at": "2026-11-25",
+    "filename": "20261125_한세실업 (105630)_유진투자증권.pdf",
+    "pdf_sha256": "827057d955459ab999d4023039ea605a2e8a7ebfb82c7f3bcbb4e4422ed30a54",
+    "query_type": "semantic",
+    "question": "한세실업의 3Q26 영업이익이 크게 부진한 원인을 설명해줘.",
+    "expected_pages": [
+      1
+    ]
+  },
+  {
+    "id": "hs-2027-op",
+    "company_name": "한세실업",
+    "published_at": "2026-11-25",
+    "filename": "20261125_한세실업 (105630)_유진투자증권.pdf",
+    "pdf_sha256": "827057d955459ab999d4023039ea605a2e8a7ebfb82c7f3bcbb4e4422ed30a54",
+    "query_type": "exact_numeric_period",
+    "question": "한세실업의 2027E 영업이익 전망치를 단위와 함께 알려줘.",
+    "expected_pages": [
+      2
+    ]
+  }
+]
