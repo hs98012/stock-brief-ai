@@ -280,22 +280,22 @@ def _grounded_polarity_fallback(evidence_results: list[dict], perspective: str,
     return None
 
 
-def analyze_document(
-    db: Session,
-    document: Document,
-    request: AnalysisRequest,
-    embedding_provider: EmbeddingProvider,
-    generation_provider: GenerationProvider,
-) -> AnalysisResult:
-    check_generation_policy(request, generation_provider)
-    started = perf_counter()
+MAX_ITEMS_PER_PERSPECTIVE = 3
+
+
+def _start_run(db: Session, document: Document, request: AnalysisRequest,
+    generation_provider: GenerationProvider) -> UUID:
     run = AnalysisRun(document_id=document.id, question=request.question, status="processing",
         generation_provider=generation_provider.provider_name, generation_model=generation_provider.model,
         result={'execution': _execution(request, generation_provider).model_dump()})
     db.add(run)
     db.commit()
-    run_id = run.id
+    return run.id
 
+
+def _collect_evidence(db: Session, document: Document, request: AnalysisRequest,
+    embedding_provider: EmbeddingProvider, generation_provider: GenerationProvider, run_id: UUID):
+    """Returns (verified evidence rows, retrieval diagnostics, timings)."""
     retrieval_diagnostics: dict = {}
     retrieval_started = perf_counter()
     generation_event('retrieving')
@@ -309,171 +309,241 @@ def analyze_document(
     timings = {'retrieval_verification': perf_counter() - retrieval_started}
     # Retrieval opens a transaction. Release its connection before the potentially long Ollama call.
     db.commit()
-    now = datetime.now(timezone.utc)
-    if not evidence_results:
-        result = AnalysisResult(analysis_status="insufficient_evidence", generation_model=None, generated_at=now,
-            summary=_empty_summary(retrieval_diagnostics), positives=[], negatives=[], citations=[],
-            positive_empty_state=_empty_state("positive", [], retrieval_diagnostics),
-            negative_empty_state=_empty_state("negative", [], retrieval_diagnostics),
-            insufficient_evidence_note=INSUFFICIENT_NOTE, disclaimer=DISCLAIMER)
-        result.run_id = run_id
-        result.requirement_status = retrieval_diagnostics.get('requirement_resolution', {}).get('status')
-        result.coverage_complete = retrieval_diagnostics.get('coverage_complete')
-        result.execution = _execution(request, generation_provider)
-        _persist_run(db, run_id, status=result.analysis_status, generated_at=now,
-            result=_stored_result(result, [], None, timings=timings,
-                retrieval_diagnostics=retrieval_diagnostics))
-        return result
+    return evidence_results, retrieval_diagnostics, timings
 
-    allowed = {row["chunk_id"]: row for row in evidence_results}
+
+def _with_run_metadata(result: AnalysisResult, run_id: UUID, request: AnalysisRequest,
+    generation_provider: GenerationProvider, retrieval_diagnostics: dict, *, generated: bool) -> AnalysisResult:
+    result.run_id = run_id
+    result.requirement_status = retrieval_diagnostics.get('requirement_resolution', {}).get('status')
+    result.coverage_complete = retrieval_diagnostics.get('coverage_complete')
+    result.execution = _execution(request, generation_provider, generated=generated)
+    return result
+
+
+def _insufficient_result(db: Session, run_id: UUID, request: AnalysisRequest,
+    generation_provider: GenerationProvider, now: datetime, timings: dict, retrieval_diagnostics: dict) -> AnalysisResult:
+    result = AnalysisResult(analysis_status="insufficient_evidence", generation_model=None, generated_at=now,
+        summary=_empty_summary(retrieval_diagnostics), positives=[], negatives=[], citations=[],
+        positive_empty_state=_empty_state("positive", [], retrieval_diagnostics),
+        negative_empty_state=_empty_state("negative", [], retrieval_diagnostics),
+        insufficient_evidence_note=INSUFFICIENT_NOTE, disclaimer=DISCLAIMER)
+    result = _with_run_metadata(result, run_id, request, generation_provider, retrieval_diagnostics, generated=False)
+    _persist_run(db, run_id, status=result.analysis_status, generated_at=now,
+        result=_stored_result(result, [], None, timings=timings,
+            retrieval_diagnostics=retrieval_diagnostics))
+    return result
+
+
+def _candidate_packet(evidence_results: list[dict]) -> dict[str, list[dict]]:
     packet = {"positive_candidates": [], "negative_candidates": [], "neutral_candidates": []}
     for row in evidence_results:
         candidate = {"chunk_id": str(row["chunk_id"]), "page_number": row["page_number"],
             "section_title": row["section_title"], "text": row["quote"], "facts": row.get("facts", []), "table_evidence": row.get("table_evidence", [])}
         packet.setdefault(f"{row['analysis_perspective']}_candidates", []).append(candidate)
+    return packet
+
+
+def _generate(document: Document, request: AnalysisRequest, packet: dict, generation_provider: GenerationProvider,
+    run_id: UUID) -> tuple[GeneratedAnalysis, dict]:
+    """Returns (generated analysis, timings for prompt construction and generation)."""
+    if not generation_provider.available:
+        raise GenerationConfigurationError(generation_provider.unavailable_reason or "Ollama 답변 생성을 사용할 수 없습니다.")
+    generation_started = perf_counter()
+    prompt_started = perf_counter()
+    prompt = _prompt(document, request.question, packet)
+    timings = {'prompt_construction': perf_counter() - prompt_started}
+    from .generation import generation_request_id
+    token = generation_request_id.set(str(run_id))
     try:
-        if not generation_provider.available:
-            raise GenerationConfigurationError(generation_provider.unavailable_reason or "Ollama 답변 생성을 사용할 수 없습니다.")
-        generation_started = perf_counter()
-        prompt_started = perf_counter()
-        prompt = _prompt(document, request.question, packet)
-        timings['prompt_construction'] = perf_counter() - prompt_started
-        from .generation import generation_request_id
-        token = generation_request_id.set(str(run_id))
-        try:
-            generation_event('generating', generation_provider.provider_name)
-            generated: GeneratedAnalysis = generation_provider.generate(prompt)
-        finally:
-            generation_request_id.reset(token)
-        timings['generation'] = perf_counter() - generation_started
+        generation_event('generating', generation_provider.provider_name)
+        generated: GeneratedAnalysis = generation_provider.generate(prompt)
+    finally:
+        generation_request_id.reset(token)
+    return generated, {**timings, 'generation': perf_counter() - generation_started}
+
+
+def _check_supplied_ids(generated: GeneratedAnalysis, allowed: dict) -> None:
+    supplied_ids = [chunk_id for item in generated.positives + generated.negatives for chunk_id in item.evidence_chunk_ids]
+    invalid = sorted({str(item) for item in supplied_ids if item not in allowed})
+    if invalid:
+        raise AnalysisValidationError(f"검색 결과에 없는 evidence_chunk_id가 포함되었습니다: {', '.join(invalid)}")
+
+
+def _validated_items(items, perspective: str, *, allowed: dict, perspective_ids: dict, label: str,
+    require_korean: bool, used_across_items: set, used_spans: list) -> list[AnalysisItem]:
+    """Keeps at most 3 items, each re-grounded on one unused candidate of its perspective.
+
+    used_across_items/used_spans are shared across both perspectives and updated here.
+    """
+    validated = []
+    for item in items:
+        if not _item_tone_is_safe(item.title) or (require_korean and not _has_hangul(item.title)):
+            continue
+        # Validate every ID first (_check_supplied_ids), then never combine claims from
+        # independent candidates into one purportedly supported sentence.
+        for evidence_id in dict.fromkeys(item.evidence_chunk_ids):
+            candidate = allowed[evidence_id]
+            if evidence_id in used_across_items or evidence_id not in perspective_ids[perspective]:
+                continue
+            if any(_spans_overlap(candidate, used) for used in used_spans):
+                continue
+            card = grounded_card(candidate, perspective)
+            if card is None:
+                continue
+            title, reason = card
+            if (item.title == title and item.reason == reason
+                    and supported_claim(item.title, item.reason, [candidate])
+                    and _item_tone_is_safe(item.title) and _item_tone_is_safe(item.reason, True)
+                    and (not require_korean or (_has_hangul(item.title) and _has_hangul(item.reason)))):
+                title, reason = item.title, item.reason
+            if not _item_tone_is_safe(title) or not _item_tone_is_safe(reason, True):
+                continue
+            used_across_items.add(evidence_id)
+            used_spans.append(candidate)
+            validated.append(AnalysisItem(title=title, reason=reason,
+                evidence_chunk_ids=[evidence_id], interpretation_label=label))
+            break
+        if len(validated) == MAX_ITEMS_PER_PERSPECTIVE:
+            break
+    return validated
+
+
+def _items_with_fallback(generated: GeneratedAnalysis, evidence_results: list[dict], allowed: dict,
+    document: Document, request: AnalysisRequest) -> tuple[list[AnalysisItem], list[AnalysisItem]]:
+    label = "증권사 리포트 해석" if document.document_type == DocumentType.broker_report else "DART 공시 사실"
+    used_across_items: set[UUID] = set()
+    used_spans: list[dict] = []
+    perspective_ids = {
+        "positive": {row["chunk_id"] for row in evidence_results if row["analysis_perspective"] == "positive"},
+        "negative": {row["chunk_id"] for row in evidence_results if row["analysis_perspective"] == "negative"},
+    }
+    shared = dict(allowed=allowed, perspective_ids=perspective_ids, label=label,
+        require_korean=_has_hangul(request.question), used_across_items=used_across_items, used_spans=used_spans)
+    positives = _validated_items(generated.positives, "positive", **shared)
+    negatives = _validated_items(generated.negatives, "negative", **shared)
+    generation_items_changed = (len(positives) != len(generated.positives)
+        or len(negatives) != len(generated.negatives)
+        or any(not _item_tone_is_safe(item.reason, require_attribution=True)
+            for item in generated.positives + generated.negatives))
+    if _is_general_summary_question(request.question):
+        if not positives:
+            fallback = _grounded_polarity_fallback(evidence_results, "positive", used_across_items, label, used_spans)
+            if fallback:
+                positives = [*positives, fallback]
+                generation_items_changed = True
+        if not negatives:
+            fallback = _grounded_polarity_fallback(evidence_results, "negative", used_across_items, label, used_spans)
+            if fallback:
+                negatives = [*negatives, fallback]
+                generation_items_changed = True
+    return positives, negatives
+
+
+def _citation(db: Session, document: Document, chunk_id: UUID, row: dict, page_texts: dict,
+    claim_hints: dict) -> AnalysisCitation:
+    source_ids = row.get("source_chunk_ids", [row.get("source_chunk_id", chunk_id)])
+    source_chunks = db.query(Chunk).filter(Chunk.id.in_(source_ids)).all()
+    source_page = db.query(Page).filter(Page.document_id == document.id,
+        Page.page_number == row["page_number"]).one_or_none()
+    if (source_page is None or not trusted_page_span(source_page, row.get("char_start", -1), row.get("char_end", -1)) or len(source_chunks) != len(set(source_ids))
+            or not span_is_covered(source_page, source_chunks,
+                row.get("char_start", -1), row.get("char_end", -1), row["quote"])):
+        raise AnalysisValidationError("인용의 문서·페이지·청크 연결이 원문과 일치하지 않습니다.")
+    display = citation_display(row["quote"], row["page_number"],
+        page_texts.get(row["page_number"]), claim_hints.get(chunk_id, ""))
+    return AnalysisCitation(chunk_id=chunk_id, filename=row["document_name"],
+        company_name=row["company_name"], published_at=row["published_at"],
+        issuer=row["publisher"], document_type=row["document_type"],
+        page_number=row["page_number"], quote=row["quote"],
+        source_chunk_id=row.get("source_chunk_id", chunk_id), char_start=row.get("char_start"),
+        source_chunk_ids=row.get("source_chunk_ids", [row.get("source_chunk_id", chunk_id)]),
+        char_end=row.get("char_end"), display_kind=display.kind,
+        citation_type=display.kind,
+        display_quote=display.display_quote, table_labels=display.table_labels,
+        display_note=display.note, table_facts=display.table_facts,
+        **citation_geometry(source_page, row))
+
+
+def _citations(db: Session, document: Document, items: list[AnalysisItem], allowed: dict) -> list[AnalysisCitation]:
+    used_ids = list(dict.fromkeys(chunk_id for item in items for chunk_id in item.evidence_chunk_ids))
+    claim_hints = {chunk_id: f"{item.title} {item.reason}" for item in items
+        for chunk_id in item.evidence_chunk_ids}
+    needed_pages = {allowed[chunk_id]["page_number"] for chunk_id in used_ids}
+    page_texts = {page.page_number: page.final_text for page in db.query(Page).filter(
+        Page.document_id == document.id, Page.page_number.in_(needed_pages)).all()}
+    return [_citation(db, document, chunk_id, allowed[chunk_id], page_texts, claim_hints)
+            for chunk_id in used_ids]
+
+
+def _summary_text(positives: list[AnalysisItem], negatives: list[AnalysisItem], citations: list,
+    require_korean: bool, retrieval_diagnostics: dict) -> str:
+    if not citations:
+        return _empty_summary(retrieval_diagnostics)
+    positive_titles = ", ".join(item.title for item in positives)
+    negative_titles = ", ".join(item.title for item in negatives)
+    if positive_titles and negative_titles:
+        candidate_summary = (f"보고서는 {_with_object_particle(positive_titles)} 긍정 요인으로 언급하는 한편, "
+            f"{_with_object_particle(negative_titles)} 주의할 요인으로 제시합니다.")
+    elif positive_titles:
+        candidate_summary = f"보고서는 {_with_object_particle(positive_titles)} 긍정 요인으로 언급합니다."
+    else:
+        candidate_summary = f"보고서는 {_with_object_particle(negative_titles)} 주의할 요인으로 제시합니다."
+    return candidate_summary if _summary_is_safe(candidate_summary, require_korean) else "확인할 수 없습니다"
+
+
+def _generated_result(generated: GeneratedAnalysis, positives: list[AnalysisItem], negatives: list[AnalysisItem],
+    citations: list[AnalysisCitation], request: AnalysisRequest, generation_provider: GenerationProvider,
+    now: datetime, retrieval_diagnostics: dict) -> AnalysisResult:
+    insufficient = generated.insufficient_evidence_note
+    if len(positives) < MAX_ITEMS_PER_PERSPECTIVE or len(negatives) < MAX_ITEMS_PER_PERSPECTIVE:
+        insufficient = INSUFFICIENT_NOTE
+    status = "completed" if positives or negatives else "insufficient_evidence"
+    summary = _summary_text(positives, negatives, citations, _has_hangul(request.question), retrieval_diagnostics)
+    return AnalysisResult(analysis_status=status, generation_model=generation_provider.model, generated_at=now,
+        summary=summary, positives=positives, negatives=negatives, citations=citations,
+        positive_empty_state=_empty_state("positive", positives, retrieval_diagnostics),
+        negative_empty_state=_empty_state("negative", negatives, retrieval_diagnostics),
+        insufficient_evidence_note=insufficient, disclaimer=DISCLAIMER)
+
+
+def analyze_document(
+    db: Session,
+    document: Document,
+    request: AnalysisRequest,
+    embedding_provider: EmbeddingProvider,
+    generation_provider: GenerationProvider,
+) -> AnalysisResult:
+    """Stages: run record -> evidence -> packet -> prompt/generation -> chunk ID check
+    -> item validation (+ general-summary fallback) -> citations -> summary -> persist."""
+    check_generation_policy(request, generation_provider)
+    started = perf_counter()
+    run_id = _start_run(db, document, request, generation_provider)
+    evidence_results, retrieval_diagnostics, timings = _collect_evidence(
+        db, document, request, embedding_provider, generation_provider, run_id)
+    now = datetime.now(timezone.utc)
+    if not evidence_results:
+        return _insufficient_result(db, run_id, request, generation_provider, now, timings, retrieval_diagnostics)
+
+    allowed = {row["chunk_id"]: row for row in evidence_results}
+    packet = _candidate_packet(evidence_results)
+    try:
+        generated, generation_timings = _generate(document, request, packet, generation_provider, run_id)
+        timings = {**timings, **generation_timings}
         validation_started = perf_counter()
         generation_event('validating', generation_provider.provider_name)
-        supplied_ids = [chunk_id for item in generated.positives + generated.negatives for chunk_id in item.evidence_chunk_ids]
-        invalid = sorted({str(item) for item in supplied_ids if item not in allowed})
-        if invalid:
-            raise AnalysisValidationError(f"검색 결과에 없는 evidence_chunk_id가 포함되었습니다: {', '.join(invalid)}")
-
-        label = "증권사 리포트 해석" if document.document_type == DocumentType.broker_report else "DART 공시 사실"
-        require_korean = _has_hangul(request.question)
-        used_across_items: set[UUID] = set()
-        used_spans: list[dict] = []
-        perspective_ids = {
-            "positive": {row["chunk_id"] for row in evidence_results if row["analysis_perspective"] == "positive"},
-            "negative": {row["chunk_id"] for row in evidence_results if row["analysis_perspective"] == "negative"},
-        }
-
-        def validated_items(items, perspective: str) -> list[AnalysisItem]:
-            validated = []
-            for item in items:
-                if not _item_tone_is_safe(item.title) or (require_korean and not _has_hangul(item.title)):
-                    continue
-                # Validate every ID first (above), then never combine claims from
-                # independent candidates into one purportedly supported sentence.
-                for evidence_id in dict.fromkeys(item.evidence_chunk_ids):
-                    candidate = allowed[evidence_id]
-                    if evidence_id in used_across_items or evidence_id not in perspective_ids[perspective]:
-                        continue
-                    if any(_spans_overlap(candidate, used) for used in used_spans):
-                        continue
-                    card = grounded_card(candidate, perspective)
-                    if card is None:
-                        continue
-                    title, reason = card
-                    if (item.title == title and item.reason == reason
-                            and supported_claim(item.title, item.reason, [candidate])
-                            and _item_tone_is_safe(item.title) and _item_tone_is_safe(item.reason, True)
-                            and (not require_korean or (_has_hangul(item.title) and _has_hangul(item.reason)))):
-                        title, reason = item.title, item.reason
-                    if not _item_tone_is_safe(title) or not _item_tone_is_safe(reason, True):
-                        continue
-                    used_across_items.add(evidence_id)
-                    used_spans.append(candidate)
-                    validated.append(AnalysisItem(title=title, reason=reason,
-                        evidence_chunk_ids=[evidence_id], interpretation_label=label))
-                    break
-                if len(validated) == 3:
-                    break
-            return validated
-
-        positives = validated_items(generated.positives, "positive")
-        negatives = validated_items(generated.negatives, "negative")
-        generation_items_changed = (len(positives) != len(generated.positives)
-            or len(negatives) != len(generated.negatives)
-            or any(not _item_tone_is_safe(item.reason, require_attribution=True)
-                for item in generated.positives + generated.negatives))
-        if _is_general_summary_question(request.question):
-            if not positives:
-                fallback = _grounded_polarity_fallback(evidence_results, "positive", used_across_items, label, used_spans)
-                if fallback:
-                    positives.append(fallback)
-                    generation_items_changed = True
-            if not negatives:
-                fallback = _grounded_polarity_fallback(evidence_results, "negative", used_across_items, label, used_spans)
-                if fallback:
-                    negatives.append(fallback)
-                    generation_items_changed = True
-        used_ids = list(dict.fromkeys(chunk_id for item in positives + negatives for chunk_id in item.evidence_chunk_ids))
-        claim_hints = {chunk_id: f"{item.title} {item.reason}" for item in positives + negatives
-            for chunk_id in item.evidence_chunk_ids}
-        needed_pages = {allowed[chunk_id]["page_number"] for chunk_id in used_ids}
-        page_texts = {page.page_number: page.final_text for page in db.query(Page).filter(
-            Page.document_id == document.id, Page.page_number.in_(needed_pages)).all()}
-        citations = []
-        for chunk_id in used_ids:
-            row = allowed[chunk_id]
-            source_ids = row.get("source_chunk_ids", [row.get("source_chunk_id", chunk_id)])
-            source_chunks = db.query(Chunk).filter(Chunk.id.in_(source_ids)).all()
-            source_page = db.query(Page).filter(Page.document_id == document.id,
-                Page.page_number == row["page_number"]).one_or_none()
-            if (source_page is None or not trusted_page_span(source_page, row.get("char_start", -1), row.get("char_end", -1)) or len(source_chunks) != len(set(source_ids))
-                    or not span_is_covered(source_page, source_chunks,
-                        row.get("char_start", -1), row.get("char_end", -1), row["quote"])):
-                raise AnalysisValidationError("인용의 문서·페이지·청크 연결이 원문과 일치하지 않습니다.")
-            display = citation_display(row["quote"], row["page_number"],
-                page_texts.get(row["page_number"]), claim_hints.get(chunk_id, ""))
-            citations.append(AnalysisCitation(chunk_id=chunk_id, filename=row["document_name"],
-                company_name=row["company_name"], published_at=row["published_at"],
-                issuer=row["publisher"], document_type=row["document_type"],
-                page_number=row["page_number"], quote=row["quote"],
-                source_chunk_id=row.get("source_chunk_id", chunk_id), char_start=row.get("char_start"),
-                source_chunk_ids=row.get("source_chunk_ids", [row.get("source_chunk_id", chunk_id)]),
-                char_end=row.get("char_end"), display_kind=display.kind,
-                citation_type=display.kind,
-                display_quote=display.display_quote, table_labels=display.table_labels,
-                display_note=display.note, table_facts=display.table_facts,
-                **citation_geometry(source_page, row)))
-        insufficient = generated.insufficient_evidence_note
-        if len(positives) < 3 or len(negatives) < 3:
-            insufficient = INSUFFICIENT_NOTE
-        status = "completed" if positives or negatives else "insufficient_evidence"
-        if citations:
-            positive_titles = ", ".join(item.title for item in positives)
-            negative_titles = ", ".join(item.title for item in negatives)
-            if positive_titles and negative_titles:
-                candidate_summary = (f"보고서는 {_with_object_particle(positive_titles)} 긍정 요인으로 언급하는 한편, "
-                    f"{_with_object_particle(negative_titles)} 주의할 요인으로 제시합니다.")
-            elif positive_titles:
-                candidate_summary = f"보고서는 {_with_object_particle(positive_titles)} 긍정 요인으로 언급합니다."
-            else:
-                candidate_summary = f"보고서는 {_with_object_particle(negative_titles)} 주의할 요인으로 제시합니다."
-            summary = candidate_summary if _summary_is_safe(candidate_summary, require_korean) else "확인할 수 없습니다"
-        else:
-            summary = _empty_summary(retrieval_diagnostics)
-        result = AnalysisResult(analysis_status=status, generation_model=generation_provider.model, generated_at=now,
-            summary=summary, positives=positives, negatives=negatives, citations=citations,
-            positive_empty_state=_empty_state("positive", positives, retrieval_diagnostics),
-            negative_empty_state=_empty_state("negative", negatives, retrieval_diagnostics),
-            insufficient_evidence_note=insufficient, disclaimer=DISCLAIMER)
+        _check_supplied_ids(generated, allowed)
+        positives, negatives = _items_with_fallback(generated, evidence_results, allowed, document, request)
+        citations = _citations(db, document, positives + negatives, allowed)
+        result = _generated_result(generated, positives, negatives, citations, request, generation_provider,
+            now, retrieval_diagnostics)
     except (GenerationConfigurationError, GenerationOutputError, AnalysisValidationError) as exc:
         _record_failure(db, run_id, str(exc), generation_provider, request)
         raise
 
-    result.run_id = run_id
-    result.requirement_status = retrieval_diagnostics.get('requirement_resolution', {}).get('status')
-    result.coverage_complete = retrieval_diagnostics.get('coverage_complete')
-    result.execution = _execution(request, generation_provider, generated=True)
-    timings['response_validation_citations'] = perf_counter() - validation_started
-    timings['total_before_persist'] = perf_counter() - started
+    result = _with_run_metadata(result, run_id, request, generation_provider, retrieval_diagnostics, generated=True)
+    timings = {**timings, 'response_validation_citations': perf_counter() - validation_started,
+        'total_before_persist': perf_counter() - started}
     result.generated_at = datetime.now(timezone.utc)
     _persist_run(db, run_id, status=result.analysis_status, generated_at=result.generated_at,
         generation_provider=generation_provider.provider_name, generation_model=generation_provider.model,
