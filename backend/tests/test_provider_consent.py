@@ -1,5 +1,5 @@
 import json
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from pydantic import ValidationError
@@ -77,13 +77,35 @@ def test_requirement_hold_precedes_every_provider(client, db, monkeypatch, mode)
     assert primary.calls == 0 and (fallback is None or fallback.calls == 0)
 
 
+ID_FIELDS = {'chunk_id', 'source_chunk_id', 'source_chunk_ids', 'evidence_chunk_ids'}
+
+
+def _without_ids(value):
+    """Drops identifier fields so a number check only sees user-visible text."""
+    if isinstance(value, dict):
+        return {k: _without_ids(v) for k, v in value.items() if k not in ID_FIELDS}
+    if isinstance(value, list):
+        return [_without_ids(v) for v in value]
+    return value
+
+
+# A chunk UUID that contains the ungrounded number below. uuid4() does this about
+# 0.55% of the time, which made the grounding check flaky.
+CHUNK_ID_CONTAINING_999 = UUID('00000000-0000-4000-8000-000000000999')
+
+
+@pytest.mark.parametrize('pinned_chunk_id', [None, CHUNK_ID_CONTAINING_999], ids=['random-id', 'id-with-999'])
 @pytest.mark.parametrize('mode,fails,expected', [
     ('LOCAL_ONLY', False, 'ollama'), ('EXTERNAL_WITH_CONSENT', False, 'gemini'),
     ('FALLBACK_ALLOWED', True, 'ollama')])
-def test_stream_all_modes_share_grounding_and_citations(client, db, monkeypatch, mode, fails, expected):
+def test_stream_all_modes_share_grounding_and_citations(client, db, monkeypatch, mode, fails, expected,
+    pinned_chunk_id):
     monkeypatch.setenv('ANALYSIS_EXTERNAL_ENABLED', '1')
     monkeypatch.setenv('ANALYSIS_OLLAMA_FALLBACK_ENABLED', '1')
     document, chunk = ready_document(db, '매출은 전년 대비 20% 증가했습니다.')
+    if pinned_chunk_id is not None:
+        chunk.id = pinned_chunk_id
+        db.commit()
     generated = GeneratedAnalysis(summary='임의의 숫자 999억원', positives=[GeneratedItem(
         title='매출 증가', reason='매출 999억원을 보장합니다.', evidence_chunk_ids=[chunk.id])], negatives=[])
     primary = CountingProvider('ollama' if mode == 'LOCAL_ONLY' else 'gemini',
@@ -102,7 +124,7 @@ def test_stream_all_modes_share_grounding_and_citations(client, db, monkeypatch,
     assert result['analysis_status'] == 'completed'
     assert len(result['positives']) == len(result['citations']) == 1
     assert result['citations'][0]['quote'] == chunk.content
-    assert '999' not in json.dumps({k: result[k] for k in ['summary', 'positives', 'negatives', 'citations']})
+    assert '999' not in json.dumps(_without_ids({k: result[k] for k in ['summary', 'positives', 'negatives', 'citations']}))
     assert result['execution'] == dict(requested_mode=mode, external_consent=mode != 'LOCAL_ONLY',
         external_request_attempted=mode != 'LOCAL_ONLY', final_provider=expected, fallback_used=fails)
     assert primary.calls == 1 and (fallback is None or fallback.calls == 1)
