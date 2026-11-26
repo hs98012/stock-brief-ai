@@ -145,6 +145,10 @@ def test_analysis_returns_verified_citation(client, db) -> None:
     trace = trace_response.json()
     assert trace["candidates"][0]["page_number"] == 1
     assert trace["generated_selection"]["positive"] == [str(chunk.id)]
+    retrieval = trace["retrieval_diagnostics"]
+    assert retrieval["candidate_count"] >= 1 and retrieval["valid_count"] >= 1
+    assert isinstance(retrieval["filter_exclusions"], list)
+    assert isinstance(retrieval["filter_counts"], dict)
 
 
 def test_unknown_evidence_id_rejects_entire_generation(client, db) -> None:

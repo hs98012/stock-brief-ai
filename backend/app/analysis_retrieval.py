@@ -256,6 +256,21 @@ def explicit_years(value: str) -> set[int]:
 from .verification_cache import request_verified
 
 
+def _note_early_exit(diagnostics: dict | None, reason: str) -> None:
+    if diagnostics is not None:
+        diagnostics["early_exit"] = reason
+
+
+def _note_exclusion(diagnostics: dict | None, span: dict, filter_name: str, reason: str | None) -> None:
+    # Evaluation-only bookkeeping; never read by retrieval or selection.
+    if diagnostics is None:
+        return
+    diagnostics.setdefault("filter_exclusions", []).append(
+        {"page_number": span["page_number"], "filter": filter_name, "reason": reason})
+    counts = diagnostics.setdefault("filter_counts", {})
+    counts[filter_name] = counts.get(filter_name, 0) + 1
+
+
 @request_verified
 def collect_analysis_evidence(db: Session, document_id: UUID, question: str, top_k: int,
     provider: EmbeddingProvider, diagnostics: dict | None = None) -> list[dict]:
@@ -266,6 +281,7 @@ def collect_analysis_evidence(db: Session, document_id: UUID, question: str, top
     if resolution['status'] not in {'supported_requirement', 'no_factual_requirement_applicable'}:
         if diagnostics is not None:
             diagnostics['coverage_complete'] = False
+        _note_early_exit(diagnostics, 'requirement_unsupported')
         return []
     # Three document-scoped queries are small enough for exact cosine scans. This avoids the local
     # ARM pgvector HNSW backend-process exits observed during long evaluation runs without changing
@@ -288,6 +304,7 @@ def collect_analysis_evidence(db: Session, document_id: UUID, question: str, top
         if index == 0 and resolution['requirements'] and not execution.requirements:
             if diagnostics is not None:
                 diagnostics['coverage_complete'] = False
+            _note_early_exit(diagnostics, 'requirement_unmatched')
             return []
         if index == 0 and execution.requirements:
             compound_pack = execution.evidence_pack or []
@@ -295,6 +312,7 @@ def collect_analysis_evidence(db: Session, document_id: UUID, question: str, top
                 diagnostics['coverage_complete'] = execution.coverage_complete
                 diagnostics['requirements'] = execution.requirements
             if not execution.coverage_complete:
+                _note_early_exit(diagnostics, 'coverage_incomplete')
                 return []
         for result in execution.results:
             chunk_id = result["chunk_id"]
@@ -317,24 +335,35 @@ def collect_analysis_evidence(db: Session, document_id: UUID, question: str, top
     if requested_years - source_years:
         if diagnostics is not None:
             diagnostics["missing_requested_years"] = sorted(requested_years - source_years)
+        _note_early_exit(diagnostics, 'missing_years')
         return []
     from .table_evidence import fact_matches_query
     structured = [span for span in candidates if span.get("table_verified") and
                   any(fact_matches_query(fact, question) for fact in span.get("table_evidence", []))]
     ranked = []
+    if diagnostics is not None:
+        diagnostics.setdefault("filter_exclusions", [])
+        diagnostics.setdefault("filter_counts", {})
+        diagnostics["required_focus_terms"] = [] if general_summary_question else sorted(
+            focus_terms - GENERIC_FOCUS_TERMS)
     for span in candidates:
         perspective = span["analysis_perspective"]
         if span["quality_status"] != "valid":
             if (diagnostics is not None and perspective in ("positive", "negative")
                     and span["exclusion_reason"] in {"ocr_noise", "contextless_numeric_fragment", "table_structure"}):
                 diagnostics.setdefault("excluded_pages", {}).setdefault(perspective, set()).add(span["page_number"])
+            _note_exclusion(diagnostics, span, "quality", span["exclusion_reason"])
             continue
         if perspective not in ("positive", "negative"):
+            _note_exclusion(diagnostics, span, "perspective", perspective)
             continue
         company_terms = set(tokenize(str(span.get("company_name", ""))))
         required_focus = focus_terms - company_terms - GENERIC_FOCUS_TERMS
         if not general_summary_question and required_focus:
+            if diagnostics is not None:
+                diagnostics["required_focus_terms"] = sorted(required_focus)
             if not any(term.casefold() in matching_text(span["quote"]).casefold() for term in required_focus):
+                _note_exclusion(diagnostics, span, "focus", "focus_terms_missing")
                 continue
         source_ids = span.get("source_chunk_ids", [span.get("source_chunk_id", span["chunk_id"])])
         span["analysis_relevance_score"] = max((scores.get(source_id, 0) for source_id in source_ids), default=0)
@@ -374,5 +403,6 @@ def collect_analysis_evidence(db: Session, document_id: UUID, question: str, top
         if any(str(item['chunk_id']) not in source_ids for item in compound_pack):
             if diagnostics is not None:
                 diagnostics['coverage_complete'] = False
+            _note_early_exit(diagnostics, 'compound_pack_incomplete')
             return []
     return packet

@@ -75,8 +75,22 @@ def _record_failure(db: Session, run_id: UUID, reason: str, provider: Generation
             "_evaluation_trace": {"generation": _provider_trace(provider)}})
 
 
+TRACE_RETRIEVAL_KEYS = ("candidate_count", "valid_count", "filter_exclusions", "filter_counts",
+    "required_focus_terms", "early_exit", "missing_requested_years", "coverage_complete")
+
+
+def _trace_retrieval_diagnostics(diagnostics: dict | None) -> dict:
+    """JSON-safe copy of evaluation-only retrieval diagnostics (sets become sorted lists)."""
+    diagnostics = diagnostics or {}
+    copied = {key: diagnostics[key] for key in TRACE_RETRIEVAL_KEYS if key in diagnostics}
+    copied["excluded_pages"] = {perspective: sorted(pages)
+        for perspective, pages in diagnostics.get("excluded_pages", {}).items()}
+    return copied
+
+
 def _stored_result(result: AnalysisResult, evidence_results: list[dict], generated: GeneratedAnalysis | None,
-    provider: GenerationProvider | None = None, timings: dict | None = None) -> dict:
+    provider: GenerationProvider | None = None, timings: dict | None = None,
+    retrieval_diagnostics: dict | None = None) -> dict:
     payload = result.model_dump(mode="json")
     payload["_evaluation_trace"] = {
         "candidates": [{"chunk_id": str(row["chunk_id"]), "page_number": row["page_number"],
@@ -94,6 +108,7 @@ def _stored_result(result: AnalysisResult, evidence_results: list[dict], generat
         },
         "generation": _provider_trace(provider) if provider else {},
         'timings_seconds': timings or {},
+        "retrieval_diagnostics": _trace_retrieval_diagnostics(retrieval_diagnostics),
     }
     return payload
 
@@ -306,7 +321,8 @@ def analyze_document(
         result.coverage_complete = retrieval_diagnostics.get('coverage_complete')
         result.execution = _execution(request, generation_provider)
         _persist_run(db, run_id, status=result.analysis_status, generated_at=now,
-            result=_stored_result(result, [], None, timings=timings))
+            result=_stored_result(result, [], None, timings=timings,
+                retrieval_diagnostics=retrieval_diagnostics))
         return result
 
     allowed = {row["chunk_id"]: row for row in evidence_results}
@@ -461,5 +477,6 @@ def analyze_document(
     result.generated_at = datetime.now(timezone.utc)
     _persist_run(db, run_id, status=result.analysis_status, generated_at=result.generated_at,
         generation_provider=generation_provider.provider_name, generation_model=generation_provider.model,
-        result=_stored_result(result, evidence_results, generated, generation_provider, timings))
+        result=_stored_result(result, evidence_results, generated, generation_provider, timings,
+            retrieval_diagnostics))
     return result

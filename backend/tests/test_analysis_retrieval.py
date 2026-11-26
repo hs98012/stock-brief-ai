@@ -233,3 +233,50 @@ def test_general_summary_prefers_report_wide_positive_outlook_sentence() -> None
 
 
 # Full table structure and page offsets are tested in test_evidence_facts.py.
+
+
+def _filter_rows(document_id):
+    base = {"rank": 1, "rrf_score": 0.03, "bm25_rank": 1, "vector_rank": 1,
+        "document_id": document_id, "document_name": "report.pdf", "company_name": "삼성전자",
+        "ticker": "005930", "publisher": "기관", "published_at": None,
+        "document_type": "broker_report", "section_title": None}
+    return [
+        {**base, "chunk_id": uuid4(), "page_number": 1, "quote": "파운드리는 적자 상태다."},
+        {**base, "chunk_id": uuid4(), "page_number": 2, "quote": "파운드리 사업부는 평택에 위치한다."},
+        {**base, "chunk_id": uuid4(), "page_number": 3, "quote": "메모리 판매량이 증가할 전망이다."},
+        {**base, "chunk_id": uuid4(), "page_number": 4,
+         "quote": "[종목 투자등급] Buy 매수, Hold 보유, Sell 매도 의견의 절대수익률 산정 방식 안내"},
+    ]
+
+
+def test_diagnostics_record_each_filter_exclusion_without_changing_packet(monkeypatch) -> None:
+    document_id = uuid4()
+    rows = _filter_rows(document_id)
+    monkeypatch.setattr("app.analysis_retrieval.hybrid_search",
+        lambda *args, **kwargs: SearchExecution(rows, True, None))
+    question = "파운드리 적자 위험을 설명해줘."
+    without = collect_analysis_evidence(object(), document_id, question, 10, object())
+    diagnostics = {}
+    with_diagnostics = collect_analysis_evidence(object(), document_id, question, 10, object(), diagnostics)
+    assert [row["chunk_id"] for row in with_diagnostics] == [row["chunk_id"] for row in without]
+    assert [row["page_number"] for row in with_diagnostics] == [1]
+    exclusions = {(row["page_number"], row["filter"]) for row in diagnostics["filter_exclusions"]}
+    assert {(2, "perspective"), (3, "focus"), (4, "quality")} <= exclusions
+    assert not any(page == 1 for page, _ in exclusions)
+    assert diagnostics["filter_counts"]["perspective"] >= 1
+    assert diagnostics["filter_counts"]["focus"] >= 1
+    assert diagnostics["filter_counts"]["quality"] >= 1
+    assert set(diagnostics["required_focus_terms"]) == {"파운드리", "적자"}
+    assert "early_exit" not in diagnostics
+
+
+def test_diagnostics_record_early_exit_reason(monkeypatch) -> None:
+    monkeypatch.setattr('app.analysis_retrieval.hybrid_search',
+        lambda *args, **kwargs: SearchExecution([], True, None,
+            evidence_pack=[], requirements=[{'id': 'narrative_1', 'kind': 'narrative'},
+                                             {'id': 'structured_1', 'kind': 'table'}],
+            coverage_complete=False))
+    diagnostics = {}
+    assert collect_analysis_evidence(object(), uuid4(),
+        '소재 개선 이유와 표의 2Q26F 영업이익을 함께 알려줘', 5, object(), diagnostics) == []
+    assert diagnostics['early_exit'] == 'coverage_incomplete'
