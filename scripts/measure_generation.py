@@ -23,7 +23,8 @@ from sqlalchemy import text  # noqa: E402
 from app.database import SessionLocal, engine, require_postgresql  # noqa: E402
 from app.evaluation import DocumentSelector, evaluate_case, match_document, validate_fixture  # noqa: E402
 from app.generation_metrics import (  # noqa: E402
-    classify_outcome, reevaluate_row, refusal_outcome, response_citation_report, summarize_generation)
+    classify_outcome, perspective_outcome, reevaluate_row, refusal_outcome, response_citation_report,
+    summarize_generation)
 from app.models import Chunk, Page  # noqa: E402
 from evaluate import request_json  # noqa: E402
 
@@ -91,6 +92,7 @@ def _score_row(row: dict, pages: dict, chunks: dict) -> dict:
         "generation_model": response.get("generation_model") if response else None,
         "final_provider": ((response or {}).get("execution") or {}).get("final_provider"),
         "refusal": refusal_outcome(row["expected_polarity"], response) if response else None,
+        "perspective": perspective_outcome(row["expected_polarity"], response) if response else None,
         "citations": response_citation_report(response, pages, chunks) if response else None}
 
 
@@ -105,7 +107,7 @@ def _score(rows: list[dict]) -> list[dict]:
 
 
 def _summary_markdown(run: dict, summary: dict, scored: list[dict]) -> str:
-    validity, refusal = summary["citation_validity"], summary["refusal"]
+    validity, refusal, perspective = summary["citation_validity"], summary["refusal"], summary["perspective"]
     lines = [f"# 생성 근거 충실도 평가 ({LABEL})", "",
         f"- run_id: `{run['run_id']}`, commit `{run['commit']}` (worktree_dirty={run['worktree_dirty']})",
         f"- 관측 provider/model: {run['observed_generation']}",
@@ -115,6 +117,8 @@ def _summary_markdown(run: dict, summary: dict, scored: list[dict]) -> str:
         f"citation이 있는 케이스 {validity['cases_with_citations']}개 중 전부 유효 {validity['cases_all_valid']}개",
         f"- 근거 부족 케이스 올바른 거절: {refusal['insufficient_correct']}/{refusal['insufficient_evaluated']}",
         f"- 답변 가능 케이스 잘못된 거절: {refusal['answerable_false_refusals']}/{refusal['answerable_evaluated']}",
+        f"- 답변 가능 케이스 관점 불일치(항목은 있으나 기대 관점 항목 0개): "
+        f"{perspective['mismatch']}/{perspective['answerable_evaluated']}, 기대·반대 관점 혼합 {perspective['mixed']}",
         f"- 요청 오류로 제외: {refusal['excluded_request_errors']}", f"- 결과 분포: {summary['outcomes']}", "",
         "| fixture | case | 기대 | 결과 | stage | failures |", "|---|---|---|---|---|---|"]
     lines += [f"| {row['fixture']} | {row['case_id']} | {row['expected_polarity']} | {row['outcome']} | "

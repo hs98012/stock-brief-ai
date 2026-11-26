@@ -4,6 +4,7 @@ from uuid import uuid4
 from app.generation_metrics import (
     citation_problems,
     classify_outcome,
+    perspective_outcome,
     reevaluate_row,
     refusal_outcome,
     response_citation_report,
@@ -154,6 +155,62 @@ def test_summarize_generation_counts_rates_and_excludes_request_errors_from_refu
     assert summary["refusal"] == {"insufficient_evaluated": 1, "insufficient_correct": 1,
         "insufficient_correct_rate": 1.0, "answerable_evaluated": 2, "answerable_false_refusals": 1,
         "answerable_false_refusal_rate": 0.5, "excluded_request_errors": 1}
+
+
+def _items(count: int) -> list[dict]:
+    return [{"title": f"t{index}", "evidence_chunk_ids": []} for index in range(count)]
+
+
+def test_perspective_outcome_flags_answer_with_only_opposite_items() -> None:
+    outcome = perspective_outcome("positive", {"positives": [], "negatives": _items(1)})
+
+    assert outcome == {"expected_items": 0, "opposite_items": 1, "answered": True, "mismatch": True, "mixed": False}
+
+
+def test_perspective_outcome_mixed_answer_is_not_mismatch() -> None:
+    outcome = perspective_outcome("negative", {"positives": _items(2), "negatives": _items(1)})
+
+    assert outcome["mismatch"] is False
+    assert outcome["mixed"] is True
+    assert (outcome["expected_items"], outcome["opposite_items"]) == (1, 2)
+
+
+def test_perspective_outcome_refusal_is_not_mismatch() -> None:
+    outcome = perspective_outcome("positive", {"positives": [], "negatives": []})
+
+    assert outcome["answered"] is False
+    assert outcome["mismatch"] is False
+
+
+def test_perspective_outcome_not_applicable_to_insufficient_cases() -> None:
+    assert perspective_outcome("insufficient", {"positives": _items(1), "negatives": []}) is None
+
+
+def test_summarize_generation_reports_perspective_mismatch_next_to_false_refusal() -> None:
+    def row(polarity, refused, perspective):
+        return {"outcome": "passed", "expected_polarity": polarity,
+            "refusal": {"refused": refused, "correct": True, "cannot_confirm_phrase": False},
+            "citations": None, "perspective": perspective}
+    rows = [
+        row("positive", False, perspective_outcome("positive", {"positives": [], "negatives": _items(1)})),
+        row("negative", False, perspective_outcome("negative", {"positives": _items(1), "negatives": _items(1)})),
+        row("positive", True, perspective_outcome("positive", {"positives": [], "negatives": []})),
+        row("insufficient", True, None),
+    ]
+
+    summary = summarize_generation(rows)
+
+    assert summary["perspective"] == {"answerable_evaluated": 3, "answerable_answered": 2,
+        "mismatch": 1, "mismatch_rate": 0.3333, "mixed": 1}
+    assert summary["refusal"]["answerable_false_refusals"] == 1
+
+
+def test_summarize_generation_perspective_ignores_rows_without_outcome() -> None:
+    summary = summarize_generation([{"outcome": "provider_error", "expected_polarity": "positive",
+        "refusal": None, "citations": None}])
+
+    assert summary["perspective"] == {"answerable_evaluated": 0, "answerable_answered": 0,
+        "mismatch": 0, "mismatch_rate": None, "mixed": 0}
 
 
 def test_classify_outcome_maps_analysis_filter_stage() -> None:

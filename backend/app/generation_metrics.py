@@ -72,6 +72,21 @@ def refusal_outcome(expected_polarity: str, response: dict[str, Any]) -> dict[st
     return {"refused": refused, "correct": correct, "cannot_confirm_phrase": CANNOT_CONFIRM in exposed}
 
 
+def perspective_outcome(expected_polarity: str, response: dict[str, Any]) -> dict[str, Any] | None:
+    """An answer whose items are all of the opposite perspective is a mismatch, not a refusal.
+
+    Mixed answers (expected and opposite items) are normal for this service and only counted.
+    """
+    if expected_polarity not in ("positive", "negative"):
+        return None
+    opposite = "negatives" if expected_polarity == "positive" else "positives"
+    expected_items = len(response.get(f"{expected_polarity}s") or [])
+    opposite_items = len(response.get(opposite) or [])
+    answered = bool(expected_items or opposite_items)
+    return {"expected_items": expected_items, "opposite_items": opposite_items, "answered": answered,
+        "mismatch": answered and not expected_items, "mixed": bool(expected_items and opposite_items)}
+
+
 def classify_outcome(result: dict[str, Any]) -> str:
     if "request_error" in result.get("failures", []):
         return "provider_error" if PROVIDER_ERROR_PATTERN.search(str(result.get("error", ""))) else "request_error"
@@ -100,6 +115,8 @@ def summarize_generation(rows: list[dict[str, Any]]) -> dict[str, Any]:
     answerable = [row for row in evaluated if row["expected_polarity"] != "insufficient"]
     insufficient_correct = sum(row["refusal"]["correct"] for row in insufficient)
     false_refusals = sum(row["refusal"]["refused"] for row in answerable)
+    perspectives = [row["perspective"] for row in answerable if row.get("perspective")]
+    mismatches = sum(outcome["mismatch"] for outcome in perspectives)
     return {
         "cases": len(rows),
         "outcomes": dict(Counter(row["outcome"] for row in rows)),
@@ -111,4 +128,8 @@ def summarize_generation(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "answerable_evaluated": len(answerable), "answerable_false_refusals": false_refusals,
             "answerable_false_refusal_rate": _rate(false_refusals, len(answerable)),
             "excluded_request_errors": len(rows) - len(evaluated)},
+        "perspective": {"answerable_evaluated": len(perspectives),
+            "answerable_answered": sum(outcome["answered"] for outcome in perspectives),
+            "mismatch": mismatches, "mismatch_rate": _rate(mismatches, len(perspectives)),
+            "mixed": sum(outcome["mixed"] for outcome in perspectives)},
     }
