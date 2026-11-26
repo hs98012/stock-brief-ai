@@ -187,6 +187,9 @@ false-complete는 기존 회귀 네 사례에서 `0 → 0`, 신규 문서 두 �
 retrieval_candidate_excluded
 검색 단계에서 필요한 근거가 후보에 포함되지 않은 경우
 
+analysis_filter_excluded
+기대 페이지의 문장이 분석 필터(품질·관점·질문 단어)에서 제외된 경우
+
 retrieval_wrong_perspective
 근거는 검색됐지만 질문에서 필요한 관점으로 분류되지 않은 경우
 

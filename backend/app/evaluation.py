@@ -97,20 +97,29 @@ def _topic_matches(terms: list[str], value: str) -> bool:
     return any(re.sub(r"\s+", "", term) in compact_value for term in terms)
 
 
+def _expected_page_filter_reasons(case: dict[str, Any], retrieval: dict[str, Any]) -> list[str]:
+    reasons = {row.get("filter") for row in retrieval.get("filter_exclusions", [])
+        if row.get("page_number") in case["expected_pages"]}
+    if retrieval.get("early_exit"):
+        reasons.add("early_exit")
+    return sorted(reason for reason in reasons if reason)
+
+
 def classify_failure_stage(case: dict[str, Any], trace: dict[str, Any] | None,
     final_selected_ids: set[str]) -> dict[str, Any]:
+    """Locate where the expected evidence was lost. Topic keywords are checked separately in evaluate_case."""
     if case["expected_polarity"] == "insufficient" or not trace:
         return {"stage": "not_applicable" if case["expected_polarity"] == "insufficient" else "trace_unavailable"}
     expected = case["expected_polarity"]
-    terms = _topic_terms(case)
     candidates = trace.get("candidates", [])
-    relevant = [row for row in candidates if row.get("page_number") in case["expected_pages"]
-        and _topic_matches(terms, str(row.get("quote", "")))]
+    relevant = [row for row in candidates if row.get("page_number") in case["expected_pages"]]
     expected_candidates = [row for row in relevant if row.get("perspective") == expected]
     generated_ids = set(trace.get("generated_selection", {}).get(expected, []))
     relevant_ids = {str(row.get("chunk_id")) for row in expected_candidates}
+    retrieval = trace.get("retrieval_diagnostics") or {}
+    filter_reasons = _expected_page_filter_reasons(case, retrieval)
     if not relevant:
-        stage = "retrieval_candidate_excluded"
+        stage = "analysis_filter_excluded" if filter_reasons else "retrieval_candidate_excluded"
     elif not expected_candidates:
         stage = "retrieval_wrong_perspective"
     elif not generated_ids.intersection(relevant_ids):
@@ -119,9 +128,15 @@ def classify_failure_stage(case: dict[str, Any], trace: dict[str, Any] | None,
         stage = "output_validation_removed"
     else:
         stage = "selected"
-    return {"stage": stage, "relevant_candidate_pages": sorted({row["page_number"] for row in relevant}),
+    diagnostics = {"stage": stage, "relevant_candidate_pages": sorted({row["page_number"] for row in relevant}),
         "expected_perspective_candidate_ids": sorted(relevant_ids),
-        "generated_selected_ids": sorted(generated_ids), "validated_selected_ids": sorted(final_selected_ids)}
+        "generated_selected_ids": sorted(generated_ids), "validated_selected_ids": sorted(final_selected_ids),
+        "filter_reasons": filter_reasons,
+        "topic_in_expected_page_candidates": any(
+            _topic_matches(_topic_terms(case), str(row.get("quote", ""))) for row in relevant)}
+    if retrieval.get("early_exit"):
+        diagnostics["early_exit"] = retrieval["early_exit"]
+    return diagnostics
 
 
 def evaluate_case(case: dict[str, Any], response: dict[str, Any], trace: dict[str, Any] | None = None) -> dict[str, Any]:

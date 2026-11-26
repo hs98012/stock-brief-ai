@@ -277,10 +277,13 @@ python3 scripts/evaluate.py --output evals/results/local-ollama.json
 
 실패 시 콘솔의 `stage`는 원인을 다음처럼 분리한다.
 
-- `retrieval_candidate_excluded`: 기대 페이지·주제의 관련 청크가 분석 후보에 없음
+- `retrieval_candidate_excluded`: 기대 페이지의 청크가 분석 후보에 없고, trace에 기대 페이지의 필터 제외 기록도 없음(진단 기록이 없는 이전 trace 포함)
+- `analysis_filter_excluded`: 기대 페이지의 문장이 분석 필터에서 제외됨. `filter_reasons`에 `quality`(OCR 잡음·면책 문구 등), `perspective`(neutral/ambiguous), `focus`(질문 단어 불일치), `early_exit`(requirement·연도·coverage 조건 미충족) 중 해당하는 것을 적는다
 - `retrieval_wrong_perspective`: 관련 청크는 있지만 기대 polarity 후보로 분류되지 않음
 - `generation_not_selected`: 올바른 후보가 모델에 전달됐지만 모델이 해당 chunk ID를 선택하지 않음
 - `output_validation_removed`: 모델은 선택했지만 기존 안전·근거 검증을 통과하지 못함
+
+단계 판정은 기대 페이지와 관점만 본다. 주제 키워드(`expected_topic`)는 단계와 별도로 `topic` 검사에서만 확인하며, 단계가 `selected`인데 `topic`만 실패하면 결과 묶음은 `judged_mismatch`다.
 
 진단 정보는 분석 실행 기록의 내부 trace에 저장되고 OpenAPI에서 숨긴 평가 전용 경로로만 CLI가 읽는다. 일반 분석 API 응답과 웹 UI에는 노출되지 않는다.
 

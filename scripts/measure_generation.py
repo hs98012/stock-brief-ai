@@ -23,7 +23,7 @@ from sqlalchemy import text  # noqa: E402
 from app.database import SessionLocal  # noqa: E402
 from app.evaluation import DocumentSelector, evaluate_case, match_document, validate_fixture  # noqa: E402
 from app.generation_metrics import (  # noqa: E402
-    classify_outcome, refusal_outcome, response_citation_report, summarize_generation)
+    classify_outcome, reevaluate_row, refusal_outcome, response_citation_report, summarize_generation)
 from app.models import Chunk, Page  # noqa: E402
 from evaluate import request_json  # noqa: E402
 
@@ -129,13 +129,29 @@ def _start_run(args: argparse.Namespace) -> dict:
             for path in sorted(args.fixtures.glob("*.json"))}}
 
 
-def _rescore(out: Path) -> int:
-    """Re-run only the DB-side scoring on saved cases.jsonl; never calls the analysis API again."""
-    report_path, summary_path = out / "report-rescored.json", out / "summary-rescored.md"
+def _fixture_cases(fixtures: Path, expected_sha256: dict[str, str]) -> dict[tuple[str, str], dict]:
+    """Load the run's fixtures; refuse when any file differs from the hashes recorded in run.json."""
+    cases = {}
+    for name, digest in expected_sha256.items():
+        path = fixtures / name
+        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            raise SystemExit(f"{path} 의 SHA-256이 run.json과 다릅니다. 재채점하지 않습니다.")
+        fixture = validate_fixture(json.loads(path.read_text(encoding="utf-8")))
+        cases.update({(path.stem, case["id"]): case for case in fixture["cases"]})
+    return cases
+
+
+def _rescore(out: Path, fixtures: Path, name: str) -> int:
+    """Re-judge saved cases.jsonl with the current evaluate_case and DB citation checks; never calls the API."""
+    report_path, summary_path = out / f"report-{name}.json", out / f"summary-{name}.md"
     if report_path.exists() or summary_path.exists():
         raise SystemExit(f"{report_path} 가 이미 있습니다. 덮어쓰지 않습니다.")
+    saved_run = json.loads((out / "run.json").read_text(encoding="utf-8"))
+    cases = _fixture_cases(fixtures, saved_run["fixtures_sha256"])
     rows = [json.loads(line) for line in (out / "cases.jsonl").read_text(encoding="utf-8").splitlines() if line]
-    run = {**json.loads((out / "run.json").read_text(encoding="utf-8")), "rescored_at": _now()}
+    rows = [reevaluate_row(row, cases[(row["fixture"], row["case_id"])]) for row in rows]
+    run = {**saved_run, "rescored_at": _now(), "rescore_commit": _git("rev-parse", "HEAD"),
+        "rescore_worktree_dirty": bool(_git("status", "--porcelain"))}
     scored = _score(rows)
     summary = summarize_generation(scored)
     _write_json(report_path, {"run": run, "summary": summary, "cases": scored})
@@ -152,10 +168,12 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path,
         default=ROOT / "evals" / "results" / f"generation-faithfulness-{date.today():%Y%m%d}")
     parser.add_argument("--rescore", type=Path, metavar="RUN_DIR",
-        help="저장된 cases.jsonl의 citation 검증만 다시 계산 (API 재호출 없음)")
+        help="저장된 cases.jsonl을 현재 판정 코드와 DB citation 검증으로 다시 채점 (API 재호출 없음)")
+    parser.add_argument("--rescore-name", default="rescored",
+        help="재채점 결과 파일 이름(report-<name>.json, summary-<name>.md). 기존 파일은 덮어쓰지 않는다")
     args = parser.parse_args()
     if args.rescore:
-        return _rescore(args.rescore)
+        return _rescore(args.rescore, args.fixtures, args.rescore_name)
     out = args.output_dir
     if out.exists():
         raise SystemExit(f"{out} 가 이미 있습니다. 기존 결과를 덮어쓰지 않습니다.")

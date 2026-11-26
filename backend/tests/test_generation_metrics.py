@@ -4,6 +4,7 @@ from uuid import uuid4
 from app.generation_metrics import (
     citation_problems,
     classify_outcome,
+    reevaluate_row,
     refusal_outcome,
     response_citation_report,
     summarize_generation,
@@ -153,3 +154,27 @@ def test_summarize_generation_counts_rates_and_excludes_request_errors_from_refu
     assert summary["refusal"] == {"insufficient_evaluated": 1, "insufficient_correct": 1,
         "insufficient_correct_rate": 1.0, "answerable_evaluated": 2, "answerable_false_refusals": 1,
         "answerable_false_refusal_rate": 0.5, "excluded_request_errors": 1}
+
+
+def test_classify_outcome_maps_analysis_filter_stage() -> None:
+    assert classify_outcome(_result(False, stage="analysis_filter_excluded", failures=["topic"])) == "analysis_filter"
+
+
+def test_reevaluate_row_recomputes_result_from_saved_response_and_trace() -> None:
+    case = {"id": "foundry", "question": "파운드리 적자", "expected_topic": "파운드리",
+        "expected_polarity": "negative", "expected_pages": [1], "notes": "본문"}
+    empty = {"analysis_status": "insufficient_evidence", "summary": "확인할 수 없습니다",
+        "positives": [], "negatives": [], "citations": [], "insufficient_evidence_note": "근거 부족"}
+    trace = {"candidates": [], "generated_selection": {"positive": [], "negative": []},
+        "retrieval_diagnostics": {"filter_exclusions": [{"page_number": 1, "filter": "focus", "reason": "x"}]}}
+    row = {"fixture": "f", "case_id": "foundry", "expected_polarity": "negative",
+        "response": empty, "trace": trace, "result": {"diagnostics": {"stage": "old"}}}
+    updated = reevaluate_row(row, case)
+    assert updated["result"]["diagnostics"]["stage"] == "analysis_filter_excluded"
+    assert row["result"]["diagnostics"]["stage"] == "old"
+
+
+def test_reevaluate_row_keeps_request_error_result() -> None:
+    row = {"fixture": "f", "case_id": "c", "expected_polarity": "positive", "response": None, "trace": None,
+        "result": {"failures": ["request_error"], "error": "HTTP 503"}}
+    assert reevaluate_row(row, {"id": "c"}) == row

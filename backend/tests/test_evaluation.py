@@ -124,3 +124,70 @@ def test_topic_matching_normalizes_pdf_line_break_whitespace() -> None:
 ])
 def test_forbidden_evidence_is_detected(quote) -> None:
     assert forbidden_evidence_reason(quote)
+
+
+def _stage_case(pages=(1,)):
+    return {"id": "foundry", "question": "파운드리 적자", "expected_topic": "파운드리 적자",
+        "expected_polarity": "negative", "expected_pages": list(pages), "notes": "본문"}
+
+
+EMPTY_RESPONSE = {"analysis_status": "insufficient_evidence", "summary": "확인할 수 없습니다",
+    "positives": [], "negatives": [], "citations": [], "insufficient_evidence_note": "근거 부족"}
+
+
+def _empty_trace(exclusions, early_exit=None):
+    diagnostics = {"candidate_count": 3, "valid_count": 0, "filter_exclusions": exclusions}
+    if early_exit:
+        diagnostics["early_exit"] = early_exit
+    return {"candidates": [], "generated_selection": {"positive": [], "negative": []},
+        "retrieval_diagnostics": diagnostics}
+
+
+@pytest.mark.parametrize("filter_name", ["perspective", "focus", "quality"])
+def test_failure_stage_attributes_expected_page_filter_exclusion(filter_name) -> None:
+    trace = _empty_trace([{"page_number": 1, "filter": filter_name, "reason": "x"},
+        {"page_number": 5, "filter": "quality", "reason": "boilerplate"}])
+    diagnostics = evaluate_case(_stage_case(), EMPTY_RESPONSE, trace)["diagnostics"]
+    assert diagnostics["stage"] == "analysis_filter_excluded"
+    assert diagnostics["filter_reasons"] == [filter_name]
+
+
+def test_failure_stage_lists_every_filter_hit_on_expected_pages() -> None:
+    trace = _empty_trace([{"page_number": 1, "filter": "perspective", "reason": "neutral"},
+        {"page_number": 1, "filter": "focus", "reason": "focus_terms_missing"},
+        {"page_number": 3, "filter": "quality", "reason": "ocr_noise"}])
+    diagnostics = evaluate_case(_stage_case((1, 3)), EMPTY_RESPONSE, trace)["diagnostics"]
+    assert diagnostics["stage"] == "analysis_filter_excluded"
+    assert diagnostics["filter_reasons"] == ["focus", "perspective", "quality"]
+
+
+def test_failure_stage_keeps_retrieval_stage_when_filters_hit_other_pages_only() -> None:
+    trace = _empty_trace([{"page_number": 4, "filter": "perspective", "reason": "neutral"}])
+    diagnostics = evaluate_case(_stage_case(), EMPTY_RESPONSE, trace)["diagnostics"]
+    assert diagnostics["stage"] == "retrieval_candidate_excluded"
+    assert diagnostics["filter_reasons"] == []
+
+
+def test_failure_stage_reports_early_exit_as_filter_exclusion() -> None:
+    trace = _empty_trace([], early_exit="missing_years")
+    diagnostics = evaluate_case(_stage_case(), EMPTY_RESPONSE, trace)["diagnostics"]
+    assert diagnostics["stage"] == "analysis_filter_excluded"
+    assert diagnostics["filter_reasons"] == ["early_exit"]
+    assert diagnostics["early_exit"] == "missing_years"
+
+
+def test_failure_stage_ignores_topic_keywords_and_topic_is_checked_separately() -> None:
+    case = {"id": "gap", "question": "긍정 요인", "expected_topic": "하반기 개선",
+        "expected_polarity": "positive", "expected_pages": [1], "notes": "키워드 불일치"}
+    response = analysis_response(quote="디램 가격 상승으로 이익 개선이 예상된다")
+    response["positives"][0]["title"] = "가격 상승"
+    response["positives"][0]["reason"] = "이익 증가 전망"
+    chunk_id = response["citations"][0]["chunk_id"]
+    response["positives"][0]["evidence_chunk_ids"] = [chunk_id]
+    trace = {"candidates": [{"chunk_id": chunk_id, "page_number": 1, "perspective": "positive",
+        "quote": "디램 가격 상승으로 이익 개선이 예상된다"}],
+        "generated_selection": {"positive": [chunk_id], "negative": []}}
+    result = evaluate_case(case, response, trace)
+    assert result["failures"] == ["topic"]
+    assert result["diagnostics"]["stage"] == "selected"
+    assert result["diagnostics"]["topic_in_expected_page_candidates"] is False

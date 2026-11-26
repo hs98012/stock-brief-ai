@@ -6,6 +6,7 @@ import re
 from collections import Counter
 from typing import Any
 
+from app.evaluation import evaluate_case
 from app.evidence_integrity import span_is_covered
 
 CANNOT_CONFIRM = "확인할 수 없습니다"
@@ -13,6 +14,7 @@ PROVIDER_ERROR_PATTERN = re.compile(r"HTTP (429|502|503|504)\b|timed out|timeout
 STAGE_BUCKETS = {
     "retrieval_candidate_excluded": "retrieval",
     "retrieval_wrong_perspective": "retrieval",
+    "analysis_filter_excluded": "analysis_filter",
     "generation_not_selected": "generation",
     "output_validation_removed": "citation",
     "selected": "judged_mismatch",
@@ -79,6 +81,13 @@ def classify_outcome(result: dict[str, Any]) -> str:
         return "refusal_failed"
     stage = (result.get("diagnostics") or {}).get("stage")
     return STAGE_BUCKETS.get(stage, "unclassified")
+
+
+def reevaluate_row(row: dict[str, Any], case: dict[str, Any]) -> dict[str, Any]:
+    """Re-judge a saved case with the current evaluate_case; request errors keep their saved result."""
+    if row.get("response") is None:
+        return row
+    return {**row, "result": evaluate_case(case, row["response"], row.get("trace"))}
 
 
 def summarize_generation(rows: list[dict[str, Any]]) -> dict[str, Any]:
