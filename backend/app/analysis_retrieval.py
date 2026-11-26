@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from .table_evidence import temporal_context
 from .embeddings import EmbeddingProvider
-from .citation_display import has_damaging_ocr_noise, is_metadata_line
+from .citation_display import TRANSLITERATION_ALIASES, has_damaging_ocr_noise, is_metadata_line
 from .models import Chunk, Page, Document
 from .evidence_facts import economic_facts, matching_text
 from .search import SearchFilters, hybrid_search, tokenize
@@ -247,6 +247,18 @@ def question_focus_terms(question: str) -> set[str]:
     return set(normalized)
 
 
+def _focus_term_in(term: str, text: str) -> bool:
+    """Literal match, or the same word in the other script (existing transliteration table only)."""
+    if term in text:
+        return True
+    for english, korean in TRANSLITERATION_ALIASES.items():
+        if term == korean and re.search(rf"(?<![a-z]){english}(?![a-z])", text):
+            return True
+        if term == english and korean in text:
+            return True
+    return False
+
+
 def explicit_years(value: str) -> set[int]:
     years = {int(year) for year in re.findall(r"(?<!\d)(20\d{2})(?!\d)", value)}
     years.update(2000 + int(year) for year in re.findall(r"(?:[1-4]Q|FY)(\d{2})(?!\d)", value, re.I))
@@ -362,7 +374,8 @@ def collect_analysis_evidence(db: Session, document_id: UUID, question: str, top
         if not general_summary_question and required_focus:
             if diagnostics is not None:
                 diagnostics["required_focus_terms"] = sorted(required_focus)
-            if not any(term.casefold() in matching_text(span["quote"]).casefold() for term in required_focus):
+            span_text = matching_text(span["quote"]).casefold()
+            if not any(_focus_term_in(term.casefold(), span_text) for term in required_focus):
                 _note_exclusion(diagnostics, span, "focus", "focus_terms_missing")
                 continue
         source_ids = span.get("source_chunk_ids", [span.get("source_chunk_id", span["chunk_id"])])

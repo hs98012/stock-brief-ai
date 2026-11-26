@@ -103,13 +103,15 @@ def _row_label(line: str) -> str | None:
     return label if label and re.search(r"[A-Za-z가-힣]", label) else None
 
 
+TRANSLITERATION_ALIASES = {"foundry": "파운드리", "dram": "디램", "nand": "낸드"}
+
+
 def _label_matches_hint(label: str, hint: str) -> bool:
     compact_label = re.sub(r"[^a-z가-힣]", "", label.casefold())
     compact_hint = re.sub(r"[^a-z가-힣]", "", hint.casefold())
     if compact_label and compact_label in compact_hint:
         return True
-    aliases = {"foundry": "파운드리", "dram": "디램", "nand": "낸드"}
-    return any(alias in compact_label and korean in compact_hint for alias, korean in aliases.items())
+    return any(alias in compact_label and korean in compact_hint for alias, korean in TRANSLITERATION_ALIASES.items())
 
 
 def extract_table_facts(page_text: str, quote: str, claim_hint: str) -> dict[str, Any] | None:

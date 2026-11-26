@@ -906,3 +906,55 @@
 - 그 뒤 전체 실행 여러 번과 단독 실행 3회에서는 재현되지 않았다. 실패 출력은 저장하지 않았고 원인은 확인하지 않았다.
 - 다음에 재현되면 실패 출력 전체를 저장하고, 실행 순서·타이밍 의존(공유 상태, 스트리밍 이벤트 순서) 여부부터 확인한다. 사용자 결정으로 지금은 고치지 않는다.
 - `./scripts/check.sh` 통과 (2026-11-26, 경계 보강 후): backend 800 passed, frontend 17 passed, lint, build.
+
+### 13단계 focus 변형 기록 (dev 전용, test-v2 미사용)
+
+**원인 확인 (2026-11-26, 읽기 전용)**
+- focus 필터(`collect_analysis_evidence`)는 질문의 필수 단어 중 **하나라도** span 원문에 그대로(부분 문자열) 있으면 통과시킨다. 필수 단어는 `question_focus_terms`(조사 13개 제거, 불용어 제외)에서 회사명 토큰과 `GENERIC_FOCUS_TERMS`를 뺀 것이다.
+- **조사·어미가 남은 단어**(`실적에`, `주는`, `보유한`, `설명돼`, `밑돈`, `확인되`, `전망이나`, `언급한`)가 실제로 생긴다. 원인은 다음 셋이다.
+  - 조사 목록에 `에`, `한`, `돼`, `이나` 등이 없다.
+  - 길이 조건(`len(token) > len(suffix) + 1`)에 걸리면 조사를 떼지 않는다(`주는`).
+  - 불용어에 `설명해줘`는 있지만 `설명돼`는 없다.
+  - 다만 하나만 맞아도 되는 규칙이라 이 단어들은 span을 막지 못한다. dev 17케이스의 packet span 중 이런 단어만으로 통과한 span도 없었다. 그래서 0개 후보의 원인은 아니다.
+- **영문 표기 불일치**가 실제 원인이다. 08-14 foundry-loss의 기대 근거(p3 표 행)는 행 라벨이 `Foundry/LS`이다. 필수 단어는 `파운드리`, `lsi`, `부담`, `부문`, `수익성`, `적자`이고, 이 중 어느 것도 원문에 없다. `LSI`/`LS` 차이가 원문 표기인지 OCR 손실인지는 확인하지 않았다.
+- 저장소에는 이미 표 라벨용 음역 표(`citation_display._label_matches_hint`의 `foundry↔파운드리`, `dram↔디램`, `nand↔낸드`)가 있다.
+
+**변형 목록**
+- 변형 F1 (시도): focus 일치에 기존 음역 표 3쌍을 양방향으로 쓴다. 영문 쪽은 글자 경계를 요구한다(Ferdinand 속 nand 제외). 표를 `citation_display.TRANSLITERATION_ALIASES` 상수로 올려 두 곳이 같이 쓴다. 새 항목은 추가하지 않았다.
+- 변형 F2 (제안만, 미실행): 조사·어미 정리. dev 영향이 없을 것으로 보이며, 0개 후보를 고치지 못한다.
+- 변형 F3 (제안만, 비추천): 검색 상위 순위 chunk이면 focus를 통과시키는 의미 기반 보완. `hybrid_search`에는 점수 임계값이 없어 근거 부족 질문에서도 상위 결과가 항상 생긴다. insufficient packet이 늘어날 위험이 크다.
+- **시도한 focus 변형 수: 1 (F1)**
+
+**변형 F1 결과**
+- 테스트 먼저: 3개를 추가했다(한→영, 영→한, 글자 경계).
+  - 처음 쓴 영→한 테스트는 질문의 `증가`가 두 span에 모두 걸려 잘못 설계돼 있었다. 질문을 `DRAM 수요를 설명해줘.`로 좁혔다.
+  - 3개 모두 올바른 이유로 실패하는 것을 확인한 뒤 구현했다. backend 803 passed.
+- dev packet (`evals/results/analysis-packet-dev-20261126-focusF1/`, 커밋 `71b1ecf` + F1, worktree_dirty=true):
+
+| 지표 | 관점 A 적용 후 | F1 |
+|---|---|---|
+| 답변 가능 기대 페이지 포함 | 9/12 | 10/12 |
+| 기대 페이지 + 관점 일치 | 8/12 | 9/12 |
+| packet이 빈 답변 가능 케이스 | 3 | 0 |
+| insufficient packet 크기 | 0,0,0,0,0 | 0,0,0,0,0 |
+
+- 바뀐 케이스는 3건이다.
+  - 08-14 foundry-loss: p3 `Foundry/LS` 영업이익·영업이익률 음수 행 2개가 들어왔다. 기대 근거다.
+  - 08-10 foundry-loss, 08-10 full-stack: p4의 `Foundry/LS` 영업이익 음수 표 행 1개가 들어왔다. fixture 기대 페이지(p1)가 아니다. 결과를 본 뒤 fixture를 고치지 않았다.
+- 생성 평가 (6단계와 같은 조건, `evals/results/generation-faithfulness-20261126-focusF1/`, 2026-11-26 08:19:50 ~ 08:26:57 UTC, 관측 `ollama/gemma3:4b`):
+
+| 지표 | 관점 A 적용 후 | F1 |
+|---|---|---|
+| passed | 11 | 12 |
+| analysis_filter | 3 | 2 |
+| retrieval / judged_mismatch | 1 / 2 | 1 / 2 |
+| citation 유효 | 17/17 | 21/21 |
+| insufficient 거절 | 5/5 | 5/5 |
+| 답변 가능 잘못된 거절 | 3/12 | 0/12, 단 1건(08-10 full-stack)은 질문과 관점이 다른 답변 |
+
+- 08-14 foundry-loss: passed. negative "Foundry/LS 영업이익 음수", "Foundry/LS 영업이익률 음수", p3 citation 2개.
+- 08-10 foundry-loss: 실패 항목이 4개에서 `expected_page`, `topic` 2개로 줄었다. p4 표 행으로 파운드리 영업적자를 답했다. 내용은 질문에 맞지만 fixture 기대 페이지는 p1이다.
+- **주의(08-10 full-stack)**: 결과 묶음과 실패 항목은 같다(analysis_filter, polarity/citation/expected_page/topic). 하지만 이전에는 거절했고, 지금은 긍정 요인 질문에 negative 항목 하나("Foundry/LS 영업이익 음수", p4)만 답한다. 근거는 원문 검증을 통과했고 "주의할 요인"으로 표시되지만, 질문이 요청한 관점은 아니다. 잘못된 거절 0/12, 단 1건(08-10 full-stack)은 질문과 관점이 다른 답변이다. 기준 4(통과 케이스 회귀)에는 걸리지 않는다.
+- 채택 기준 대조: 1 충족(9→10, 손실 없음), 2 충족(5/5), 3 충족(21/21), 4 충족(통과 11건 중 실패 전환 0, 잘못된 거절 3/12 → 0/12, 단 1건(08-10 full-stack)은 질문과 관점이 다른 답변). 위 주의 1건은 기준 밖 관찰로 남긴다. 기준 5(test-v2)는 관점·focus 최종 설정에서 한 번만 실행할 예정이며 아직 실행하지 않았다.
+- `./scripts/check.sh` 통과 (2026-11-26, F1 적용 상태): backend 803 passed, frontend 17 passed, lint, build.
+- [x] **dev 개발 (focus)**: F1 채택 (2026-11-26, 사용자 결정). 시도한 focus 변형 1개(F1), 미실행 2개(F2, F3).

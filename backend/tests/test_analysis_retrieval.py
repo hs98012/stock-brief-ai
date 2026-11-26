@@ -270,6 +270,35 @@ def test_diagnostics_record_each_filter_exclusion_without_changing_packet(monkey
     assert "early_exit" not in diagnostics
 
 
+def _focus_packet_pages(monkeypatch, question: str, quotes: list[str]) -> list[int]:
+    document_id = uuid4()
+    base = _filter_rows(document_id)[0]
+    rows = [{**base, "chunk_id": uuid4(), "page_number": page, "quote": quote}
+        for page, quote in enumerate(quotes, start=1)]
+    monkeypatch.setattr("app.analysis_retrieval.hybrid_search",
+        lambda *args, **kwargs: SearchExecution(rows, True, None))
+    packet = collect_analysis_evidence(object(), document_id, question, 10, object())
+    return sorted(row["page_number"] for row in packet)
+
+
+def test_focus_matches_english_transliteration_of_korean_term(monkeypatch) -> None:
+    pages = _focus_packet_pages(monkeypatch, "파운드리 적자 부담을 설명해줘.",
+        ["Foundry 부문 영업이익은 감소할 전망이다.", "Mobile 부문 영업이익은 감소할 전망이다."])
+    assert pages == [1]
+
+
+def test_focus_matches_korean_transliteration_of_english_term(monkeypatch) -> None:
+    pages = _focus_packet_pages(monkeypatch, "DRAM 수요를 설명해줘.",
+        ["디램 판매량이 증가할 전망이다.", "모바일 판매량이 증가할 전망이다."])
+    assert pages == [1]
+
+
+def test_focus_transliteration_needs_letter_boundary(monkeypatch) -> None:
+    pages = _focus_packet_pages(monkeypatch, "낸드 수익성 악화를 설명해줘.",
+        ["Ferdinand 부문 영업이익은 감소할 전망이다.", "NAND 부문 영업이익은 감소할 전망이다."])
+    assert pages == [2]
+
+
 def test_diagnostics_record_early_exit_reason(monkeypatch) -> None:
     monkeypatch.setattr('app.analysis_retrieval.hybrid_search',
         lambda *args, **kwargs: SearchExecution([], True, None,
