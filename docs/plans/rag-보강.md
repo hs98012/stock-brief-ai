@@ -996,3 +996,22 @@
   - API 응답 필드나 상태가 바뀌면 `api-contract.md`, `acceptance.md`, `qa-rules.md`를 함께 갱신한다.
 - 효과 확인 지표: 위 "관점 불일치 수"와, 그 케이스의 요약·안내 문구.
 - `./scripts/check.sh` 통과 (2026-11-26, 관점 불일치 지표 추가 후): backend 809 passed, frontend 17 passed, lint, build.
+
+### 13단계 기준 5: test-v2 최종 확인 (2026-11-26, 1회)
+- **test-v2 두 번째 사용**이다. 첫 사용은 10단계 검색 지표 측정이고, 이번에는 분석 packet 포함률을 쟀다. 결과 라벨(`run.label`)에도 같은 문구가 들어 있다.
+- 기준선 커밋: `79699a8`. 관점 변형 A(`71b1ecf`) 직전 커밋이고, 측정 스크립트를 포함한다. 필터·분석 코드는 `ecc060a`와 같다. 최종 커밋: `1690d4c`(HEAD, 관점 A와 focus F1 포함).
+- 두 커밋을 각각 임시 detached worktree에서 실행했다. 둘 다 worktree_dirty=false이고, 같은 PostgreSQL DB와 같은 embedding(`ollama/bge-m3/1024`)을 썼으며 top_k=10이다.
+- 입력 SHA-256은 봉인 값과 같다(cases `3ea9fbec…`, gold `78509eb6…`). 두 커밋 사이에 test-v2 파일 변경은 없다.
+- 실행 시각(UTC): 기준선 09:05:47 ~ 09:09:32, 최종 09:09:32 ~ 09:13:13. 출력 `evals/results/analysis-packet-test-v2-20261126-{baseline,final}/`. 각 1회만 실행했다.
+
+| 지표 (gold 단위) | 기준선 `79699a8` | 최종 `1690d4c` |
+|---|---|---|
+| gold unit packet 포함 | 4/13 | 4/13 |
+| unit이 하나라도 포함된 케이스 | 4/13 | 4/13 |
+
+- 포함된 unit은 두 커밋에서 같다: cj-domestic, isu-margin, isu-bottleneck, hs-2027-op. 나머지 9개 unit은 두 커밋 모두 미포함이다.
+- **판정: 기준 5 충족**("최종이 기준선보다 낮지 않다", 4/13 = 4/13). 다만 개선도 없다. dev에서 얻은 관점 A·focus F1 효과는 test-v2 문서에서 확인되지 않았다.
+- 결과를 본 뒤 설정을 바꾸지 않았고, test-v2 결과로 다시 튜닝하지 않는다. 미포함 9개 unit의 원인은 이번에 분석하지 않았다. 분석하면 그 결과는 test-v2를 개발에 쓰는 것이므로 test-v2를 다시 봉인셋으로 쓸 수 없다.
+- 한계: test-v2에는 insufficient 케이스가 없어 과허용은 dev 기준 2(5/5)로만 확인했다. gold 단위는 literal 조건을 모두 담아야 포함으로 치므로, dev의 기대 페이지 단위 포함률(10/12)과 직접 비교하지 않는다.
+- [x] 13단계 채택 기준 1~5 모두 충족(기준 5는 "낮지 않음"만 충족, 개선 없음).
+- `./scripts/check.sh` 통과 (2026-11-26, test-v2 측정 기록 후, HEAD `1690d4c` + 플랜 변경): backend 809 passed, frontend 17 passed, lint, build. 임시 worktree 2개는 측정 후 제거했다.
