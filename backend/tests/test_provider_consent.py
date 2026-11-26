@@ -1,4 +1,5 @@
 import json
+from dataclasses import replace
 from uuid import UUID, uuid4
 
 import pytest
@@ -89,6 +90,12 @@ def _without_ids(value):
     return value
 
 
+def _shows_ungrounded_number(result: dict) -> bool:
+    """True when the generator's ungrounded '999' reaches any user-visible field."""
+    visible = {k: result[k] for k in ['summary', 'positives', 'negatives', 'citations']}
+    return '999' in json.dumps(_without_ids(visible), ensure_ascii=False)
+
+
 # A chunk UUID that contains the ungrounded number below. uuid4() does this about
 # 0.55% of the time, which made the grounding check flaky.
 CHUNK_ID_CONTAINING_999 = UUID('00000000-0000-4000-8000-000000000999')
@@ -124,13 +131,44 @@ def test_stream_all_modes_share_grounding_and_citations(client, db, monkeypatch,
     assert result['analysis_status'] == 'completed'
     assert len(result['positives']) == len(result['citations']) == 1
     assert result['citations'][0]['quote'] == chunk.content
-    assert '999' not in json.dumps(_without_ids({k: result[k] for k in ['summary', 'positives', 'negatives', 'citations']}))
+    assert not _shows_ungrounded_number(result)
     assert result['execution'] == dict(requested_mode=mode, external_consent=mode != 'LOCAL_ONLY',
         external_request_attempted=mode != 'LOCAL_ONLY', final_provider=expected, fallback_used=fails)
     assert primary.calls == 1 and (fallback is None or fallback.calls == 1)
     run = db.query(AnalysisRun).one()
     assert run.result['execution'] == result['execution']
 
+
+
+def _leak_999(monkeypatch, field: str) -> None:
+    """Simulates the ungrounded number surviving into one user-visible field."""
+    import app.analysis_service as service
+    if field == 'summary':
+        monkeypatch.setattr(service, '_summary_text', lambda *args: '보고서는 매출 999억원을 언급합니다.')
+    elif field == 'reason':
+        monkeypatch.setattr(service, 'grounded_card', lambda candidate, perspective: ('매출 증가', '보고서는 매출 999억원을 제시합니다.'))
+    else:
+        real = service.citation_display
+        monkeypatch.setattr(service, 'citation_display',
+            lambda *args: replace(real(*args), display_quote='매출 999억원'))
+
+
+@pytest.mark.parametrize('field', ['summary', 'reason', 'display_quote'])
+def test_ungrounded_number_check_still_sees_visible_text(client, db, monkeypatch, field):
+    # Guards the ID exclusion above: only chunk IDs are skipped, so a leaked
+    # number in any visible text field must still be detected.
+    document, chunk = ready_document(db, '매출은 전년 대비 20% 증가했습니다.')
+    chunk.id = CHUNK_ID_CONTAINING_999
+    db.commit()
+    generated = GeneratedAnalysis(summary='임의의 숫자 999억원', positives=[GeneratedItem(
+        title='매출 증가', reason='매출 999억원을 보장합니다.', evidence_chunk_ids=[chunk.id])], negatives=[])
+    set_providers(FallbackGenerationProvider(CountingProvider('ollama', generated), None))
+    _leak_999(monkeypatch, field)
+    response = client.post('/api/v1/analyses/stream', json=dict(document_id=str(document.id),
+        execution_mode='LOCAL_ONLY', external_consent=False))
+    result = [json.loads(line) for line in response.text.splitlines()][-1]['result']
+    assert result['analysis_status'] == 'completed'
+    assert _shows_ungrounded_number(result)
 
 def test_stream_schema_failure_is_error_without_fallback_or_raw_output(client, db, monkeypatch):
     monkeypatch.setenv('ANALYSIS_EXTERNAL_ENABLED', '1')
