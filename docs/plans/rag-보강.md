@@ -936,6 +936,7 @@
   - 두 건의 판단: 181행(EXTERNAL_WITH_CONSENT-gemini)은 실패 assertion이 이 검사로 기록돼 있어 같은 원인으로 확인된다. 891행·이 항목(LOCAL_ONLY-ollama)은 실패 출력을 저장하지 않아 assertion을 확인할 수 없다. 같은 검사를 같은 무작위 ID로 돌리고, 고정 ID로 LOCAL_ONLY도 똑같이 실패하므로 같은 원인일 가능성이 높다고 추정한다. 다른 원인(공유 상태·이벤트 순서)의 증거는 찾지 못했다.
   - 수정: 테스트만 바꿨다. 검사 전에 ID 필드 네 개를 빼는 `_without_ids`를 거친다. 문장 필드는 그대로 검사하므로 "999"가 문장에 남으면 계속 실패한다.
   - 확인: 수정 후 6개 parametrize 모두 통과했다. `test_provider_consent.py` 전체(25개)를 50회 연속 실행해 50/50 통과했다. 수정 전 기대 실패 수가 50회에 약 0.8회라 반복 실행만으로는 근거가 약하고, 고정 ID 테스트가 결정적 근거다. `./scripts/check.sh` 통과: backend 812 passed(추가 3), frontend 17 passed, lint, build.
+  - push 전 보강(사용자 요청): ID 제외가 문장 검사를 약하게 만들지 않는지 지키는 `test_ungrounded_number_check_still_sees_visible_text`를 추가했다. ID에 999가 있는 상태에서 summary, reason, citation `display_quote` 중 하나에 "999억원"이 남도록 monkeypatch하고 검사가 이를 잡는지 확인한다(3개). 검사 식은 `_shows_ungrounded_number`로 묶어 기존 테스트와 같이 쓴다. 이 테스트가 실제로 잡는지 보려고 `ID_FIELDS`에 `summary`, `reason`, `display_quote`를 임시로 넣어 3개 모두 실패하는 것을 확인한 뒤 되돌렸다. 파일 전체(28개) 50회 연속 50/50 통과. `./scripts/check.sh` 통과: backend 815 passed, frontend 17 passed, lint, build.
 
 ### 13단계 focus 변형 기록 (dev 전용, test-v2 미사용)
 
