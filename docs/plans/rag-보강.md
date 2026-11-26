@@ -958,3 +958,41 @@
 - 채택 기준 대조: 1 충족(9→10, 손실 없음), 2 충족(5/5), 3 충족(21/21), 4 충족(통과 11건 중 실패 전환 0, 잘못된 거절 3/12 → 0/12, 단 1건(08-10 full-stack)은 질문과 관점이 다른 답변). 위 주의 1건은 기준 밖 관찰로 남긴다. 기준 5(test-v2)는 관점·focus 최종 설정에서 한 번만 실행할 예정이며 아직 실행하지 않았다.
 - `./scripts/check.sh` 통과 (2026-11-26, F1 적용 상태): backend 803 passed, frontend 17 passed, lint, build.
 - [x] **dev 개발 (focus)**: F1 채택 (2026-11-26, 사용자 결정). 시도한 focus 변형 1개(F1), 미실행 2개(F2, F3).
+
+**08-10 full-stack 검토 (2026-11-26, 코드 수정 없음)**
+- 저장 응답(`generation-faithfulness-20261126-focusF1/cases.jsonl`):
+  - `analysis_status=completed`, positives 0개, negatives 1개("Foundry/LS 영업이익 음수", p4 표 citation).
+  - summary "보고서는 Foundry/LS 영업이익 음수를 주의할 요인으로 제시합니다."
+  - `positive_empty_state` "확인된 호재 근거가 없습니다.", `insufficient_evidence_note` "근거가 부족해 추가 항목을 제시하지 않았습니다."
+- 화면(`frontend/app/analysis-view.tsx`의 `AnalysisResultView` 기준, 실제 렌더 캡처는 안 함): "분석 완료 · 로컬 분석 사용" → 핵심 요약(위 summary) → 호재 칸 "확인된 호재 근거가 없습니다." → 악재 칸 카드와 표 근거 → 노란 안내 → 면책 순으로 표시된다.
+- "질문한 긍정 요인은 확인되지 않았다"처럼 질문 관점을 기준으로 한 안내는 없다. 호재 칸의 문구는 질문과 무관하게 positives가 비면 항상 나오는 일반 문구다. 노란 안내는 positives나 negatives가 3개 미만이면 항상 붙는다.
+- 원인: 서비스는 질문이 요구한 관점을 모른다.
+  - `validated_items`는 positives/negatives를 각각 검증해 둘 다 남긴다.
+  - `status`는 항목이 하나라도 있으면 completed다.
+  - summary는 남은 항목 제목으로 정해진 문장을 만든다(생성 모델의 summary는 쓰지 않음).
+  - `_empty_state`는 관점별 항목 유무만 본다.
+- 다음 단계 지표 제안: 생성 평가에 "답변 관점 불일치 수"를 추가한다. 정의는 기대 관점이 positive/negative인 답변 가능 케이스 중, 항목이 있지만 기대 관점 항목이 0개인 케이스 수다. 잘못된 거절과 따로 보고한다. 미구현.
+
+**답변 관점 불일치 지표 (2026-11-26 구현)**
+- 정의: 기대 관점이 positive/negative인 답변 가능 케이스 중 항목은 있으나 기대 관점 항목이 0개인 케이스 수. 기대·반대 관점 항목이 함께 있는 답변(혼합)은 서비스 설계상 정상이라 불일치로 세지 않고 따로 센다. 거절(항목 0개)은 불일치가 아니라 잘못된 거절로 센다.
+- `app.generation_metrics.perspective_outcome`과 `summarize_generation`의 `perspective` 블록으로 추가했다. 테스트 6개를 먼저 쓰고 import 실패를 확인한 뒤 구현했다. `measure_generation.py`는 케이스별 `perspective`와 summary.md 한 줄을 남긴다.
+- 저장 응답 재계산: `--rescore <폴더> --rescore-name perspective`, 2026-11-26 08:48 UTC, API·생성 재호출 없음. 출력은 각 폴더의 `report-perspective.json`/`summary-perspective.md`이다. 세 폴더의 기존 파일은 SHA-256이 실행 전과 같다. outcome·citation·거절 지표는 원래 report와 같다.
+
+| 실행 | passed | 잘못된 거절 | 관점 불일치 | 불일치 케이스 | 혼합 |
+|---|---|---|---|---|---|
+| 새 trace 기준선 (-diag) | 10 | 4/12 | 1/12 | 06-29 second-quarter-cost-burden | 4 |
+| 관점 변형 A (-varA) | 11 | 3/12 | 1/12 | 06-29 second-quarter-cost-burden | 4 |
+| focus F1 (-focusF1) | 12 | 0/12 | 2/12 | 06-29 second-quarter-cost-burden, 08-10 full-stack-positive | 4 |
+
+- 정정: 위 F1 기록의 "단 1건(08-10 full-stack)은 질문과 관점이 다른 답변"은 F1이 **새로 만든** 불일치만 센 것이다. 지표로 다시 세면 F1 결과의 관점 불일치는 2/12다. 06-29 second-quarter-cost-burden(악재 질문에 호재 항목만 답함, `retrieval_wrong_perspective`)은 필터 수정 전 기준선부터 있었다.
+- 혼합 4건은 세 실행에서 같다(07-09 summary-positive, second-quarter-miss, hbm-foundry-risk, 07-31 demand-price-resistance-risk).
+
+### 후속 과제: 질문 관점에 맞춘 요약·안내 (미착수, 사용자 결정으로 이번에 하지 않음)
+- [ ] 현재 화면: 질문이 묻는 관점의 항목이 없어도 서비스는 질문 관점을 모른다. 그래서 반대 관점 항목만으로 `completed`가 되고, 요약이 그 항목을 답처럼 앞세운다.
+  - 예: 08-10 full-stack은 "보고서는 Foundry/LS 영업이익 음수를 주의할 요인으로 제시합니다."
+  - 호재 칸에는 질문과 무관한 일반 문구 "확인된 호재 근거가 없습니다."가 나온다. 노란 안내 "근거가 부족해 추가 항목을 제시하지 않았습니다."는 한쪽이라도 3개 미만이면 항상 붙는다.
+- 검토할 방향: 질문의 요청 관점을 판정해 요청 관점 항목이 0개면 요약과 안내에서 "질문한 관점의 근거는 확인되지 않았다"를 먼저 밝힌다. 반대 관점 항목은 참고로 구분해 보여준다.
+  - 판정이 모호하면 지금처럼 둔다(fail closed).
+  - API 응답 필드나 상태가 바뀌면 `api-contract.md`, `acceptance.md`, `qa-rules.md`를 함께 갱신한다.
+- 효과 확인 지표: 위 "관점 불일치 수"와, 그 케이스의 요약·안내 문구.
+- `./scripts/check.sh` 통과 (2026-11-26, 관점 불일치 지표 추가 후): backend 809 passed, frontend 17 passed, lint, build.
