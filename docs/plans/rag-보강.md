@@ -924,11 +924,18 @@
 - 동작이 바뀌었으므로 dev packet을 다시 측정했다. 출력 `evals/results/analysis-packet-dev-20261126-varA2/`. 케이스별 포함 여부, 관점 일치, packet 크기와 페이지가 변형 A 1차 측정과 모두 같다(9/12, 8/12, insufficient 모두 0). packet이 같으므로 생성 평가는 다시 돌리지 않았다.
 - [x] **dev 개발**: 관점 쪽 변형 A 채택. 시도한 변형 1개(A), 미실행 2개(0, B).
 
-### 별도 항목: `test_provider_consent` 간헐 실패 (미수정)
-- [ ] `tests/test_provider_consent.py::test_stream_all_modes_share_grounding_and_citations[LOCAL_ONLY-False-ollama]`가 2026-11-26 전체 backend 실행 1회에서 실패했다. 변형 A 코드가 아직 적용되지 않은 시점이었다.
+### 별도 항목: `test_provider_consent` 간헐 실패 (2026-11-26 테스트 수정)
+- [x] `tests/test_provider_consent.py::test_stream_all_modes_share_grounding_and_citations[LOCAL_ONLY-False-ollama]`가 2026-11-26 전체 backend 실행 1회에서 실패했다. 변형 A 코드가 아직 적용되지 않은 시점이었다.
 - 그 뒤 전체 실행 여러 번과 단독 실행 3회에서는 재현되지 않았다. 실패 출력은 저장하지 않았고 원인은 확인하지 않았다.
 - 다음에 재현되면 실패 출력 전체를 저장하고, 실행 순서·타이밍 의존(공유 상태, 스트리밍 이벤트 순서) 여부부터 확인한다. 사용자 결정으로 지금은 고치지 않는다.
 - `./scripts/check.sh` 통과 (2026-11-26, 경계 보강 후): backend 800 passed, frontend 17 passed, lint, build.
+- 2026-11-26 원인 확인과 수정(사용자 요청):
+  - 실패 지점: `assert '999' not in json.dumps({k: result[k] for k in ['summary', 'positives', 'negatives', 'citations']})`. 생성기가 근거 없는 "999억원"을 냈을 때 그 숫자가 사용자 화면 문장에 남지 않는지 보는 검사다.
+  - 원인(테스트 쪽): 검사 대상 JSON에 무작위 `uuid4` chunk ID가 `evidence_chunk_ids`, `chunk_id`, `source_chunk_id`, `source_chunk_ids` 네 필드로 들어간다. ID 문자열에 `999`가 있으면 문장과 관계없이 실패한다. 이 네 필드 외에 무작위 값은 없다(문서 날짜·파일명·해시는 고정). `uuid4` 100만 개 모의 실험에서 `999` 포함 비율은 0.554%였고, 3개 parametrize를 모두 도는 check.sh 1회 기준 실패 확률은 약 1.65%다.
+  - 재현(RED): chunk ID를 `00000000-0000-4000-8000-000000000999`로 고정하는 parametrize(`id-with-999`)를 추가했다. 수정 전 3개 모드 모두 이 assertion에서 실패했고 `random-id` 3개는 통과했다. 실패 시 `999`가 나온 위치는 ID 필드뿐이었다. summary("보고서는 매출 전년 대비 증가를 긍정 요인으로 언급합니다.")와 reason은 원문 근거로 다시 쓰여 "999억원"이 없었다. 따라서 제품 코드 문제는 아니다.
+  - 두 건의 판단: 181행(EXTERNAL_WITH_CONSENT-gemini)은 실패 assertion이 이 검사로 기록돼 있어 같은 원인으로 확인된다. 891행·이 항목(LOCAL_ONLY-ollama)은 실패 출력을 저장하지 않아 assertion을 확인할 수 없다. 같은 검사를 같은 무작위 ID로 돌리고, 고정 ID로 LOCAL_ONLY도 똑같이 실패하므로 같은 원인일 가능성이 높다고 추정한다. 다른 원인(공유 상태·이벤트 순서)의 증거는 찾지 못했다.
+  - 수정: 테스트만 바꿨다. 검사 전에 ID 필드 네 개를 빼는 `_without_ids`를 거친다. 문장 필드는 그대로 검사하므로 "999"가 문장에 남으면 계속 실패한다.
+  - 확인: 수정 후 6개 parametrize 모두 통과했다. `test_provider_consent.py` 전체(25개)를 50회 연속 실행해 50/50 통과했다. 수정 전 기대 실패 수가 50회에 약 0.8회라 반복 실행만으로는 근거가 약하고, 고정 ID 테스트가 결정적 근거다. `./scripts/check.sh` 통과: backend 812 passed(추가 3), frontend 17 passed, lint, build.
 
 ### 13단계 focus 변형 기록 (dev 전용, test-v2 미사용)
 
