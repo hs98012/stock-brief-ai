@@ -1,0 +1,250 @@
+{
+  "artifact_sha256": "944886449b1899b2e3f15ad9bc6d4765c822abc2218e762a228a8c002020715c",
+  "fixture_sha256": "50874005814a50fd48fbe0908dfadb72bfe15d356092dbe8872fbcfab36c5601",
+  "method": "원본 PDF 물리 페이지 렌더 대조 후 동일 문서 top-5의 실제 page, chunk, source span/bbox, table/numeric fact 조건 검증. 미검증 복합 원인 문장은 성공으로 세지 않음.",
+  "units": [
+    {
+      "case": "old-miss",
+      "unit": "잠정 실적 하회",
+      "active_hit": true,
+      "shadow_hit": true,
+      "failure_category": null,
+      "chunk_ids": []
+    },
+    {
+      "case": "old-risk",
+      "unit": "HBM·파운드리 위험",
+      "active_hit": true,
+      "shadow_hit": true,
+      "failure_category": null,
+      "chunk_ids": []
+    },
+    {
+      "case": "lg-fact",
+      "unit": "2Q26 증가",
+      "active_hit": true,
+      "shadow_hit": true,
+      "failure_category": null,
+      "chunk_ids": [
+        "19d4372f-f7fa-4229-bab4-861b04f03203"
+      ],
+      "page_number": 3,
+      "numeric": [
+        {
+          "metric": "영업이익",
+          "period": "2Q26",
+          "unit": "억원",
+          "value": "5,330",
+          "status": "actual"
+        },
+        {
+          "metric": "영업이익",
+          "period": "2Q26",
+          "unit": "%",
+          "value": "92.5",
+          "status": "actual"
+        }
+      ],
+      "literal_conditions": [
+        "2Q26 연결 영업이익은 5,330억원",
+        "전년동기 대비 92.5% 증가"
+      ]
+    },
+    {
+      "case": "lg-period",
+      "unit": "2Q26 실제",
+      "active_hit": true,
+      "shadow_hit": true,
+      "failure_category": null,
+      "chunk_ids": [
+        "19d4372f-f7fa-4229-bab4-861b04f03203"
+      ],
+      "page_number": 3,
+      "numeric": [
+        {
+          "metric": "영업이익",
+          "period": "2Q26",
+          "unit": "억원",
+          "value": "5,330",
+          "status": "actual"
+        }
+      ],
+      "literal_conditions": [
+        "2Q26 연결 영업이익은 5,330억원"
+      ]
+    },
+    {
+      "case": "lg-period",
+      "unit": "2026F 연간 전망",
+      "active_hit": false,
+      "shadow_hit": true,
+      "failure_category": null,
+      "chunk_ids": [
+        "aea387c3-8c01-4bdd-96f1-8b24ab6e5ae6"
+      ],
+      "page_number": 1,
+      "table": {
+        "row_label": "영업이익",
+        "metric": "영업이익",
+        "period": "2026F",
+        "unit": "십억원",
+        "value": "1,643",
+        "status": "forecast"
+      }
+    },
+    {
+      "case": "lg-table",
+      "unit": "CNS 지분가치",
+      "active_hit": false,
+      "shadow_hit": true,
+      "failure_category": null,
+      "chunk_ids": [
+        "d567e344-fb0d-4fe4-966c-f89dfb46d0de"
+      ],
+      "page_number": 2,
+      "table": {
+        "row_label": "LG CNS",
+        "period": null,
+        "unit": "조원",
+        "value": "3.42"
+      }
+    },
+    {
+      "case": "db-scan",
+      "unit": "2분기 순이익·컨센서스·상회율",
+      "active_hit": false,
+      "shadow_hit": true,
+      "failure_category": null,
+      "chunk_ids": [
+        "c74f531a-128b-41a1-8d99-4cdd613da703"
+      ],
+      "page_number": 1,
+      "numeric": [
+        {
+          "metric": "순이익",
+          "period": "2분기",
+          "unit": "억원",
+          "value": "4,993",
+          "status": "forecast"
+        },
+        {
+          "metric": "순이익",
+          "period": "2분기",
+          "unit": "억원",
+          "value": "4,386",
+          "comparison_basis": "컨센서스"
+        },
+        {
+          "metric": "순이익",
+          "period": "2분기",
+          "unit": "%",
+          "value": "13.8",
+          "comparison_basis": "컨센서스"
+        }
+      ],
+      "literal_conditions": [
+        "2분기 순이익은 4,993억원",
+        "컨센서스 4,386억원",
+        "13.8% 상회"
+      ]
+    },
+    {
+      "case": "db-table",
+      "unit": "1Q26 보험손익",
+      "active_hit": false,
+      "shadow_hit": true,
+      "failure_category": null,
+      "chunk_ids": [
+        "d9c8c393-9d9e-4767-b5fa-3785afd9d258"
+      ],
+      "page_number": 2,
+      "table": {
+        "row_label": "보험손익",
+        "metric": "보험손익",
+        "period": "1Q26",
+        "unit": "십억원",
+        "value": "227",
+        "status": "unspecified"
+      }
+    },
+    {
+      "case": "db-table",
+      "unit": "2Q26F 보험손익",
+      "active_hit": true,
+      "shadow_hit": true,
+      "failure_category": null,
+      "chunk_ids": [
+        "d9c8c393-9d9e-4767-b5fa-3785afd9d258"
+      ],
+      "page_number": 2,
+      "table": {
+        "row_label": "보험손익",
+        "metric": "보험손익",
+        "period": "2Q26F",
+        "unit": "십억원",
+        "value": "282",
+        "status": "forecast"
+      }
+    },
+    {
+      "case": "posco-multi",
+      "unit": "철강 개선 이유 묶음",
+      "active_hit": false,
+      "shadow_hit": false,
+      "failure_category": "fact 연결 실패",
+      "chunk_ids": []
+    },
+    {
+      "case": "posco-multi",
+      "unit": "2Q26F 철강 영업이익",
+      "active_hit": true,
+      "shadow_hit": true,
+      "failure_category": null,
+      "chunk_ids": [
+        "85298d85-092f-40bf-b1e6-02587168fb9c"
+      ],
+      "page_number": 2,
+      "table": {
+        "row_label": "철강",
+        "metric": "영업이익",
+        "period": "2Q26F",
+        "unit": "십억원",
+        "value": "424",
+        "status": "forecast"
+      }
+    },
+    {
+      "case": "posco-forecast",
+      "unit": "2Q26 영업이익·시장 예상치",
+      "active_hit": true,
+      "shadow_hit": true,
+      "failure_category": null,
+      "chunk_ids": [
+        "745c6703-2e64-4674-a39f-65c534f0b265"
+      ],
+      "page_number": 1,
+      "numeric": [
+        {
+          "metric": "영업이익",
+          "period": "2026년2분기",
+          "unit": "억원",
+          "value": "7,570",
+          "status": "forecast"
+        },
+        {
+          "metric": "영업이익",
+          "period": "2026년2분기",
+          "unit": "억원",
+          "value": "7,097",
+          "comparison_basis": "시장예상치"
+        }
+      ],
+      "literal_conditions": [
+        "2026년 2분기",
+        "7,570억원",
+        "시장 예상치",
+        "7,097억원"
+      ]
+    }
+  ]
+}

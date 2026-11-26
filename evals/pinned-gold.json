@@ -1,0 +1,204 @@
+{
+  "purpose": "prospectively fixed development-set source requirements, not a verdict",
+  "units": [
+    {
+      "case": "old-miss",
+      "unit": "잠정 실적 하회",
+      "source_scope": "active_control",
+      "page_number": 1
+    },
+    {
+      "case": "old-risk",
+      "unit": "HBM·파운드리 위험",
+      "source_scope": "active_control",
+      "page_number": 1
+    },
+    {
+      "case": "lg-fact",
+      "unit": "2Q26 증가",
+      "numeric": [
+        {
+          "metric": "영업이익",
+          "period": "2Q26",
+          "unit": "억원",
+          "value": "5,330",
+          "status": "actual"
+        },
+        {
+          "metric": "영업이익",
+          "period": "2Q26",
+          "unit": "%",
+          "value": "92.5",
+          "status": "actual"
+        }
+      ],
+      "literal_conditions": [
+        "2Q26 연결 영업이익은 5,330억원",
+        "전년동기 대비 92.5% 증가"
+      ],
+      "source_scope": "paddle_candidate",
+      "page_number": 3
+    },
+    {
+      "case": "lg-period",
+      "unit": "2Q26 실제",
+      "numeric": [
+        {
+          "metric": "영업이익",
+          "period": "2Q26",
+          "unit": "억원",
+          "value": "5,330",
+          "status": "actual"
+        }
+      ],
+      "literal_conditions": [
+        "2Q26 연결 영업이익은 5,330억원"
+      ],
+      "source_scope": "paddle_candidate",
+      "page_number": 3
+    },
+    {
+      "case": "lg-period",
+      "unit": "2026F 연간 전망",
+      "table": {
+        "row_label": "영업이익",
+        "metric": "영업이익",
+        "period": "2026F",
+        "unit": "십억원",
+        "value": "1,643",
+        "status": "forecast"
+      },
+      "source_scope": "paddle_candidate",
+      "page_number": 1
+    },
+    {
+      "case": "lg-table",
+      "unit": "CNS 지분가치",
+      "table": {
+        "row_label": "LG CNS",
+        "period": null,
+        "unit": "조원",
+        "value": "3.42"
+      },
+      "source_scope": "paddle_candidate",
+      "page_number": 2
+    },
+    {
+      "case": "db-scan",
+      "unit": "2분기 순이익·컨센서스·상회율",
+      "numeric": [
+        {
+          "metric": "순이익",
+          "period": "2분기",
+          "unit": "억원",
+          "value": "4,993",
+          "status": "forecast"
+        },
+        {
+          "metric": "순이익",
+          "period": "2분기",
+          "unit": "억원",
+          "value": "4,386",
+          "comparison_basis": "컨센서스"
+        },
+        {
+          "metric": "순이익",
+          "period": "2분기",
+          "unit": "%",
+          "value": "13.8",
+          "comparison_basis": "컨센서스"
+        }
+      ],
+      "literal_conditions": [
+        "2분기 순이익은 4,993억원",
+        "컨센서스 4,386억원",
+        "13.8% 상회"
+      ],
+      "source_scope": "paddle_candidate",
+      "page_number": 1
+    },
+    {
+      "case": "db-table",
+      "unit": "1Q26 보험손익",
+      "table": {
+        "row_label": "보험손익",
+        "metric": "보험손익",
+        "period": "1Q26",
+        "unit": "십억원",
+        "value": "227",
+        "status": "unspecified"
+      },
+      "source_scope": "paddle_candidate",
+      "page_number": 2
+    },
+    {
+      "case": "db-table",
+      "unit": "2Q26F 보험손익",
+      "table": {
+        "row_label": "보험손익",
+        "metric": "보험손익",
+        "period": "2Q26F",
+        "unit": "십억원",
+        "value": "282",
+        "status": "forecast"
+      },
+      "source_scope": "paddle_candidate",
+      "page_number": 2
+    },
+    {
+      "case": "posco-multi",
+      "unit": "철강 개선 이유 묶음",
+      "source_scope": "paddle_candidate",
+      "page_number": 1,
+      "literal_conditions": [
+        "철강 부문 영업이익은",
+        "판가 상승",
+        "성수기 판매량 증가",
+        "원화 약세",
+        "중국 장가항 연결 제외 효과"
+      ]
+    },
+    {
+      "case": "posco-multi",
+      "unit": "2Q26F 철강 영업이익",
+      "table": {
+        "row_label": "철강",
+        "metric": "영업이익",
+        "period": "2Q26F",
+        "unit": "십억원",
+        "value": "424",
+        "status": "forecast"
+      },
+      "source_scope": "paddle_candidate",
+      "page_number": 2
+    },
+    {
+      "case": "posco-forecast",
+      "unit": "2Q26 영업이익·시장 예상치",
+      "numeric": [
+        {
+          "metric": "영업이익",
+          "period": "2026년2분기",
+          "unit": "억원",
+          "value": "7,570",
+          "status": "forecast"
+        },
+        {
+          "metric": "영업이익",
+          "period": "2026년2분기",
+          "unit": "억원",
+          "value": "7,097",
+          "comparison_basis": "시장예상치"
+        }
+      ],
+      "literal_conditions": [
+        "2026년 2분기",
+        "7,570억원",
+        "시장 예상치",
+        "7,097억원"
+      ],
+      "source_scope": "paddle_candidate",
+      "page_number": 1
+    }
+  ]
+}

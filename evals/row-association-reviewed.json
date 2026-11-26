@@ -1,0 +1,475 @@
+{
+  "date": "2026-10-07",
+  "method": "offline geometry validation and frozen-rank replay over observed challenge data",
+  "raw_artifact": "evals/results/paddle/row-association-verified-20261007.json",
+  "raw_sha256": "50f7d3685a0919c80618a0f9903ed6640091c84793fc14ce5d447e8d3ca66bfa",
+  "changed_files": [
+    "backend/app/structured_cells.py",
+    "backend/app/primitive_graph.py",
+    "backend/tests/test_row_association.py",
+    "scripts/audit_unit_precision.py",
+    "api-contract.md",
+    "acceptance.md",
+    "qa-rules.md"
+  ],
+  "production_changes_vs_prior_audit": [
+    "primitive_graph.py",
+    "structured_cells.py"
+  ],
+  "source_hashes_unchanged": true,
+  "development": {
+    "paddle_candidate_recall@5": [
+      10,
+      10
+    ],
+    "invariant_control_recall@5": [
+      2,
+      2
+    ],
+    "combined_comparison_recall@5": [
+      12,
+      12
+    ],
+    "compound_evidence_coverage@5_after": [
+      1,
+      1
+    ],
+    "single_fact_regression": []
+  },
+  "control_limit": "two unchanged active controls from immutable baseline; no live retrieval replay",
+  "fixed_regression": [
+    {
+      "id": "unseen-report-a-compound",
+      "coverage_complete": true,
+      "automatic_strict_pass": true,
+      "prior_strict_review_retained": false,
+      "selected_pack_unchanged": true
+    },
+    {
+      "id": "unseen-report-b-comparison",
+      "coverage_complete": true,
+      "automatic_strict_pass": true,
+      "prior_strict_review_retained": false,
+      "selected_pack_unchanged": true
+    },
+    {
+      "id": "holdout-kia-compound-01",
+      "coverage_complete": true,
+      "automatic_strict_pass": false,
+      "prior_strict_review_retained": true,
+      "selected_pack_unchanged": true
+    },
+    {
+      "id": "holdout-sk-compound-01",
+      "coverage_complete": false,
+      "automatic_strict_pass": false,
+      "prior_strict_review_retained": false,
+      "selected_pack_unchanged": true
+    }
+  ],
+  "strict_review_artifact": "evals/results/paddle/selection-holdout-release-reviewed-20261002.json",
+  "strict_review_sha256": "75701cb716d92fc1d902077120b681f54cac48fac813863769c250e1bfe4dda1",
+  "challenge_set": [
+    {
+      "id": "new-period-cashflow",
+      "coverage_complete": true,
+      "strict_pass": true
+    },
+    {
+      "id": "new-mixed-valuation",
+      "coverage_complete": false,
+      "strict_pass": false
+    },
+    {
+      "id": "new-mixed-counts",
+      "coverage_complete": null,
+      "strict_pass": false
+    },
+    {
+      "id": "new-samsung-annual-pair",
+      "coverage_complete": false,
+      "strict_pass": false
+    },
+    {
+      "id": "new-hyundai-mixed-pair",
+      "coverage_complete": false,
+      "strict_pass": false
+    }
+  ],
+  "challenge_strict_success": [
+    1,
+    5
+  ],
+  "challenge_false_complete": 0,
+  "samsung_false_complete": 0,
+  "hyundai_verdict": "deferred at metric association",
+  "hyundai_source_proofs": [
+    {
+      "approved": false,
+      "coverage_complete": false,
+      "rejection_reason": "merged_metric_context_unverified",
+      "metric_span": {
+        "role": "metric",
+        "char_start": 1341,
+        "char_end": 1348,
+        "quote": "영업이익률3)",
+        "bbox": [
+          688.9717407226562,
+          398.1713562011719,
+          727.0438232421875,
+          408.3382568359375
+        ],
+        "source": "native",
+        "confidence": 100.0
+      },
+      "value_span": {
+        "role": "value",
+        "char_start": 1355,
+        "char_end": 1358,
+        "quote": "6.9",
+        "bbox": [
+          929.9860229492188,
+          399.0669860839844,
+          940.9539794921875,
+          408.7789611816406
+        ],
+        "source": "native",
+        "confidence": 100.0
+      },
+      "period_span": {
+        "role": "period",
+        "char_start": 718,
+        "char_end": 722,
+        "quote": "2022",
+        "bbox": [
+          906.6057739257812,
+          134.88787841796875,
+          921.7467651367188,
+          143.48388671875
+        ],
+        "source": "native",
+        "confidence": 100.0
+      },
+      "unit_span": {
+        "role": "unit",
+        "char_start": 1349,
+        "char_end": 1350,
+        "quote": "%",
+        "bbox": [
+          792.0020141601562,
+          398.6269836425781,
+          798.2340087890625,
+          408.3389587402344
+        ],
+        "source": "native",
+        "confidence": 100.0
+      },
+      "row_group_id": "b200ec8a8f92ce3e9eab8fd3",
+      "row_group_reason": {
+        "vertical_overlap_min": 0.8,
+        "baseline_distance_max_height": 0.2,
+        "ordered_columns_verified": true,
+        "member_boxes": [
+          [
+            683.1497192382812,
+            396.1271667480469,
+            773.858249830163,
+            411.7177734375
+          ],
+          [
+            773.858249830163,
+            396.1271667480469,
+            816.3779907226562,
+            411.7177734375
+          ],
+          [
+            816.3779907226562,
+            396.1271667480469,
+            881.5748450237771,
+            411.7177734375
+          ],
+          [
+            881.5748450237771,
+            396.1271667480469,
+            946.771752398947,
+            411.7177734375
+          ],
+          [
+            946.771752398947,
+            396.1271667480469,
+            1011.9685483186141,
+            411.7177734375
+          ],
+          [
+            1011.9685483186141,
+            396.1271667480469,
+            1116.8509521484375,
+            411.7177734375
+          ]
+        ]
+      },
+      "stage": "metric_association",
+      "column_association_reason": {
+        "header_cell": [
+          881.5748450237771,
+          130.7464662749192,
+          946.771752398947,
+          146.67794799804688
+        ],
+        "period_cell": [
+          881.5748450237771,
+          130.7464662749192,
+          946.771752398947,
+          146.67794799804688
+        ],
+        "value_cell": [
+          881.5748450237771,
+          396.1271667480469,
+          946.771752398947,
+          411.7177734375
+        ],
+        "metric_cell": [
+          683.1497192382812,
+          396.1271667480469,
+          773.858249830163,
+          411.7177734375
+        ],
+        "literal_span_membership": "unique_overlap_over_0.8",
+        "column": 5,
+        "x_overlap_min": 0.9,
+        "boundary_distance_max_width": 0.1
+      }
+    },
+    {
+      "approved": false,
+      "coverage_complete": false,
+      "rejection_reason": "merged_metric_context_unverified",
+      "metric_span": {
+        "role": "metric",
+        "char_start": 1341,
+        "char_end": 1348,
+        "quote": "영업이익률3)",
+        "bbox": [
+          688.9717407226562,
+          398.1713562011719,
+          727.0438232421875,
+          408.3382568359375
+        ],
+        "source": "native",
+        "confidence": 100.0
+      },
+      "value_span": {
+        "role": "value",
+        "char_start": 1359,
+        "char_end": 1362,
+        "quote": "9.3",
+        "bbox": [
+          995.18603515625,
+          399.0669860839844,
+          1006.1539916992188,
+          408.7789611816406
+        ],
+        "source": "native",
+        "confidence": 100.0
+      },
+      "period_span": {
+        "role": "period",
+        "char_start": 723,
+        "char_end": 727,
+        "quote": "2023",
+        "bbox": [
+          971.7757568359375,
+          134.88787841796875,
+          986.9727783203125,
+          143.48388671875
+        ],
+        "source": "native",
+        "confidence": 100.0
+      },
+      "unit_span": {
+        "role": "unit",
+        "char_start": 1349,
+        "char_end": 1350,
+        "quote": "%",
+        "bbox": [
+          792.0020141601562,
+          398.6269836425781,
+          798.2340087890625,
+          408.3389587402344
+        ],
+        "source": "native",
+        "confidence": 100.0
+      },
+      "row_group_id": "b200ec8a8f92ce3e9eab8fd3",
+      "row_group_reason": {
+        "vertical_overlap_min": 0.8,
+        "baseline_distance_max_height": 0.2,
+        "ordered_columns_verified": true,
+        "member_boxes": [
+          [
+            683.1497192382812,
+            396.1271667480469,
+            773.858249830163,
+            411.7177734375
+          ],
+          [
+            773.858249830163,
+            396.1271667480469,
+            816.3779907226562,
+            411.7177734375
+          ],
+          [
+            816.3779907226562,
+            396.1271667480469,
+            881.5748450237771,
+            411.7177734375
+          ],
+          [
+            881.5748450237771,
+            396.1271667480469,
+            946.771752398947,
+            411.7177734375
+          ],
+          [
+            946.771752398947,
+            396.1271667480469,
+            1011.9685483186141,
+            411.7177734375
+          ],
+          [
+            1011.9685483186141,
+            396.1271667480469,
+            1116.8509521484375,
+            411.7177734375
+          ]
+        ]
+      },
+      "stage": "metric_association",
+      "column_association_reason": {
+        "header_cell": [
+          946.771752398947,
+          130.7464662749192,
+          1011.9685483186141,
+          146.67794799804688
+        ],
+        "period_cell": [
+          946.771752398947,
+          130.7464662749192,
+          1011.9685483186141,
+          146.67794799804688
+        ],
+        "value_cell": [
+          946.771752398947,
+          396.1271667480469,
+          1011.9685483186141,
+          411.7177734375
+        ],
+        "metric_cell": [
+          683.1497192382812,
+          396.1271667480469,
+          773.858249830163,
+          411.7177734375
+        ],
+        "literal_span_membership": "unique_overlap_over_0.8",
+        "column": 6,
+        "x_overlap_min": 0.9,
+        "boundary_distance_max_width": 0.1
+      }
+    }
+  ],
+  "hyundai_merged_context_cells": [
+    {
+      "row": 17,
+      "column": 1,
+      "bbox": [
+        634.960693359375,
+        396.1271667480469,
+        683.1497192382812,
+        427.30828857421875
+      ],
+      "text": "수익성지표\n(연결 기준)"
+    }
+  ],
+  "hyundai_paddle_cell_topology_available": false,
+  "live_active_hash_artifact": "evals/results/paddle/row-association-active-20261007.json",
+  "live_active_hash_sha256": "6c0621e28ca527f17cbb9a74d2ea0ab3b0cc2ac24e934b834d857358f5b87329",
+  "active_hash_before": {
+    "documents": {
+      "count": 10,
+      "sha256": "90a528749fa287d8614fe5383fa6c8a37f67498e778206108d5796860565f8b4"
+    },
+    "pages": {
+      "count": 75,
+      "sha256": "1cf7866151671415c87cc90b8a439c48969ebdc7a95611ba289fc041179cb575"
+    },
+    "chunks": {
+      "count": 231,
+      "sha256": "bce2ec67ef0b99dca798891b76998fedc9cbbe969c01a749906619198033bf0e"
+    },
+    "analysis_runs": {
+      "count": 311,
+      "sha256": "ce0bab08903d1fafb004361a493d67ff41ae332ca93563faf92715d5b70810fd"
+    },
+    "page_extractions": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "active_hash_after": {
+    "documents": {
+      "count": 10,
+      "sha256": "90a528749fa287d8614fe5383fa6c8a37f67498e778206108d5796860565f8b4"
+    },
+    "pages": {
+      "count": 75,
+      "sha256": "1cf7866151671415c87cc90b8a439c48969ebdc7a95611ba289fc041179cb575"
+    },
+    "chunks": {
+      "count": 231,
+      "sha256": "bce2ec67ef0b99dca798891b76998fedc9cbbe969c01a749906619198033bf0e"
+    },
+    "analysis_runs": {
+      "count": 311,
+      "sha256": "ce0bab08903d1fafb004361a493d67ff41ae332ca93563faf92715d5b70810fd"
+    },
+    "page_extractions": {
+      "count": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "active_hash_live_verified": true,
+  "checks": {
+    "target_passed": 80,
+    "backend_passed": 346,
+    "backend_skipped": 1,
+    "frontend_passed": 7,
+    "lint": "PASS",
+    "build": "PASS",
+    "git_diff_check": "PASS",
+    "postgres": "healthy",
+    "backend": "healthy /health HTTP 200",
+    "ocr_worker": "healthy",
+    "frontend": "HTTP 200",
+    "alembic_current": "20260923_0006",
+    "alembic_heads": [
+      "20260923_0006"
+    ],
+    "new_migration_applied": false
+  },
+  "no_ocr_reprocessing": true,
+  "no_embedding_regeneration": true,
+  "no_generator_called": true,
+  "no_active_revision_switch": true,
+  "remaining": [
+    "merged metric context ownership",
+    "Samsung cell geometry",
+    "SK unit association",
+    "valuation requirement matching outside this scope"
+  ],
+  "new_sealed_holdout_needed": true,
+  "new_sealed_holdout_collected": false,
+  "superseded_artifacts": [
+    "row-association-final-20261006.json",
+    "row-association-final-20261007.json"
+  ]
+}

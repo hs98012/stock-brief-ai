@@ -1,0 +1,142 @@
+{
+  "date": "2026-10-10",
+  "decision": "C: HOLD; no production implementation",
+  "question": "표에서  계과 계의 값을 알려줘.",
+  "failure": {
+    "query": "fallback query omits column metric identity",
+    "requirement": "PERIOD.search(question) is false",
+    "execution": "rank_rows returns before requirements_for because admitted rows is empty",
+    "primitive": "len(headers) < 2 with header_count=0",
+    "scope": "requested count/ratio column is ambiguous"
+  },
+  "count_type": "explicit source total candidate; not member enumeration",
+  "source_evidence": "raw header/total cells observed; no admitted count proof",
+  "completeness_proof": false,
+  "unique_target": false,
+  "source_bound_result_reconstruction": false,
+  "automatic_pass_justified": false,
+  "counts_before": {
+    "requirements_direct": [],
+    "requirements_search": null,
+    "coverage": null,
+    "strict": false
+  },
+  "counts_after": {
+    "requirements_direct": [],
+    "requirements_search": null,
+    "coverage": null,
+    "strict": false
+  },
+  "regression": {
+    "development": [
+      12,
+      12
+    ],
+    "posco": [
+      1,
+      1
+    ],
+    "selected_pack_equal": [
+      20,
+      20
+    ],
+    "frozen_sk_baseline_checks": [
+      {
+        "id": "unseen-report-a-compound",
+        "state_unchanged": true,
+        "pack_unchanged": true
+      },
+      {
+        "id": "unseen-report-b-comparison",
+        "state_unchanged": true,
+        "pack_unchanged": true
+      },
+      {
+        "id": "holdout-kia-compound-01",
+        "state_unchanged": true,
+        "pack_unchanged": true
+      },
+      {
+        "id": "holdout-sk-compound-01",
+        "state_unchanged": true,
+        "pack_unchanged": true
+      },
+      {
+        "id": "new-period-cashflow",
+        "state_unchanged": true,
+        "pack_unchanged": true
+      },
+      {
+        "id": "new-mixed-valuation",
+        "state_unchanged": true,
+        "pack_unchanged": true
+      },
+      {
+        "id": "new-mixed-counts",
+        "state_unchanged": true,
+        "pack_unchanged": true
+      },
+      {
+        "id": "new-samsung-annual-pair",
+        "state_unchanged": true,
+        "pack_unchanged": true
+      },
+      {
+        "id": "new-hyundai-mixed-pair",
+        "state_unchanged": true,
+        "pack_unchanged": true
+      }
+    ],
+    "hyundai_frozen_pass_outcomes": 15,
+    "samsung_offline_strict": true,
+    "kia_manual_review": true,
+    "sk_hold": true,
+    "review_aware_false_complete": 0,
+    "reviewed_effective_false_complete": 0
+  },
+  "tests": {
+    "added": 10,
+    "backend_passed": 506,
+    "backend_skipped": 1,
+    "frontend_passed": 7,
+    "targeted_passed": 262,
+    "targeted_skipped": 1,
+    "lint": true,
+    "build": true,
+    "diff_check": true,
+    "new_file_whitespace": true,
+    "count_validator_positive_negative_matrix": "NOT_IMPLEMENTED; deferred because no justified contract",
+    "hardcoding": "New diagnostic AST contains no fixed challenge ID, expected count, or gold file path; all production hashes unchanged"
+  },
+  "db": {
+    "status": "NOT_VERIFIED",
+    "reason": "Read-only snapshot connection refused on localhost:5432 after sandbox-exempt retry",
+    "tables": [
+      "documents",
+      "pages",
+      "chunks",
+      "analysis_runs",
+      "page_extractions"
+    ],
+    "active_baseline_comparison": "NOT_VERIFIED; live hash unavailable"
+  },
+  "production": {
+    "changed_files": [],
+    "hashes_unchanged": true,
+    "api_model_changed": false
+  },
+  "artifacts": {
+    "evals/results/paddle/counts-diagnosis-final-20261010.json": "72ad1078887569ef83a5bf80fd61371c19400b0e2e39aef134e623b905a1c3ac",
+    "evals/results/paddle/counts-regression-20261010.json": "d2aeeb1abf1e91b7550089fa8b340b381132275553b9f512fd722ba078d62ffb",
+    "evals/results/paddle/counts-composite-verification-20261010.json": "32623039f3f5a4383d94d8752eb9c8b16f4af9b0ec5dc92e6dd7347985c18a13",
+    "evals/results/paddle/sk-unit-regression-20261010.json": "94245208355c44f7814fdfdec0f03bfbb0c0afaf8709f228592be949f64fd801",
+    "scripts/audit_counts_requirement.py": "f3de8a5d1391ea4dc31334ff10fcd6fd2f366c32831e237232cf6df86f238740",
+    "backend/tests/test_counts_diagnosis.py": "6d2365534651042674edd38d73625a197da06b1c9d8821f6a84f0a92b38219f0",
+    "docs/counts-requirement-audit-20261010.md": "aee3b38d447f2234e6e538b85def2aaf168b0d69ee06c3765be3408c027f9082"
+  },
+  "next_steps": [
+    "Obtain independent unambiguous query target/scope without using gold to repair challenge",
+    "Verify source PDF total/header/unit and period state; design explicit-total primitive contract",
+    "Only implement member counts with closed population and stable identity proof"
+  ]
+}

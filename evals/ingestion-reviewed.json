@@ -1,0 +1,691 @@
+{
+  "scope": "Inactive original-PDF extraction; live DB retrieval is a separate unchanged corpus. No generation.",
+  "artifacts": {
+    "parser-before.json": "1b033d52dc1885be99954be79c4a59b8c99f47e8c4d28a305fd42a2d9e31671f",
+    "parser-confirmed.json": "bfe5ed8e25b7562fe7ada5ad4eb289e29f3fed244e5198c052b784b25f7e1337",
+    "parser-reviewed.json": "eb83b60c559131e062e6d22f7b29bb851a46a7deaf805239a63e02603ec02dde",
+    "retrieval-before.json": "c633ee4e75ef82e2c96c72c023eba2f3e3734ed27b53378c0d9f73c6b1f48b89",
+    "retrieval-after.json": "e9e95181694c423d2ceb34b0f618fb2f5a20b83202de6a704e42634f6790cf77",
+    "db-before.json": "563008fe0175c2c20ca49ba8fbee0995de5a48b2560e131b14c105eaf7090f5a",
+    "db-after.json": "68d700b7c53e2e6ec8b1b78a5e442fb35b3173ede4c58a7e721f3dfef495df87"
+  },
+  "runtime_sources": {
+    "pdf_pipeline.py": "1aba678d08e7ff00d3187b17d72808a5ff306d3f37fca5baed14005d00f242c3",
+    "page_layout.py": "4c2ab965405b6f51fe967ae35de9eb2d910b599f920a5022401352bb9d97061e",
+    "layout_tables.py": "5e909711d08297ffe9c9e410ea7835c08f5eb92579fe6edd54165e73edbddeb1",
+    "numeric_evidence.py": "44c460c2f9d0bd10981ce7c61b2e773765bb442c1ca6f5c1a5fb6912e968aa1e",
+    "extraction_provenance.py": "eb06b45b9213d331656666f8779d57adee56830e81ed867bef3a4410237ec57a",
+    "service.py": "3468c63281ab22439ad8d828f78ed0b2cb28c4aca1dd57ca0d146dead98a78bb"
+  },
+  "restored": [
+    {
+      "case": "lg-period",
+      "file_sha256": "3489541bb393c16772ba3ed5d31c3f34a035ba36a472eabc884fa6ad60209808",
+      "page": 1,
+      "kind": "table",
+      "facts": [
+        {
+          "row_label": "영 업 이익",
+          "metric": "영 업 이익",
+          "column_name": "2026F",
+          "period": "2026F",
+          "period_status": "explicit",
+          "status": "forecast",
+          "comparison_basis": null,
+          "unit": "십억원",
+          "value": "1,643",
+          "page_number": 1,
+          "table_title": null,
+          "char_start": 1972,
+          "char_end": 1978,
+          "quote": "영 업 이익",
+          "source_spans": [
+            {
+              "role": "row",
+              "char_start": 1972,
+              "char_end": 1973,
+              "quote": "영",
+              "bbox": [
+                212.1172456568357,
+                693.5999859208528,
+                217.87608490543758,
+                701.2799857649591
+              ],
+              "source": "ocr",
+              "confidence": 93.0
+            },
+            {
+              "role": "row",
+              "char_start": 1974,
+              "char_end": 1975,
+              "quote": "업",
+              "bbox": [
+                219.55574635294647,
+                693.5999859208528,
+                224.35477906011468,
+                701.0399857698308
+              ],
+              "source": "ocr",
+              "confidence": 93.0
+            },
+            {
+              "role": "row",
+              "char_start": 1976,
+              "char_end": 1978,
+              "quote": "이익",
+              "bbox": [
+                225.31458560154834,
+                693.5999859208528,
+                237.3121673694689,
+                701.0399857698308
+              ],
+              "source": "ocr",
+              "confidence": 96.0
+            },
+            {
+              "role": "metric",
+              "char_start": 1972,
+              "char_end": 1973,
+              "quote": "영",
+              "bbox": [
+                212.1172456568357,
+                693.5999859208528,
+                217.87608490543758,
+                701.2799857649591
+              ],
+              "source": "ocr",
+              "confidence": 93.0
+            },
+            {
+              "role": "metric",
+              "char_start": 1974,
+              "char_end": 1975,
+              "quote": "업",
+              "bbox": [
+                219.55574635294647,
+                693.5999859208528,
+                224.35477906011468,
+                701.0399857698308
+              ],
+              "source": "ocr",
+              "confidence": 93.0
+            },
+            {
+              "role": "metric",
+              "char_start": 1976,
+              "char_end": 1978,
+              "quote": "이익",
+              "bbox": [
+                225.31458560154834,
+                693.5999859208528,
+                237.3121673694689,
+                701.0399857698308
+              ],
+              "source": "ocr",
+              "confidence": 96.0
+            },
+            {
+              "role": "columns",
+              "char_start": 1914,
+              "char_end": 1919,
+              "quote": "2026F",
+              "bbox": [
+                432.63279855121584,
+                668.3999864323789,
+                452.54878428596396,
+                674.8799863008436
+              ],
+              "source": "ocr",
+              "confidence": 91.0
+            },
+            {
+              "role": "unit",
+              "char_start": 1979,
+              "char_end": 1984,
+              "quote": "(십억원)",
+              "bbox": [
+                240.91144189984507,
+                693.3599859257245,
+                263.9467988942526,
+                701.2799857649591
+              ],
+              "source": "ocr",
+              "confidence": 96.0
+            },
+            {
+              "role": "value",
+              "char_start": 1993,
+              "char_end": 1998,
+              "quote": "1,643",
+              "bbox": [
+                435.03231490479993,
+                691.6799859598262,
+                452.78873592132237,
+                702.9599857308574
+              ],
+              "source": "ocr",
+              "confidence": 95.0
+            }
+          ],
+          "processing_version": "mixed-layout-v1",
+          "verification": "coordinate_aligned",
+          "source": "ocr",
+          "header_bbox": [
+            34.792987126969656,
+            666.4799864713523,
+            549.4892449707622,
+            681.839986159565
+          ]
+        }
+      ]
+    },
+    {
+      "case": "db-scan",
+      "file_sha256": "b4448fe38a9dda167b9a65caa5c53bb82151487495bb47a6f7bab8ee994c8266",
+      "page": 1,
+      "kind": "text_numeric",
+      "facts": [
+        {
+          "kind": "text_numeric",
+          "metric": "순이익",
+          "period": "2분기",
+          "value": "4,993",
+          "unit": "억원",
+          "status": "forecast",
+          "comparison_basis": null,
+          "page_number": 1,
+          "char_start": 487,
+          "char_end": 550,
+          "quote": "2 분 기 순 이 익 은 4,993 억 원 으로, 컨센서스 4,386 억 원 을 13.8% 상 회 할 것으로 예상",
+          "source_spans": [
+            {
+              "role": "period",
+              "char_start": 487,
+              "char_end": 492,
+              "quote": "2 분 기",
+              "boxes": [
+                [
+                  212.83710056291093,
+                  281.9999942757793,
+                  217.63613327007917,
+                  290.39999410527054
+                ],
+                [
+                  219.07584308222965,
+                  281.7599942806509,
+                  226.7542954136988,
+                  291.1199940906555
+                ],
+                [
+                  228.4339568612077,
+                  281.5199942855226,
+                  234.67269938052638,
+                  291.35999408578385
+                ]
+              ],
+              "sources": [
+                "ocr"
+              ]
+            },
+            {
+              "role": "metric",
+              "char_start": 493,
+              "char_end": 498,
+              "quote": "순 이 익",
+              "boxes": [
+                [
+                  239.95163535841144,
+                  281.5199942855226,
+                  274.7446224853811,
+                  291.35999408578385
+                ],
+                [
+                  250.98941058489837,
+                  276.71999438295614,
+                  260.5874759992348,
+                  293.27999404681043
+                ],
+                [
+                  260.3475243638764,
+                  281.5199942855226,
+                  270.9053963196465,
+                  291.35999408578385
+                ]
+              ],
+              "sources": [
+                "ocr"
+              ]
+            },
+            {
+              "role": "value",
+              "char_start": 501,
+              "char_end": 506,
+              "quote": "4,993",
+              "boxes": [
+                [
+                  279.3037035571909,
+                  281.5199942855226,
+                  341.45117711501945,
+                  291.59999408091215
+                ]
+              ],
+              "sources": [
+                "ocr"
+              ]
+            },
+            {
+              "role": "unit",
+              "char_start": 507,
+              "char_end": 510,
+              "quote": "억 원",
+              "boxes": [
+                [
+                  303.7787703637489,
+                  276.71999438295614,
+                  314.336642319519,
+                  293.27999404681043
+                ],
+                [
+                  314.0966906841606,
+                  276.71999438295614,
+                  323.694756098497,
+                  293.27999404681043
+                ]
+              ],
+              "sources": [
+                "ocr"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "text_numeric",
+          "metric": "순이익",
+          "period": "2분기",
+          "value": "4,386",
+          "unit": "억원",
+          "status": "forecast",
+          "comparison_basis": "컨센서스",
+          "page_number": 1,
+          "char_start": 487,
+          "char_end": 550,
+          "quote": "2 분 기 순 이 익 은 4,993 억 원 으로, 컨센서스 4,386 억 원 을 13.8% 상 회 할 것으로 예상",
+          "source_spans": [
+            {
+              "role": "period",
+              "char_start": 487,
+              "char_end": 492,
+              "quote": "2 분 기",
+              "boxes": [
+                [
+                  212.83710056291093,
+                  281.9999942757793,
+                  217.63613327007917,
+                  290.39999410527054
+                ],
+                [
+                  219.07584308222965,
+                  281.7599942806509,
+                  226.7542954136988,
+                  291.1199940906555
+                ],
+                [
+                  228.4339568612077,
+                  281.5199942855226,
+                  234.67269938052638,
+                  291.35999408578385
+                ]
+              ],
+              "sources": [
+                "ocr"
+              ]
+            },
+            {
+              "role": "metric",
+              "char_start": 493,
+              "char_end": 498,
+              "quote": "순 이 익",
+              "boxes": [
+                [
+                  239.95163535841144,
+                  281.5199942855226,
+                  274.7446224853811,
+                  291.35999408578385
+                ],
+                [
+                  250.98941058489837,
+                  276.71999438295614,
+                  260.5874759992348,
+                  293.27999404681043
+                ],
+                [
+                  260.3475243638764,
+                  281.5199942855226,
+                  270.9053963196465,
+                  291.35999408578385
+                ]
+              ],
+              "sources": [
+                "ocr"
+              ]
+            },
+            {
+              "role": "value",
+              "char_start": 520,
+              "char_end": 525,
+              "quote": "4,386",
+              "boxes": [
+                [
+                  385.84222965632557,
+                  281.5199942855226,
+                  437.1918796230256,
+                  291.59999408091215
+                ]
+              ],
+              "sources": [
+                "ocr"
+              ]
+            },
+            {
+              "role": "unit",
+              "char_start": 526,
+              "char_end": 529,
+              "quote": "억 원",
+              "boxes": [
+                [
+                  411.5170546396756,
+                  276.71999438295614,
+                  423.03473313687937,
+                  293.27999404681043
+                ],
+                [
+                  422.79478150152096,
+                  276.71999438295614,
+                  433.35265345729107,
+                  293.27999404681043
+                ]
+              ],
+              "sources": [
+                "ocr"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "text_numeric",
+          "metric": "순이익",
+          "period": "2분기",
+          "value": "13.8",
+          "unit": "%",
+          "status": "forecast",
+          "comparison_basis": "컨센서스",
+          "page_number": 1,
+          "char_start": 487,
+          "char_end": 550,
+          "quote": "2 분 기 순 이 익 은 4,993 억 원 으로, 컨센서스 4,386 억 원 을 13.8% 상 회 할 것으로 예상",
+          "source_spans": [
+            {
+              "role": "period",
+              "char_start": 487,
+              "char_end": 492,
+              "quote": "2 분 기",
+              "boxes": [
+                [
+                  212.83710056291093,
+                  281.9999942757793,
+                  217.63613327007917,
+                  290.39999410527054
+                ],
+                [
+                  219.07584308222965,
+                  281.7599942806509,
+                  226.7542954136988,
+                  291.1199940906555
+                ],
+                [
+                  228.4339568612077,
+                  281.5199942855226,
+                  234.67269938052638,
+                  291.35999408578385
+                ]
+              ],
+              "sources": [
+                "ocr"
+              ]
+            },
+            {
+              "role": "metric",
+              "char_start": 493,
+              "char_end": 498,
+              "quote": "순 이 익",
+              "boxes": [
+                [
+                  239.95163535841144,
+                  281.5199942855226,
+                  274.7446224853811,
+                  291.35999408578385
+                ],
+                [
+                  250.98941058489837,
+                  276.71999438295614,
+                  260.5874759992348,
+                  293.27999404681043
+                ],
+                [
+                  260.3475243638764,
+                  281.5199942855226,
+                  270.9053963196465,
+                  291.35999408578385
+                ]
+              ],
+              "sources": [
+                "ocr"
+              ]
+            },
+            {
+              "role": "value",
+              "char_start": 532,
+              "char_end": 536,
+              "quote": "13.8",
+              "boxes": [
+                [
+                  442.7107672362691,
+                  281.9999942757793,
+                  469.5853503964112,
+                  290.39999410527054
+                ]
+              ],
+              "sources": [
+                "ocr"
+              ]
+            },
+            {
+              "role": "unit",
+              "char_start": 536,
+              "char_end": 537,
+              "quote": "%",
+              "boxes": [
+                [
+                  442.7107672362691,
+                  281.9999942757793,
+                  469.5853503964112,
+                  290.39999410527054
+                ]
+              ],
+              "sources": [
+                "ocr"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "existing_supported_table": {
+    "file_sha256": "a21946429a6980e28e88ac8b4289b8789d57e912fdc20360f5d246d31395e364",
+    "page": 2,
+    "fact": {
+      "row_label": "철강",
+      "metric": "영 업 이익",
+      "column_name": "2Q26F",
+      "period": "2Q26F",
+      "period_status": "explicit",
+      "status": "forecast",
+      "comparison_basis": null,
+      "unit": "십억원",
+      "value": "424",
+      "page_number": 2,
+      "table_title": null,
+      "char_start": 1414,
+      "char_end": 1418,
+      "quote": "- 철강",
+      "source_spans": [
+        {
+          "role": "row",
+          "char_start": 1414,
+          "char_end": 1415,
+          "quote": "-",
+          "bbox": [
+            43.19129436451406,
+            451.1999908412468,
+            46.79056889489023,
+            451.91999082663176
+          ],
+          "source": "ocr",
+          "confidence": 93.0
+        },
+        {
+          "role": "row",
+          "char_start": 1416,
+          "char_end": 1418,
+          "quote": "철강",
+          "bbox": [
+            49.90994015454958,
+            448.0799909045786,
+            62.867328463903796,
+            455.7599907486849
+          ],
+          "source": "ocr",
+          "confidence": 97.0
+        },
+        {
+          "role": "metric",
+          "char_start": 1358,
+          "char_end": 1359,
+          "quote": "영",
+          "bbox": [
+            43.19129436451406,
+            435.3599911627775,
+            48.95013361311593,
+            443.03999100688384
+          ],
+          "source": "ocr",
+          "confidence": 93.0
+        },
+        {
+          "role": "metric",
+          "char_start": 1360,
+          "char_end": 1361,
+          "quote": "업",
+          "bbox": [
+            50.869746695983224,
+            435.3599911627775,
+            55.428827767793045,
+            442.7999910117555
+          ],
+          "source": "ocr",
+          "confidence": 93.0
+        },
+        {
+          "role": "metric",
+          "char_start": 1362,
+          "char_end": 1364,
+          "quote": "이익",
+          "bbox": [
+            57.34844085066033,
+            435.3599911627775,
+            68.38621607714725,
+            442.7999910117555
+          ],
+          "source": "ocr",
+          "confidence": 97.0
+        },
+        {
+          "role": "columns",
+          "char_start": 564,
+          "char_end": 569,
+          "quote": "2Q26F",
+          "bbox": [
+            366.40614719229427,
+            292.79999405655377,
+            388.2417460099097,
+            300.4799939006601
+          ],
+          "source": "ocr",
+          "confidence": 72.0
+        },
+        {
+          "role": "unit",
+          "char_start": 528,
+          "char_end": 533,
+          "quote": "(십억원)",
+          "bbox": [
+            528.6134526945804,
+            277.67999436346946,
+            552.3686645950631,
+            285.59999420270407
+          ],
+          "source": "ocr",
+          "confidence": 96.0
+        },
+        {
+          "role": "value",
+          "char_start": 1445,
+          "char_end": 1448,
+          "quote": "424",
+          "bbox": [
+            376.00421260663074,
+            448.55999089483527,
+            388.4816976452681,
+            454.79999076817165
+          ],
+          "source": "ocr",
+          "confidence": 96.0
+        }
+      ],
+      "processing_version": "mixed-layout-v1",
+      "verification": "coordinate_aligned",
+      "source": "ocr",
+      "header_bbox": [
+        127.41431837531647,
+        290.15999411014224,
+        550.4490515121959,
+        301.91999387143005
+      ]
+    }
+  },
+  "held": [
+    {
+      "case": "lg-table",
+      "page": 2,
+      "reason": "CNS and 3.42 confirmed, leading name token “LG confidence 35 unconfirmed; no complete cell."
+    },
+    {
+      "case": "db-table",
+      "page": 2,
+      "reason": "1Q26 still read as 1026. No 1Q26 cell inferred."
+    },
+    {
+      "case": "posco-multi-reasons",
+      "page": 1,
+      "reason": "Full cause set and reading order not certified; partial OCR recovery not scored."
+    }
+  ],
+  "restored_failed_units": 2,
+  "failed_units_total": 5,
+  "active_retrieval_before": 7,
+  "active_retrieval_after": 7,
+  "retrieval_denominator": 12,
+  "new_parser_reembedded_recall": null,
+  "generation_evaluated": false
+}

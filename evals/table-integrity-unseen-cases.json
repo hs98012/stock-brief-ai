@@ -1,0 +1,56 @@
+[
+  {
+    "id": "unseen-report-a-compound",
+    "filename": "20260827_현대차 (005380_매수).pdf",
+    "pdf_sha256": "b0b07f0da3e797316573b44d8089fd3054117ffa670bac7983f92cd607dc0aad",
+    "question": "2030년 영업이익률 가이던스 상향 이유와 표의 2026F 영업이익을 함께 알려줘.",
+    "gold_fact_bundle": [
+      {
+        "kind": "narrative",
+        "physical_page": 1,
+        "source_excerpt": "30년 가이던스는 기존 8~9%에서 9%+로 소폭 상향 조정했는데, HEV 비중 확대와 원가 절감 효과다.",
+        "required_terms": ["HEV", "원가", "상향"],
+        "bbox_pdf_points": [210, 295, 555, 335]
+      },
+      {
+        "kind": "table",
+        "physical_page": 1,
+        "row": "영업이익",
+        "period": "2026F",
+        "unit": "십억원",
+        "value": "11,491",
+        "source_cells": [
+          {"role": "period", "text": "2026F", "bbox_pdf_points": [481, 668, 502, 676]},
+          {"role": "row", "text": "영업이익 (십억원)", "bbox_pdf_points": [211, 692, 274, 703]},
+          {"role": "value", "text": "11,491", "bbox_pdf_points": [479, 693, 500, 702]}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unseen-report-b-comparison",
+    "filename": "2025 국문_신용보증기금 지속가능경영보고서_요약본.pdf",
+    "pdf_sha256": "06bfa06a2915558674fdff95ea7f074522e0a0582cef6a94a5084fd37b9c0186",
+    "question": "보고서의 표에서 2024년 신규 리스크인수율은 2023년과 비교해 얼마인가?",
+    "gold_fact_bundle": [
+      {
+        "kind": "table_comparison",
+        "physical_page": 17,
+        "row": "신규 리스크인수율",
+        "period": "2024년",
+        "unit": "%",
+        "value": "3.30",
+        "comparison_basis": "2023년",
+        "comparison_value": "3.43",
+        "source_excerpt": "신규 리스크인수율은 2023년 3.43%에서 2024년 3.30%로 하락",
+        "source_cells": [
+          {"role": "metric", "text": "신규 리스크인수율", "bbox_pdf_points": [468, 388, 544, 402]},
+          {"role": "comparison_period", "text": "2023년", "bbox_pdf_points": [546, 388, 577, 402]},
+          {"role": "comparison_value", "text": "3.43%", "bbox_pdf_points": [579, 388, 623, 402]},
+          {"role": "period", "text": "2024년", "bbox_pdf_points": [625, 388, 656, 402]},
+          {"role": "value", "text": "3.30%", "bbox_pdf_points": [658, 388, 694, 402]}
+        ]
+      }
+    ]
+  }
+]

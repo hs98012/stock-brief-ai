@@ -1,0 +1,113 @@
+[
+  {
+    "id": "new-period-cashflow",
+    "filename": "20260811_company_224552000.pdf",
+    "pdf_sha256": "1dd23fb28c2da210fba191f8b69bde83609fd9ce32788a9a3bc86006e80834f7",
+    "page": 6,
+    "table_type": "multi_period",
+    "document_unseen": false,
+    "table_gold_previously_used": false,
+    "comparison_required": true,
+    "cells": [
+      {
+        "row_label": "영업활동으로 인한 현금흐름",
+        "period": "2025",
+        "unit": "십억원",
+        "value": "85,315",
+        "bbox_pdf_points": [
+          42,
+          456,
+          190,
+          467
+        ]
+      },
+      {
+        "row_label": "영업활동으로 인한 현금흐름",
+        "period": "2026F",
+        "unit": "십억원",
+        "value": "344,784",
+        "bbox_pdf_points": [
+          191,
+          456,
+          221,
+          467
+        ]
+      }
+    ]
+  },
+  {
+    "id": "new-mixed-valuation",
+    "filename": "20260811_company_224552000.pdf",
+    "pdf_sha256": "1dd23fb28c2da210fba191f8b69bde83609fd9ce32788a9a3bc86006e80834f7",
+    "page": 6,
+    "table_type": "mixed_unit",
+    "document_unseen": false,
+    "table_gold_previously_used": false,
+    "comparison_required": false,
+    "cells": [
+      {
+        "row_label": "EPS (원)",
+        "period": "2026F",
+        "unit": "원",
+        "value": "46,469",
+        "bbox_pdf_points": [
+          304,
+          512,
+          480,
+          522
+        ]
+      },
+      {
+        "row_label": "배당성향 (%)",
+        "period": "2026F",
+        "unit": "%",
+        "value": "22.1",
+        "bbox_pdf_points": [
+          304,
+          557,
+          480,
+          567
+        ]
+      }
+    ]
+  },
+  {
+    "id": "new-mixed-counts",
+    "filename": "9. 제1당사자의 시도경찰청별 노인운전자 교통사고.pdf",
+    "pdf_sha256": "b1b8f7ed3a4ef97ca43b69620496c9c5414650f7d32b228a96763834c23c6e34",
+    "page": 1,
+    "table_type": "mixed_unit",
+    "document_unseen": true,
+    "table_gold_previously_used": false,
+    "comparison_required": false,
+    "period_note": "원본 페이지에 기간 미표기; 추정 금지",
+    "cells": [
+      {
+        "row_label": "계",
+        "metric": "노인사고",
+        "period": null,
+        "unit": "건",
+        "value": "42,369",
+        "bbox_pdf_points": [
+          185,
+          191,
+          215,
+          208
+        ]
+      },
+      {
+        "row_label": "계",
+        "metric": "사망",
+        "period": null,
+        "unit": "명",
+        "value": "761",
+        "bbox_pdf_points": [
+          356,
+          191,
+          377,
+          208
+        ]
+      }
+    ]
+  }
+]

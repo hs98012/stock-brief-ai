@@ -1,0 +1,237 @@
+{
+  "method": "원문 대조한 기존 6단위 유지 + 신규 철강 행/열 source_spans 대조. 페이지 일치만으로 채점하지 않음.",
+  "fixture_sha256": "50874005814a50fd48fbe0908dfadb72bfe15d356092dbe8872fbcfab36c5601",
+  "artifacts": {
+    "before.json": "057c80619bcc8332f3bf355b66f15a5ce93d72c8b99a2a8c0aa4501e49a6b2bc",
+    "after.json": "00ce6d7fc4233d52c4a2391a410922e78fbea65c3cbebb046071a714db41ea8e",
+    "staged-ocr300.json": "7430da4914aea914ac1d1c59cb3c8265044c6036ac477a997ebbd8aa6787e17d"
+  },
+  "before": {
+    "existing": 2,
+    "additional": 4,
+    "total": 6,
+    "denominator": 12
+  },
+  "after": {
+    "existing": 2,
+    "additional": 5,
+    "total": 7,
+    "denominator": 12
+  },
+  "retained_case_units": [
+    "old-miss",
+    "old-risk",
+    "lg-fact",
+    "lg-period",
+    "db-table",
+    "posco-forecast"
+  ],
+  "new_hit": {
+    "row_label": "철강",
+    "metric": "영업이익",
+    "column_name": "2Q26F",
+    "period": "2Q26F",
+    "status": "forecast",
+    "comparison_basis": null,
+    "unit": "십억원",
+    "value": "424",
+    "page_number": 2,
+    "table_title": "표 2. 『0500홀딩스 사업부문별 실적 테이블                                                                                 (십억원)",
+    "char_start": 3308,
+    "char_end": 3468,
+    "quote": "- 철강                        453          602          651          255        1,961          345          424          439          370        1,578       2,071",
+    "source_spans": [
+      {
+        "role": "title",
+        "char_start": 1455,
+        "char_end": 1567,
+        "quote": "표 2. 『0500홀딩스 사업부문별 실적 테이블                                                                                 (십억원)"
+      },
+      {
+        "role": "unit",
+        "char_start": 1562,
+        "char_end": 1567,
+        "quote": "(십억원)"
+      },
+      {
+        "role": "columns",
+        "char_start": 1569,
+        "char_end": 1733,
+        "quote": "1025             2025            3025            4025             2025             1026          2Q26F          3Q26F          4Q26F           2026F           2027F"
+      },
+      {
+        "role": "metric",
+        "char_start": 3096,
+        "char_end": 3100,
+        "quote": "영업이익"
+      },
+      {
+        "role": "row",
+        "char_start": 3308,
+        "char_end": 3468,
+        "quote": "- 철강                        453          602          651          255        1,961          345          424          439          370        1,578       2,071"
+      }
+    ],
+    "processing_version": "table-spans-v1",
+    "document_id": "aff19647-b451-411e-897e-995133c36c60",
+    "page_id": "413940e2-28be-4164-8ef5-4a902c2222aa",
+    "source_chunk_ids": [
+      "1a262113-4088-49f3-ba3b-3dacb1c083ff",
+      "ac5b3413-7c84-4955-9f15-c488574e4a86"
+    ]
+  },
+  "failures": [
+    {
+      "case": "lg-period",
+      "unit": "연간 전망",
+      "gold_page": 1,
+      "gold": "2026F 영업이익 1,643십억원",
+      "stage": "1 — 추출 훼손 (표 헤더 분절도 동반)",
+      "next": "OCR/파서 → 표 청킹",
+      "ranks": [
+        {
+          "chunk_id": "596a6390-8c10-4eb5-a147-6084a3e5fb0a",
+          "page_number": 1,
+          "char_start": 0,
+          "char_end": 1199,
+          "bm25_rank": 4,
+          "vector_rank": 9,
+          "rrf_rank": 5
+        },
+        {
+          "chunk_id": "a2d0fddf-24c7-40f8-adb7-b499645d7d4c",
+          "page_number": 4,
+          "char_start": 1197,
+          "char_end": 2396,
+          "bm25_rank": 2,
+          "vector_rank": 2,
+          "rrf_rank": 2
+        },
+        {
+          "chunk_id": "559d613c-fa00-4473-a319-70c12296f425",
+          "page_number": 7,
+          "char_start": 0,
+          "char_end": 1163,
+          "bm25_rank": 9,
+          "vector_rank": 3,
+          "rrf_rank": 4
+        }
+      ]
+    },
+    {
+      "case": "lg-table",
+      "unit": "지분가치",
+      "gold_page": 2,
+      "gold": "LG CNS 지분가치 3.42조원",
+      "stage": "1 — 추출 누락",
+      "next": "혼합 native/시각 페이지 OCR 파서",
+      "ranks": [
+        {
+          "chunk_id": "e517cb14-7e8a-40d7-a415-70315edc5423",
+          "page_number": 2,
+          "char_start": 0,
+          "char_end": 284,
+          "bm25_rank": 16,
+          "vector_rank": 18,
+          "rrf_rank": 19
+        }
+      ]
+    },
+    {
+      "case": "db-scan",
+      "unit": "순이익 비교",
+      "gold_page": 1,
+      "gold": "2분기 순이익 예상 4,993억원 / 컨센서스 4,386억원 / 13.8% 상회",
+      "stage": "1 — OCR 수치 훼손",
+      "next": "OCR 파서",
+      "ranks": [
+        {
+          "chunk_id": "5ed15a8d-2759-4ff4-8e2e-9ad47fc61f67",
+          "page_number": 1,
+          "char_start": 0,
+          "char_end": 1190,
+          "bm25_rank": 1,
+          "vector_rank": 4,
+          "rrf_rank": 1
+        },
+        {
+          "chunk_id": "d2858de0-552f-42a4-b953-e996b9b82a51",
+          "page_number": 1,
+          "char_start": 1191,
+          "char_end": 2374,
+          "bm25_rank": 3,
+          "vector_rank": 3,
+          "rrf_rank": 2
+        }
+      ]
+    },
+    {
+      "case": "db-table",
+      "unit": "1Q26 보험손익",
+      "gold_page": 2,
+      "gold": "1Q26 보험손익 227십억원 (2Q26F 282와 구분)",
+      "stage": "1 — OCR 기간 훼손",
+      "next": "표 OCR/열 좌표 파서",
+      "ranks": [
+        {
+          "chunk_id": "f1b1f5a6-f32f-4108-976c-b50ec876832a",
+          "page_number": 2,
+          "char_start": 0,
+          "char_end": 1187,
+          "bm25_rank": 1,
+          "vector_rank": 1,
+          "rrf_rank": 1
+        }
+      ]
+    },
+    {
+      "case": "posco-multi",
+      "unit": "실적 개선 이유",
+      "gold_page": 1,
+      "gold": "판가 상승·성수기 판매량 증가·원화 약세 및 중국 장가항 연결 제외",
+      "stage": "1 — OCR 본문 훼손",
+      "next": "OCR/읽기 순서 파서",
+      "ranks": [
+        {
+          "chunk_id": "78d9f01d-96c5-4dac-b6c2-c9488d4df852",
+          "page_number": 1,
+          "char_start": 0,
+          "char_end": 1197,
+          "bm25_rank": 3,
+          "vector_rank": 7,
+          "rrf_rank": 5
+        },
+        {
+          "chunk_id": "9e56ae4b-1c1e-4251-bd16-73d9454b5ba4",
+          "page_number": 1,
+          "char_start": 1198,
+          "char_end": 2393,
+          "bm25_rank": 2,
+          "vector_rank": 4,
+          "rrf_rank": 2
+        }
+      ]
+    },
+    {
+      "case": "posco-multi",
+      "unit": "철강 영업이익",
+      "gold_page": 2,
+      "gold": "2Q26F 철강 영업이익 424십억원, 전망",
+      "stage": "2 — 검색 top-5 누락 (부모 헤더 분절 동반)",
+      "next": "같은 페이지 표 parent context + 조건 재정렬",
+      "ranks": [
+        {
+          "chunk_id": "1a262113-4088-49f3-ba3b-3dacb1c083ff",
+          "page_number": 2,
+          "char_start": 2403,
+          "char_end": 3592,
+          "bm25_rank": 7,
+          "vector_rank": 3,
+          "rrf_rank": 6
+        }
+      ]
+    }
+  ],
+  "generation_evaluated": false,
+  "staged_revision_recall": null
+}

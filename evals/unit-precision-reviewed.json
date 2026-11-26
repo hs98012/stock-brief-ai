@@ -1,0 +1,166 @@
+{
+  "method": "offline validation/selection replay; no new retrieval",
+  "raw_artifact": "evals/results/paddle/unit-precision-final-20261006.json",
+  "raw_sha256": "9d422201cbbbee6ce82682188525fa8adc4545db810d4e4ab758d7b71036aeeb",
+  "development": {
+    "paddle_candidate_recall@5": [
+      10,
+      10
+    ],
+    "invariant_control_recall@5": [
+      2,
+      2
+    ],
+    "combined_comparison_recall@5": [
+      12,
+      12
+    ],
+    "compound_evidence_coverage@5_after": [
+      1,
+      1
+    ],
+    "single_fact_regression": []
+  },
+  "control_limit": "two unchanged controls from immutable baseline; no live DB replay",
+  "fixed_regression": [
+    {
+      "id": "unseen-report-a-compound",
+      "coverage_complete": true,
+      "automatic_strict_pass": true,
+      "prior_strict_review_retained": false,
+      "false_complete": false
+    },
+    {
+      "id": "unseen-report-b-comparison",
+      "coverage_complete": true,
+      "automatic_strict_pass": true,
+      "prior_strict_review_retained": false,
+      "false_complete": false
+    },
+    {
+      "id": "holdout-kia-compound-01",
+      "coverage_complete": true,
+      "automatic_strict_pass": false,
+      "prior_strict_review_retained": true,
+      "false_complete": false
+    },
+    {
+      "id": "holdout-sk-compound-01",
+      "coverage_complete": false,
+      "automatic_strict_pass": false,
+      "prior_strict_review_retained": false,
+      "false_complete": false
+    }
+  ],
+  "existing_false_complete": [
+    0,
+    0
+  ],
+  "new_false_complete": [
+    1,
+    0
+  ],
+  "challenge_set": [
+    {
+      "id": "new-period-cashflow",
+      "previous_complete": true,
+      "coverage_complete": true,
+      "strict_pass": true
+    },
+    {
+      "id": "new-mixed-valuation",
+      "previous_complete": false,
+      "coverage_complete": false,
+      "strict_pass": false
+    },
+    {
+      "id": "new-mixed-counts",
+      "previous_complete": null,
+      "coverage_complete": null,
+      "strict_pass": false
+    },
+    {
+      "id": "new-samsung-annual-pair",
+      "previous_complete": true,
+      "coverage_complete": false,
+      "strict_pass": false
+    },
+    {
+      "id": "new-hyundai-mixed-pair",
+      "previous_complete": false,
+      "coverage_complete": false,
+      "strict_pass": false
+    }
+  ],
+  "active_hash_live_verified": false,
+  "active_hash_limitation": "Docker daemon unavailable and localhost PostgreSQL connection refused; no current PostgreSQL hash can be confirmed",
+  "strict_review_sha256": "75701cb716d92fc1d902077120b681f54cac48fac813863769c250e1bfe4dda1",
+  "source_hashes": {
+    "graph-dev-run4-20261002.json": "a0023a586859967e9f2faf35e2e80bea8f24928ff864637dda1caaaf184de473",
+    "graph-regression-unseen-final-20261002.json": "8a9ddfaca60806e4448733781d0487f8d4b16a88dd789c8e2a4bb7ca8617f4ff",
+    "extraction-unseen-index-release2-20261002.json": "73aff002a6b054c558b8151060ca5fed4f3ec44349a78a146aeba8cf34aaac1f",
+    "graph-regression-holdout-run1-20261002.json": "d6be0cf1302463651798a7881124f2fb9b156f39cc69c5dad54a7f3af4b68865",
+    "extraction-holdout-index-release2-20261002.json": "66bc3ae7f110b481553a37fe85e741248b7850a681f60eed9c1c7b6942daec9a",
+    "graph-before-tables-20261002.json": "2c89af2239122a847e1400b7b6fe12f3db062ec85049e86c75f7bea155410066",
+    "graph-after-final-search-20261002.json": "d5ddfd31176d5381c3b1404af9c366cb7f6f3e0b4b84654992d39c1f168e9f0f",
+    "graph-new-observations-20261002.json": "6689322196ab4a7ba769fb5a331cec9de29b979cbf0955ebf4a5c1cfe5679c07",
+    "graph-new-search-20261002.json": "dee6f5b56e5a054dc1f7bb83b4d1581ac901d6db61ebc4f20fabc24460f1b713"
+  },
+  "production_hashes": {
+    "citations.py": "8c27b5b45e7bd38fc45c6fb8cc777a43b292408e7c16442f9f8f5c16b4bd3323",
+    "service.py": "182b9c97806dd129496f211863f6a26cd1f3b9a39a34240fbd2e82576dc9f789",
+    "evidence_bundle.py": "25fcac7fd1935dc47eb18c00d298df8b3b0aca740f91e0277ff5021b0a470ad1",
+    "spatial_tables.py": "b04927253988bdf1fa1aff5dc54f606f88e9071c9dfe7472c8c8d68337328136",
+    "document_candidates.py": "c020eb405e8f2bf82a4a70c1180be8fbc11d7d099ba4a4a84544858d4c051f5c",
+    "chunking.py": "cd2de6a4bd5a0d95dc99d8e8250b8c9fd8e707b3f7f594e321b302d6a0e2e45a",
+    "fused_candidates.py": "6dd286920b3071c213f13e6dcbffeb0255c5d3b79c45c6f812d1e0f0c47d85a0",
+    "generation.py": "569eaa727407a57798f270815855ab7c9b214407da55caab706543098f264766",
+    "models.py": "c2ee22d3045f940d3d5f08d8050a1358d76bb47b428f511fbed7391e8b0a04af",
+    "primitive_graph.py": "942cc01bc4dbf11fffe26dad745ada8bbfbb0afc2acc51fa66385663583047c0",
+    "unit_validation.py": "377deaa7c14e23bfce839abd0e8c099315df225ecb2151b50f349fa2bc5adeec",
+    "fact_fusion.py": "c6137c5c4e007d9510fa25f815370622f1d5318531b37122256cf513f1cfe057",
+    "evidence_requirements.py": "e6f39adef670ece90c8cd607fe86c06113fd9a405601a7ee243f4cf2cd104b1a",
+    "evidence_facts.py": "d4aac38f4a35394269e18b60618f3f4e9e538e3e93a9b3a7578cd9a614feb776",
+    "shadow_revision.py": "c73eec2aba00443c7671d5bafcb7e0fb08817dfd151e0c3af9de6e58849d145b",
+    "pdf_pipeline.py": "0acf9940d067fe614fc95a4801baae50083bc716bbfb7011c6c4d9a15945336e",
+    "page_layout.py": "cecf972a9fa60d86b338f0b844f228c4dc65094cdb67edfd80c040b5c7d44ed4",
+    "citation_display.py": "a61426181eb5ce2116db4a739dd51cf335bace57e52889fa02a38e10b257e2e4",
+    "database.py": "071e615895c91b22d7729e3112f6ccf8ec2d4170163635f674624f25febdd41b",
+    "evaluation.py": "3e21ab6fe01b63cd63f6efb43335fd50bdad8688433938f44d014633c204adfd",
+    "structured_cells.py": "574e57fa8b20541335386fdd94be614f0673dc6ab3fba5d8782a3706a66dd05f",
+    "__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "fused_extraction.py": "a56161130c94f21f66eed66247e1abb16953ddfade9c40d1713910fe4cb91e00",
+    "embedding_service.py": "b91d50e83bb1c1bf920dd38c14a9af2720438691d1b68185ad695a670a90a374",
+    "analysis_retrieval.py": "416ad93b474d95df8e60b0c41f8292efaf9821f3511a1beeb7d99888268f87a6",
+    "shadow_models.py": "3aa4b40075c5da21c5b571e4e8ca689e3c58e2810d5bece38b82b133eef0b0c3",
+    "evidence_integrity.py": "d65398bdc97093195769d3f71e53377efe6d61ac62247d3a221157f8bb0df438",
+    "embeddings.py": "8998064093cdb2cd0b0c2b4559fbe1224f5e85ccfdc805780a1449457b87f6ae",
+    "schemas.py": "81c3ea832d6205a620b9dfb4ae7d280a2dfddfe65438b633418b43844e391c99",
+    "paddle_tables.py": "6356151a84ba792062a237a3c4f7f1452bd2c38db67008526ef1eb848e158d34",
+    "layout_tables.py": "5e909711d08297ffe9c9e410ea7835c08f5eb92579fe6edd54165e73edbddeb1",
+    "native_tables.py": "41d13ac2b6c12a11935bf142582836cefdea099e77dc60ef3f2caa4a7c7b03a9",
+    "table_evidence.py": "319c88d3036112225c34edbf92394da4c766b04f7a1a11708ca7aa186d1d118e",
+    "extraction_provenance.py": "6a75fa1cfc3c691213aec5fd13bf46ea54ba7a8af2a85562ca2385c73ac41dc0",
+    "search.py": "ce4af4c62fc73d70bae361d0f443605474fbd76aabc52676f7cda9bbad0df496",
+    "paddle_structure.py": "d03e8722bcc5783fe38699c01562c44f629bdc9fa51d17a28bea7f699b68400e",
+    "numeric_evidence.py": "da2c0e069a430d6453f3291a6e05d22032fd1851dc440cf5e4572a1fd0a5f1d0",
+    "main.py": "77f733218cc3249edc4ce834ee1e550aa0f4c2f19a1270bae8ad33c181e5c34e",
+    "fused_index.py": "eb287aae6db7de5a8a63bbe6c658f078840a4c2b3921cd1b4059bbe069901203",
+    "analysis_service.py": "651906189d0296686b3aa08527b380816a23fe6b68f51deb98feb4ade4de640d"
+  },
+  "sealed_holdout_needed": "At least two previously unobserved broker reports or DART documents; no downloads in this task",
+  "verification": {
+    "target_passed": 97,
+    "backend_passed": 334,
+    "backend_skipped": 1,
+    "frontend_passed": 7,
+    "lint_passed": true,
+    "build_passed": true,
+    "git_diff_check": true,
+    "compose_health_verified": false,
+    "compose_reason": "Docker daemon unavailable",
+    "local_original_pdf_ui_compose_hashes_unchanged": true
+  },
+  "local_hash_proof": "evals/results/paddle/unit-local-hashes-after-20261006.json",
+  "local_db_file_is_empty_and_is_not_active_postgres_proof": true
+}

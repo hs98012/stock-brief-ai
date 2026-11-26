@@ -1,0 +1,4430 @@
+{
+  "date": "2026-10-08",
+  "method": "offline validation/selection replay; no new retrieval",
+  "changed_files": [
+    "backend/app/metric_annotations.py",
+    "backend/app/evidence_requirements.py",
+    "backend/app/primitive_graph.py",
+    "backend/app/table_evidence.py",
+    "backend/app/evidence_bundle.py",
+    "backend/tests/test_metric_annotations.py",
+    "scripts/hash_active_tables.py",
+    "api-contract.md",
+    "acceptance.md",
+    "qa-rules.md",
+    "docs/metric-annotation-20261008.md",
+    "evals/metric-annotation-reviewed.json"
+  ],
+  "raw_artifact": "evals/results/paddle/metric-annotation-final-20261008.json",
+  "raw_sha256": "aa1661fcbdee39317e0bd43c3767b4abb6bcbd819915611cf5aca164d2a647c6",
+  "baseline_artifact": "evals/results/paddle/shared-context-final-20261007.json",
+  "baseline_sha256": "1f57555faafabfc24da9f38e7218f3287f10ce3bcb3432ff70e7c49646ab4649",
+  "proof_artifact": "evals/results/paddle/metric-annotation-hyundai-proof-20261008.json",
+  "proof_sha256": "d9d3e854e0748e8cd06e735cd0108228ae5f608ba477404d7eea0342625729c1",
+  "hyundai_annotation_proof": {
+    "facts": [
+      {
+        "kind": "table",
+        "row_label": "영업이익률3)",
+        "metric": "영업이익률3)",
+        "row_subject": null,
+        "column_name": "2022",
+        "period": "2022",
+        "period_status": "explicit",
+        "status": "unspecified",
+        "unit": "%",
+        "value": "6.9",
+        "comparison_basis": null,
+        "comparison_cell": null,
+        "page_number": 97,
+        "table_id": "2291360b61bd9ac726bf62ff",
+        "row_id": "d3153329701704ac7aeaa87d",
+        "column_id": "65c9bb976f9a5d877a77b2b3",
+        "cell_fact_id": "672b193483cb66144875bf39",
+        "table_title": null,
+        "char_start": 1341,
+        "char_end": 1348,
+        "quote": "영업이익률3)",
+        "source_spans": [
+          {
+            "role": "row",
+            "char_start": 1341,
+            "char_end": 1348,
+            "quote": "영업이익률3)",
+            "bbox": [
+              688.9717407226562,
+              398.1713562011719,
+              727.0438232421875,
+              408.3382568359375
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "metric",
+            "char_start": 1341,
+            "char_end": 1348,
+            "quote": "영업이익률3)",
+            "bbox": [
+              688.9717407226562,
+              398.1713562011719,
+              727.0438232421875,
+              408.3382568359375
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "columns",
+            "char_start": 718,
+            "char_end": 722,
+            "quote": "2022",
+            "bbox": [
+              906.6057739257812,
+              134.88787841796875,
+              921.7467651367188,
+              143.48388671875
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "period",
+            "char_start": 718,
+            "char_end": 722,
+            "quote": "2022",
+            "bbox": [
+              906.6057739257812,
+              134.88787841796875,
+              921.7467651367188,
+              143.48388671875
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "unit",
+            "char_start": 1349,
+            "char_end": 1350,
+            "quote": "%",
+            "bbox": [
+              792.0020141601562,
+              398.6269836425781,
+              798.2340087890625,
+              408.3389587402344
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "value",
+            "char_start": 1355,
+            "char_end": 1358,
+            "quote": "6.9",
+            "bbox": [
+              929.9860229492188,
+              399.0669860839844,
+              940.9539794921875,
+              408.7789611816406
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "metric_context",
+            "char_start": 1335,
+            "char_end": 1340,
+            "quote": "수익성지표",
+            "bbox": [
+              640.7797241210938,
+              400.92230224609375,
+              675.0198364257812,
+              410.63427734375
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "metric_context",
+            "char_start": 1363,
+            "char_end": 1366,
+            "quote": "(연결",
+            "bbox": [
+              640.7797241210938,
+              411.92230224609375,
+              657.0517578125,
+              421.63427734375
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "metric_context",
+            "char_start": 1367,
+            "char_end": 1370,
+            "quote": "기준)",
+            "bbox": [
+              658.851806640625,
+              411.92230224609375,
+              675.1238403320312,
+              421.63427734375
+            ],
+            "source": "native",
+            "confidence": 100.0
+          }
+        ],
+        "bbox": [
+          929.9860229492188,
+          399.0669860839844,
+          940.9539794921875,
+          408.7789611816406
+        ],
+        "header_bbox": [
+          906.6057739257812,
+          134.88787841796875,
+          921.7467651367188,
+          143.48388671875
+        ],
+        "context_bbox": [
+          592.5204010009766,
+          130.7464662749192,
+          1116.8509521484375,
+          458.4893798828125
+        ],
+        "confidence": 100.0,
+        "source": "native_table",
+        "processing_version": "fact-fusion-paddle-v3",
+        "verification": "structured_primitive_cell",
+        "cell_geometry": {
+          "mode": "cell",
+          "source": "native",
+          "table_bbox": [
+            592.5204010009766,
+            130.7464662749192,
+            1116.8509521484375,
+            458.4893798828125
+          ],
+          "row": 17,
+          "column": 5,
+          "value_cell": [
+            881.5748450237771,
+            396.1271667480469,
+            946.771752398947,
+            411.7177734375
+          ],
+          "header_cell": [
+            881.5748450237771,
+            130.7464662749192,
+            946.771752398947,
+            146.67794799804688
+          ],
+          "label_cell": [
+            683.1497192382812,
+            396.1271667480469,
+            773.858249830163,
+            411.7177734375
+          ],
+          "unit_scope": "row"
+        },
+        "column_association_reason": {
+          "header_cell": [
+            881.5748450237771,
+            130.7464662749192,
+            946.771752398947,
+            146.67794799804688
+          ],
+          "period_cell": [
+            881.5748450237771,
+            130.7464662749192,
+            946.771752398947,
+            146.67794799804688
+          ],
+          "value_cell": [
+            881.5748450237771,
+            396.1271667480469,
+            946.771752398947,
+            411.7177734375
+          ],
+          "metric_cell": [
+            683.1497192382812,
+            396.1271667480469,
+            773.858249830163,
+            411.7177734375
+          ],
+          "literal_span_membership": "unique_overlap_over_0.8",
+          "column": 5,
+          "x_overlap_min": 0.9,
+          "boundary_distance_max_width": 0.1
+        },
+        "metric_span": {
+          "role": "metric",
+          "char_start": 1341,
+          "char_end": 1348,
+          "quote": "영업이익률3)",
+          "bbox": [
+            688.9717407226562,
+            398.1713562011719,
+            727.0438232421875,
+            408.3382568359375
+          ],
+          "source": "native",
+          "confidence": 100.0
+        },
+        "period_span": {
+          "role": "period",
+          "char_start": 718,
+          "char_end": 722,
+          "quote": "2022",
+          "bbox": [
+            906.6057739257812,
+            134.88787841796875,
+            921.7467651367188,
+            143.48388671875
+          ],
+          "source": "native",
+          "confidence": 100.0
+        },
+        "metric_context_ownership": {
+          "approved": true,
+          "coverage_complete": false,
+          "stage": "metric_association",
+          "rejection_reason": null,
+          "context_bbox": [
+            634.960693359375,
+            396.1271667480469,
+            683.1497192382812,
+            427.30828857421875
+          ],
+          "context_membership": {
+            "approved": true,
+            "status": "shared_metric_context_verified",
+            "rejection_reason": null,
+            "context_id": "a5d310833ef4cb375ed99772",
+            "context_bbox": [
+              634.960693359375,
+              396.1271667480469,
+              683.1497192382812,
+              427.30828857421875
+            ],
+            "members": [
+              {
+                "metric_span": {
+                  "role": "metric",
+                  "char_start": 1341,
+                  "char_end": 1348,
+                  "quote": "영업이익률3)",
+                  "bbox": [
+                    688.9717407226562,
+                    398.1713562011719,
+                    727.0438232421875,
+                    408.3382568359375
+                  ],
+                  "source": "native",
+                  "confidence": 100.0
+                },
+                "row_bbox": [
+                  683.1497192382812,
+                  396.1271667480469,
+                  773.858249830163,
+                  411.7177734375
+                ],
+                "metric_ownership_id": "e57298f7178d0603a4ea3a10"
+              },
+              {
+                "metric_span": {
+                  "role": "metric",
+                  "char_start": 1371,
+                  "char_end": 1377,
+                  "quote": "순이익률3)",
+                  "bbox": [
+                    688.9700317382812,
+                    413.761962890625,
+                    720.203857421875,
+                    423.93096923828125
+                  ],
+                  "source": "native",
+                  "confidence": 100.0
+                },
+                "row_bbox": [
+                  683.1497192382812,
+                  411.7177734375,
+                  773.858249830163,
+                  427.30828857421875
+                ],
+                "metric_ownership_id": "8182d26654df0a56cd58d576"
+              }
+            ],
+            "context_spans": [
+              {
+                "role": "metric_context",
+                "char_start": 1335,
+                "char_end": 1340,
+                "quote": "수익성지표",
+                "bbox": [
+                  640.7797241210938,
+                  400.92230224609375,
+                  675.0198364257812,
+                  410.63427734375
+                ],
+                "source": "native",
+                "confidence": 100.0
+              },
+              {
+                "role": "metric_context",
+                "char_start": 1363,
+                "char_end": 1366,
+                "quote": "(연결",
+                "bbox": [
+                  640.7797241210938,
+                  411.92230224609375,
+                  657.0517578125,
+                  421.63427734375
+                ],
+                "source": "native",
+                "confidence": 100.0
+              },
+              {
+                "role": "metric_context",
+                "char_start": 1367,
+                "char_end": 1370,
+                "quote": "기준)",
+                "bbox": [
+                  658.851806640625,
+                  411.92230224609375,
+                  675.1238403320312,
+                  421.63427734375
+                ],
+                "source": "native",
+                "confidence": 100.0
+              }
+            ],
+            "checks": {
+              "source_span_ownership": true,
+              "vertical_containment": true,
+              "horizontal_continuity": true,
+              "independent_metric_rows": true,
+              "literal_context": true
+            },
+            "metric_ownership_id": "e57298f7178d0603a4ea3a10"
+          },
+          "candidate_metrics": [
+            {
+              "role": "metric",
+              "char_start": 1341,
+              "char_end": 1348,
+              "quote": "영업이익률3)",
+              "bbox": [
+                688.9717407226562,
+                398.1713562011719,
+                727.0438232421875,
+                408.3382568359375
+              ],
+              "source": "native",
+              "confidence": 100.0
+            },
+            {
+              "role": "metric",
+              "char_start": 1371,
+              "char_end": 1377,
+              "quote": "순이익률3)",
+              "bbox": [
+                688.9700317382812,
+                413.761962890625,
+                720.203857421875,
+                423.93096923828125
+              ],
+              "source": "native",
+              "confidence": 100.0
+            }
+          ],
+          "mode": "cell_geometry",
+          "checks": {
+            "source_span_ownership": true,
+            "vertical_containment": true,
+            "horizontal_continuity": true,
+            "independent_metric_rows": true,
+            "literal_context": true,
+            "downstream_row_chain": true
+          },
+          "context_spans": [
+            {
+              "role": "metric_context",
+              "char_start": 1335,
+              "char_end": 1340,
+              "quote": "수익성지표",
+              "bbox": [
+                640.7797241210938,
+                400.92230224609375,
+                675.0198364257812,
+                410.63427734375
+              ],
+              "source": "native",
+              "confidence": 100.0
+            },
+            {
+              "role": "metric_context",
+              "char_start": 1363,
+              "char_end": 1366,
+              "quote": "(연결",
+              "bbox": [
+                640.7797241210938,
+                411.92230224609375,
+                657.0517578125,
+                421.63427734375
+              ],
+              "source": "native",
+              "confidence": 100.0
+            },
+            {
+              "role": "metric_context",
+              "char_start": 1367,
+              "char_end": 1370,
+              "quote": "기준)",
+              "bbox": [
+                658.851806640625,
+                411.92230224609375,
+                675.1238403320312,
+                421.63427734375
+              ],
+              "source": "native",
+              "confidence": 100.0
+            }
+          ],
+          "ownership_id": "e57298f7178d0603a4ea3a10"
+        },
+        "row_group_id": "b200ec8a8f92ce3e9eab8fd3",
+        "row_group_reason": {
+          "vertical_overlap_min": 0.8,
+          "baseline_distance_max_height": 0.2,
+          "ordered_columns_verified": true,
+          "member_boxes": [
+            [
+              683.1497192382812,
+              396.1271667480469,
+              773.858249830163,
+              411.7177734375
+            ],
+            [
+              773.858249830163,
+              396.1271667480469,
+              816.3779907226562,
+              411.7177734375
+            ],
+            [
+              816.3779907226562,
+              396.1271667480469,
+              881.5748450237771,
+              411.7177734375
+            ],
+            [
+              881.5748450237771,
+              396.1271667480469,
+              946.771752398947,
+              411.7177734375
+            ],
+            [
+              946.771752398947,
+              396.1271667480469,
+              1011.9685483186141,
+              411.7177734375
+            ],
+            [
+              1011.9685483186141,
+              396.1271667480469,
+              1116.8509521484375,
+              411.7177734375
+            ]
+          ]
+        },
+        "unit_source": "same_row",
+        "unit_surface": "%",
+        "unit_span": {
+          "char_start": 1349,
+          "char_end": 1350,
+          "quote": "%",
+          "bbox": [
+            792.0020141601562,
+            398.6269836425781,
+            798.2340087890625,
+            408.3389587402344
+          ],
+          "boxes": [
+            [
+              792.0020141601562,
+              398.6269836425781,
+              798.2340087890625,
+              408.3389587402344
+            ]
+          ],
+          "source": "native"
+        },
+        "canonical_unit": "%",
+        "unit_association": {
+          "table_bbox": [
+            592.5204010009766,
+            130.7464662749192,
+            1116.8509521484375,
+            458.4893798828125
+          ],
+          "value_cell": {
+            "row": 17,
+            "column": 5,
+            "bbox": [
+              881.5748450237771,
+              396.1271667480469,
+              946.771752398947,
+              411.7177734375
+            ],
+            "text": "6.9"
+          },
+          "unit_cell": {
+            "row": 17,
+            "column": 3,
+            "bbox": [
+              773.858249830163,
+              396.1271667480469,
+              816.3779907226562,
+              411.7177734375
+            ],
+            "text": "%"
+          }
+        },
+        "value_span": {
+          "char_start": 1355,
+          "char_end": 1358,
+          "quote": "6.9",
+          "bbox": [
+            929.9860229492188,
+            399.0669860839844,
+            940.9539794921875,
+            408.7789611816406
+          ],
+          "boxes": [
+            [
+              929.9860229492188,
+              399.0669860839844,
+              940.9539794921875,
+              408.7789611816406
+            ]
+          ],
+          "source": "native"
+        },
+        "metric_identity": {
+          "raw_label": "영업이익률3)",
+          "canonical_label": "영업이익률",
+          "annotation": "3)",
+          "raw_span": {
+            "char_start": 1341,
+            "char_end": 1348,
+            "quote": "영업이익률3)",
+            "bbox": [
+              688.9717407226562,
+              398.1713562011719,
+              727.0438232421875,
+              408.3382568359375
+            ],
+            "source": "native"
+          },
+          "marker_span": {
+            "char_start": 1346,
+            "char_end": 1348,
+            "quote": "3)",
+            "bbox": [
+              688.9717407226562,
+              398.1713562011719,
+              727.0438232421875,
+              408.3382568359375
+            ],
+            "source": "native"
+          },
+          "separate_marker": false,
+          "row": 17,
+          "unique_cell": true,
+          "proof_level": "verified_annotation",
+          "annotation_type": "footnote",
+          "definition_spans": [
+            {
+              "char_start": 1445,
+              "char_end": 1447,
+              "quote": "3)",
+              "bbox": [
+                592.440673828125,
+                462.9814758300781,
+                595.8115844726562,
+                467.9358215332031
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1448,
+              "char_end": 1453,
+              "quote": "2023년",
+              "bbox": [
+                597.345703125,
+                463.3801574707031,
+                618.28271484375,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1454,
+              "char_end": 1457,
+              "quote": "기말,",
+              "bbox": [
+                619.7877197265625,
+                463.3801574707031,
+                633.563720703125,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1458,
+              "char_end": 1465,
+              "quote": "Hyundai",
+              "bbox": [
+                635.0687866210938,
+                463.3801574707031,
+                660.5558471679688,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1466,
+              "char_end": 1471,
+              "quote": "Motor",
+              "bbox": [
+                662.0608520507812,
+                463.3801574707031,
+                680.6248168945312,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1472,
+              "char_end": 1485,
+              "quote": "Manufacturing",
+              "bbox": [
+                682.1298828125,
+                463.3801574707031,
+                726.9721069335938,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1486,
+              "char_end": 1489,
+              "quote": "Rus",
+              "bbox": [
+                728.4771118164062,
+                463.3801574707031,
+                739.8521728515625,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1490,
+              "char_end": 1493,
+              "quote": "LLC",
+              "bbox": [
+                741.357177734375,
+                463.3801574707031,
+                752.9212036132812,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1494,
+              "char_end": 1501,
+              "quote": "(HMMR)이",
+              "bbox": [
+                754.4262084960938,
+                463.3801574707031,
+                786.1432495117188,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1502,
+              "char_end": 1504,
+              "quote": "처분",
+              "bbox": [
+                787.6482543945312,
+                463.3801574707031,
+                799.6182861328125,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1505,
+              "char_end": 1509,
+              "quote": "자산집단",
+              "bbox": [
+                801.123291015625,
+                463.3801574707031,
+                824.9933471679688,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1510,
+              "char_end": 1511,
+              "quote": "및",
+              "bbox": [
+                826.4983520507812,
+                463.3801574707031,
+                832.5183715820312,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1512,
+              "char_end": 1518,
+              "quote": "중단영업으로",
+              "bbox": [
+                834.0233764648438,
+                463.3801574707031,
+                869.79345703125,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1519,
+              "char_end": 1523,
+              "quote": "분류됨에",
+              "bbox": [
+                871.2984619140625,
+                463.3801574707031,
+                895.1685180664062,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1524,
+              "char_end": 1527,
+              "quote": "따라,",
+              "bbox": [
+                896.6735229492188,
+                463.3801574707031,
+                910.4495239257812,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1528,
+              "char_end": 1530,
+              "quote": "비교",
+              "bbox": [
+                911.95458984375,
+                463.3801574707031,
+                923.9246215820312,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1531,
+              "char_end": 1533,
+              "quote": "공시",
+              "bbox": [
+                925.4296264648438,
+                463.3801574707031,
+                937.399658203125,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1534,
+              "char_end": 1536,
+              "quote": "대상",
+              "bbox": [
+                938.9046630859375,
+                463.3801574707031,
+                950.8746948242188,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1537,
+              "char_end": 1540,
+              "quote": "기간의",
+              "bbox": [
+                952.3796997070312,
+                463.3801574707031,
+                970.2997436523438,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1541,
+              "char_end": 1543,
+              "quote": "금액",
+              "bbox": [
+                971.8047485351562,
+                463.3801574707031,
+                983.7747802734375,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1544,
+              "char_end": 1547,
+              "quote": "재작성",
+              "bbox": [
+                985.27978515625,
+                463.3801574707031,
+                1003.1998291015625,
+                471.8781433105469
+              ],
+              "source": "native"
+            }
+          ],
+          "proof_checks": {
+            "unique_footer_definition": true,
+            "unique_metric_cell": true,
+            "explicit_note": false,
+            "raised_definition_marker": true,
+            "repeated_table_convention": true,
+            "separate_superscript": false
+          },
+          "rejection_reason": "canonical_metric_collision",
+          "scope_metrics": [
+            {
+              "raw_label": "재무성과",
+              "candidate_label": "재무성과",
+              "canonical_label": "재무성과",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1116,
+                "char_end": 1120,
+                "quote": "재무성과",
+                "bbox": [
+                  592.4409790039062,
+                  297.16326904296875,
+                  619.841064453125,
+                  306.875244140625
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "재무상태표",
+              "candidate_label": "재무상태표",
+              "canonical_label": "재무상태표",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 765,
+                "char_end": 770,
+                "quote": "재무상태표",
+                "bbox": [
+                  640.7769775390625,
+                  159.1952362060547,
+                  675.01708984375,
+                  168.90724182128906
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "(연결",
+              "candidate_label": "(연결",
+              "canonical_label": "(연결",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 771,
+                "char_end": 774,
+                "quote": "(연결",
+                "bbox": [
+                  640.7769775390625,
+                  170.1952362060547,
+                  657.0490112304688,
+                  179.90724182128906
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "기준)",
+              "candidate_label": "기준)",
+              "canonical_label": "기준)",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 775,
+                "char_end": 778,
+                "quote": "기준)",
+                "bbox": [
+                  658.8490600585938,
+                  170.1952362060547,
+                  675.12109375,
+                  179.90724182128906
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "자산총계",
+              "candidate_label": "자산총계",
+              "canonical_label": "자산총계",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 731,
+                "char_end": 735,
+                "quote": "자산총계",
+                "bbox": [
+                  688.968994140625,
+                  149.1072235107422,
+                  716.3690795898438,
+                  158.81922912597656
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 736,
+                "char_end": 738,
+                "quote": "십억",
+                "bbox": [
+                  783.9210205078125,
+                  149.1072235107422,
+                  797.6410522460938,
+                  158.81922912597656
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "부채총계",
+              "candidate_label": "부채총계",
+              "canonical_label": "부채총계",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 779,
+                "char_end": 783,
+                "quote": "부채총계",
+                "bbox": [
+                  688.97705078125,
+                  164.77122497558594,
+                  716.3771362304688,
+                  174.4832305908203
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 784,
+                "char_end": 786,
+                "quote": "십억",
+                "bbox": [
+                  783.9290771484375,
+                  164.77122497558594,
+                  797.6491088867188,
+                  174.4832305908203
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "자본총계",
+              "candidate_label": "자본총계",
+              "canonical_label": "자본총계",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 813,
+                "char_end": 817,
+                "quote": "자본총계",
+                "bbox": [
+                  688.985107421875,
+                  180.3632354736328,
+                  716.3851928710938,
+                  190.0752410888672
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 818,
+                "char_end": 820,
+                "quote": "십억",
+                "bbox": [
+                  783.9371337890625,
+                  180.3632354736328,
+                  797.6571655273438,
+                  190.0752410888672
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "재무상태표",
+              "candidate_label": "재무상태표",
+              "canonical_label": "재무상태표",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 876,
+                "char_end": 881,
+                "quote": "재무상태표",
+                "bbox": [
+                  640.80908203125,
+                  206.04322814941406,
+                  675.0491943359375,
+                  215.75523376464844
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "(별도",
+              "candidate_label": "(별도",
+              "canonical_label": "(별도",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 882,
+                "char_end": 885,
+                "quote": "(별도",
+                "bbox": [
+                  640.80908203125,
+                  217.04322814941406,
+                  657.0811157226562,
+                  226.75523376464844
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "기준)",
+              "candidate_label": "기준)",
+              "canonical_label": "기준)",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 886,
+                "char_end": 889,
+                "quote": "기준)",
+                "bbox": [
+                  658.8811645507812,
+                  217.04322814941406,
+                  675.1531982421875,
+                  226.75523376464844
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "자산총계",
+              "candidate_label": "자산총계",
+              "canonical_label": "자산총계",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 845,
+                "char_end": 849,
+                "quote": "자산총계",
+                "bbox": [
+                  689.0010986328125,
+                  195.95521545410156,
+                  716.4011840820312,
+                  205.66722106933594
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 850,
+                "char_end": 852,
+                "quote": "십억",
+                "bbox": [
+                  783.953125,
+                  195.95521545410156,
+                  797.6731567382812,
+                  205.66722106933594
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "부채총계",
+              "candidate_label": "부채총계",
+              "canonical_label": "부채총계",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 890,
+                "char_end": 894,
+                "quote": "부채총계",
+                "bbox": [
+                  689.0091552734375,
+                  211.54722595214844,
+                  716.4092407226562,
+                  221.2592315673828
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 895,
+                "char_end": 897,
+                "quote": "십억",
+                "bbox": [
+                  783.961181640625,
+                  211.54722595214844,
+                  797.6812133789062,
+                  221.2592315673828
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "자본총계",
+              "candidate_label": "자본총계",
+              "canonical_label": "자본총계",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 921,
+                "char_end": 925,
+                "quote": "자본총계",
+                "bbox": [
+                  689.0172119140625,
+                  227.1392364501953,
+                  716.4172973632812,
+                  236.8512420654297
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 926,
+                "char_end": 928,
+                "quote": "십억",
+                "bbox": [
+                  783.96923828125,
+                  227.1392364501953,
+                  797.6892700195312,
+                  236.8512420654297
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "손익계산서",
+              "candidate_label": "손익계산서",
+              "canonical_label": "손익계산서",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1018,
+                "char_end": 1023,
+                "quote": "손익계산서",
+                "bbox": [
+                  640.8412475585938,
+                  268.4112548828125,
+                  675.0813598632812,
+                  278.12322998046875
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "(연결",
+              "candidate_label": "(연결",
+              "canonical_label": "(연결",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1024,
+                "char_end": 1027,
+                "quote": "(연결",
+                "bbox": [
+                  640.8412475585938,
+                  279.4112548828125,
+                  657.11328125,
+                  289.12322998046875
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "기준)",
+              "candidate_label": "기준)",
+              "canonical_label": "기준)",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1028,
+                "char_end": 1031,
+                "quote": "기준)",
+                "bbox": [
+                  658.913330078125,
+                  279.4112548828125,
+                  675.1853637695312,
+                  289.12322998046875
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "매출액3)",
+              "candidate_label": "매출액",
+              "canonical_label": "매출액",
+              "proof_level": "verified_annotation",
+              "raw_span": {
+                "char_start": 952,
+                "char_end": 957,
+                "quote": "매출액3)",
+                "bbox": [
+                  689.0332641601562,
+                  242.26577758789062,
+                  713.3642578125,
+                  252.44325256347656
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 958,
+                "char_end": 960,
+                "quote": "십억",
+                "bbox": [
+                  783.9182739257812,
+                  242.7213592529297,
+                  797.6383056640625,
+                  252.43336486816406
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "영업이익3)",
+              "candidate_label": "영업이익",
+              "canonical_label": "영업이익",
+              "proof_level": "verified_annotation",
+              "raw_span": {
+                "char_start": 987,
+                "char_end": 993,
+                "quote": "영업이익3)",
+                "bbox": [
+                  688.9742431640625,
+                  257.8563537597656,
+                  720.2041625976562,
+                  268.0253601074219
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 994,
+                "char_end": 996,
+                "quote": "십억",
+                "bbox": [
+                  783.9182739257812,
+                  258.3118896484375,
+                  797.6383056640625,
+                  268.02386474609375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "판매비와",
+              "candidate_label": "판매비와",
+              "canonical_label": "판매비와",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1032,
+                "char_end": 1036,
+                "quote": "판매비와",
+                "bbox": [
+                  688.9742431640625,
+                  273.9039001464844,
+                  716.3743286132812,
+                  283.6158752441406
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "관리비3)",
+              "candidate_label": "관리비",
+              "canonical_label": "관리비",
+              "proof_level": "verified_annotation",
+              "raw_span": {
+                "char_start": 1037,
+                "char_end": 1042,
+                "quote": "관리비3)",
+                "bbox": [
+                  718.1743774414062,
+                  273.4468688964844,
+                  742.5636596679688,
+                  283.6158752441406
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1043,
+                "char_end": 1045,
+                "quote": "십억",
+                "bbox": [
+                  783.9182739257812,
+                  273.9024963378906,
+                  797.6383056640625,
+                  283.6144714355469
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "당기순이익",
+              "candidate_label": "당기순이익",
+              "canonical_label": "당기순이익",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1069,
+                "char_end": 1074,
+                "quote": "당기순이익",
+                "bbox": [
+                  688.974365234375,
+                  289.4945068359375,
+                  723.2144775390625,
+                  299.20648193359375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1075,
+                "char_end": 1077,
+                "quote": "십억",
+                "bbox": [
+                  783.9263916015625,
+                  289.4945068359375,
+                  797.6464233398438,
+                  299.20648193359375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "EBITDA3)",
+              "candidate_label": "EBITDA",
+              "canonical_label": "EBITDA",
+              "proof_level": "verified_annotation",
+              "raw_span": {
+                "char_start": 1121,
+                "char_end": 1129,
+                "quote": "EBITDA3)",
+                "bbox": [
+                  688.9688720703125,
+                  304.6280517578125,
+                  719.1724243164062,
+                  314.7955627441406
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1130,
+                "char_end": 1132,
+                "quote": "십억",
+                "bbox": [
+                  783.9182739257812,
+                  305.0835876464844,
+                  797.6383056640625,
+                  314.7955627441406
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "손익계산서",
+              "candidate_label": "손익계산서",
+              "canonical_label": "손익계산서",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1222,
+                "char_end": 1227,
+                "quote": "손익계산서",
+                "bbox": [
+                  640.77978515625,
+                  346.35528564453125,
+                  675.0198974609375,
+                  356.0672607421875
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "(별도",
+              "candidate_label": "(별도",
+              "canonical_label": "(별도",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1228,
+                "char_end": 1231,
+                "quote": "(별도",
+                "bbox": [
+                  640.77978515625,
+                  357.35528564453125,
+                  657.0518188476562,
+                  367.0672607421875
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "기준)",
+              "candidate_label": "기준)",
+              "canonical_label": "기준)",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1232,
+                "char_end": 1235,
+                "quote": "기준)",
+                "bbox": [
+                  658.8518676757812,
+                  357.35528564453125,
+                  675.1239013671875,
+                  367.0672607421875
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "매출액",
+              "candidate_label": "매출액",
+              "canonical_label": "매출액",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1166,
+                "char_end": 1169,
+                "quote": "매출액",
+                "bbox": [
+                  688.9718017578125,
+                  320.67529296875,
+                  709.5318603515625,
+                  330.38726806640625
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1170,
+                "char_end": 1172,
+                "quote": "십억",
+                "bbox": [
+                  783.923828125,
+                  320.67529296875,
+                  797.6438598632812,
+                  330.38726806640625
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "영업이익",
+              "candidate_label": "영업이익",
+              "canonical_label": "영업이익",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1196,
+                "char_end": 1200,
+                "quote": "영업이익",
+                "bbox": [
+                  688.9798583984375,
+                  336.2673034667969,
+                  716.3799438476562,
+                  345.9792785644531
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1201,
+                "char_end": 1203,
+                "quote": "십억",
+                "bbox": [
+                  783.931884765625,
+                  336.2673034667969,
+                  797.6519165039062,
+                  345.9792785644531
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "판매비와",
+              "candidate_label": "판매비와",
+              "canonical_label": "판매비와",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1236,
+                "char_end": 1240,
+                "quote": "판매비와",
+                "bbox": [
+                  688.9879150390625,
+                  351.85931396484375,
+                  716.3880004882812,
+                  361.5712890625
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "관리비",
+              "candidate_label": "관리비",
+              "canonical_label": "관리비",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1241,
+                "char_end": 1244,
+                "quote": "관리비",
+                "bbox": [
+                  718.1880493164062,
+                  351.85931396484375,
+                  738.7481079101562,
+                  361.5712890625
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1245,
+                "char_end": 1247,
+                "quote": "십억",
+                "bbox": [
+                  783.93994140625,
+                  351.85931396484375,
+                  797.6599731445312,
+                  361.5712890625
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "당기순이익",
+              "candidate_label": "당기순이익",
+              "canonical_label": "당기순이익",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1268,
+                "char_end": 1273,
+                "quote": "당기순이익",
+                "bbox": [
+                  688.9959716796875,
+                  367.4513244628906,
+                  723.236083984375,
+                  377.1632995605469
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1274,
+                "char_end": 1276,
+                "quote": "십억",
+                "bbox": [
+                  783.947998046875,
+                  367.4513244628906,
+                  797.6680297851562,
+                  377.1632995605469
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "EBITDA",
+              "candidate_label": "EBITDA",
+              "canonical_label": "EBITDA",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1295,
+                "char_end": 1301,
+                "quote": "EBITDA",
+                "bbox": [
+                  689.0040283203125,
+                  383.0433349609375,
+                  715.3720092773438,
+                  392.75531005859375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1302,
+                "char_end": 1304,
+                "quote": "십억",
+                "bbox": [
+                  783.9560546875,
+                  383.0433349609375,
+                  797.6760864257812,
+                  392.75531005859375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "수익성지표",
+              "candidate_label": "수익성지표",
+              "canonical_label": "수익성지표",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1335,
+                "char_end": 1340,
+                "quote": "수익성지표",
+                "bbox": [
+                  640.7797241210938,
+                  400.92230224609375,
+                  675.0198364257812,
+                  410.63427734375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "(연결",
+              "candidate_label": "(연결",
+              "canonical_label": "(연결",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1363,
+                "char_end": 1366,
+                "quote": "(연결",
+                "bbox": [
+                  640.7797241210938,
+                  411.92230224609375,
+                  657.0517578125,
+                  421.63427734375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "기준)",
+              "candidate_label": "기준)",
+              "canonical_label": "기준)",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1367,
+                "char_end": 1370,
+                "quote": "기준)",
+                "bbox": [
+                  658.851806640625,
+                  411.92230224609375,
+                  675.1238403320312,
+                  421.63427734375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "영업이익률3)",
+              "candidate_label": "영업이익률",
+              "canonical_label": "영업이익률",
+              "proof_level": "verified_annotation",
+              "raw_span": {
+                "char_start": 1341,
+                "char_end": 1348,
+                "quote": "영업이익률3)",
+                "bbox": [
+                  688.9717407226562,
+                  398.1713562011719,
+                  727.0438232421875,
+                  408.3382568359375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "순이익률3)",
+              "candidate_label": "순이익률",
+              "canonical_label": "순이익률",
+              "proof_level": "verified_annotation",
+              "raw_span": {
+                "char_start": 1371,
+                "char_end": 1377,
+                "quote": "순이익률3)",
+                "bbox": [
+                  688.9700317382812,
+                  413.761962890625,
+                  720.203857421875,
+                  423.93096923828125
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "수익성지표",
+              "candidate_label": "수익성지표",
+              "canonical_label": "수익성지표",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1392,
+                "char_end": 1397,
+                "quote": "수익성지표",
+                "bbox": [
+                  640.785888671875,
+                  432.04949951171875,
+                  675.0260009765625,
+                  441.761474609375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "(별도",
+              "candidate_label": "(별도",
+              "canonical_label": "(별도",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1418,
+                "char_end": 1421,
+                "quote": "(별도",
+                "bbox": [
+                  640.785888671875,
+                  443.04949951171875,
+                  657.0579223632812,
+                  452.761474609375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "기준)",
+              "candidate_label": "기준)",
+              "canonical_label": "기준)",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1422,
+                "char_end": 1425,
+                "quote": "기준)",
+                "bbox": [
+                  658.8579711914062,
+                  443.04949951171875,
+                  675.1300048828125,
+                  452.761474609375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "영업이익률",
+              "candidate_label": "영업이익률",
+              "canonical_label": "영업이익률",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1398,
+                "char_end": 1403,
+                "quote": "영업이익률",
+                "bbox": [
+                  688.9779052734375,
+                  429.8014831542969,
+                  723.218017578125,
+                  439.5134582519531
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "순이익률",
+              "candidate_label": "순이익률",
+              "canonical_label": "순이익률",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1426,
+                "char_end": 1430,
+                "quote": "순이익률",
+                "bbox": [
+                  688.9779052734375,
+                  445.3454895019531,
+                  716.3779907226562,
+                  455.0574645996094
+                ],
+                "source": "native"
+              }
+            }
+          ],
+          "collision_spans": [
+            {
+              "char_start": 1341,
+              "char_end": 1348,
+              "quote": "영업이익률3)",
+              "bbox": [
+                688.9717407226562,
+                398.1713562011719,
+                727.0438232421875,
+                408.3382568359375
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1398,
+              "char_end": 1403,
+              "quote": "영업이익률",
+              "bbox": [
+                688.9779052734375,
+                429.8014831542969,
+                723.218017578125,
+                439.5134582519531
+              ],
+              "source": "native"
+            }
+          ]
+        }
+      },
+      {
+        "kind": "table",
+        "row_label": "영업이익률3)",
+        "metric": "영업이익률3)",
+        "row_subject": null,
+        "column_name": "2023",
+        "period": "2023",
+        "period_status": "explicit",
+        "status": "unspecified",
+        "unit": "%",
+        "value": "9.3",
+        "comparison_basis": null,
+        "comparison_cell": null,
+        "page_number": 97,
+        "table_id": "2291360b61bd9ac726bf62ff",
+        "row_id": "d3153329701704ac7aeaa87d",
+        "column_id": "d89eb2532329129ae79cf1d1",
+        "cell_fact_id": "75f73004255faf87a002facb",
+        "table_title": null,
+        "char_start": 1341,
+        "char_end": 1348,
+        "quote": "영업이익률3)",
+        "source_spans": [
+          {
+            "role": "row",
+            "char_start": 1341,
+            "char_end": 1348,
+            "quote": "영업이익률3)",
+            "bbox": [
+              688.9717407226562,
+              398.1713562011719,
+              727.0438232421875,
+              408.3382568359375
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "metric",
+            "char_start": 1341,
+            "char_end": 1348,
+            "quote": "영업이익률3)",
+            "bbox": [
+              688.9717407226562,
+              398.1713562011719,
+              727.0438232421875,
+              408.3382568359375
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "columns",
+            "char_start": 723,
+            "char_end": 727,
+            "quote": "2023",
+            "bbox": [
+              971.7757568359375,
+              134.88787841796875,
+              986.9727783203125,
+              143.48388671875
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "period",
+            "char_start": 723,
+            "char_end": 727,
+            "quote": "2023",
+            "bbox": [
+              971.7757568359375,
+              134.88787841796875,
+              986.9727783203125,
+              143.48388671875
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "unit",
+            "char_start": 1349,
+            "char_end": 1350,
+            "quote": "%",
+            "bbox": [
+              792.0020141601562,
+              398.6269836425781,
+              798.2340087890625,
+              408.3389587402344
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "value",
+            "char_start": 1359,
+            "char_end": 1362,
+            "quote": "9.3",
+            "bbox": [
+              995.18603515625,
+              399.0669860839844,
+              1006.1539916992188,
+              408.7789611816406
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "metric_context",
+            "char_start": 1335,
+            "char_end": 1340,
+            "quote": "수익성지표",
+            "bbox": [
+              640.7797241210938,
+              400.92230224609375,
+              675.0198364257812,
+              410.63427734375
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "metric_context",
+            "char_start": 1363,
+            "char_end": 1366,
+            "quote": "(연결",
+            "bbox": [
+              640.7797241210938,
+              411.92230224609375,
+              657.0517578125,
+              421.63427734375
+            ],
+            "source": "native",
+            "confidence": 100.0
+          },
+          {
+            "role": "metric_context",
+            "char_start": 1367,
+            "char_end": 1370,
+            "quote": "기준)",
+            "bbox": [
+              658.851806640625,
+              411.92230224609375,
+              675.1238403320312,
+              421.63427734375
+            ],
+            "source": "native",
+            "confidence": 100.0
+          }
+        ],
+        "bbox": [
+          995.18603515625,
+          399.0669860839844,
+          1006.1539916992188,
+          408.7789611816406
+        ],
+        "header_bbox": [
+          971.7757568359375,
+          134.88787841796875,
+          986.9727783203125,
+          143.48388671875
+        ],
+        "context_bbox": [
+          592.5204010009766,
+          130.7464662749192,
+          1116.8509521484375,
+          458.4893798828125
+        ],
+        "confidence": 100.0,
+        "source": "native_table",
+        "processing_version": "fact-fusion-paddle-v3",
+        "verification": "structured_primitive_cell",
+        "cell_geometry": {
+          "mode": "cell",
+          "source": "native",
+          "table_bbox": [
+            592.5204010009766,
+            130.7464662749192,
+            1116.8509521484375,
+            458.4893798828125
+          ],
+          "row": 17,
+          "column": 6,
+          "value_cell": [
+            946.771752398947,
+            396.1271667480469,
+            1011.9685483186141,
+            411.7177734375
+          ],
+          "header_cell": [
+            946.771752398947,
+            130.7464662749192,
+            1011.9685483186141,
+            146.67794799804688
+          ],
+          "label_cell": [
+            683.1497192382812,
+            396.1271667480469,
+            773.858249830163,
+            411.7177734375
+          ],
+          "unit_scope": "row"
+        },
+        "column_association_reason": {
+          "header_cell": [
+            946.771752398947,
+            130.7464662749192,
+            1011.9685483186141,
+            146.67794799804688
+          ],
+          "period_cell": [
+            946.771752398947,
+            130.7464662749192,
+            1011.9685483186141,
+            146.67794799804688
+          ],
+          "value_cell": [
+            946.771752398947,
+            396.1271667480469,
+            1011.9685483186141,
+            411.7177734375
+          ],
+          "metric_cell": [
+            683.1497192382812,
+            396.1271667480469,
+            773.858249830163,
+            411.7177734375
+          ],
+          "literal_span_membership": "unique_overlap_over_0.8",
+          "column": 6,
+          "x_overlap_min": 0.9,
+          "boundary_distance_max_width": 0.1
+        },
+        "metric_span": {
+          "role": "metric",
+          "char_start": 1341,
+          "char_end": 1348,
+          "quote": "영업이익률3)",
+          "bbox": [
+            688.9717407226562,
+            398.1713562011719,
+            727.0438232421875,
+            408.3382568359375
+          ],
+          "source": "native",
+          "confidence": 100.0
+        },
+        "period_span": {
+          "role": "period",
+          "char_start": 723,
+          "char_end": 727,
+          "quote": "2023",
+          "bbox": [
+            971.7757568359375,
+            134.88787841796875,
+            986.9727783203125,
+            143.48388671875
+          ],
+          "source": "native",
+          "confidence": 100.0
+        },
+        "metric_context_ownership": {
+          "approved": true,
+          "coverage_complete": false,
+          "stage": "metric_association",
+          "rejection_reason": null,
+          "context_bbox": [
+            634.960693359375,
+            396.1271667480469,
+            683.1497192382812,
+            427.30828857421875
+          ],
+          "context_membership": {
+            "approved": true,
+            "status": "shared_metric_context_verified",
+            "rejection_reason": null,
+            "context_id": "a5d310833ef4cb375ed99772",
+            "context_bbox": [
+              634.960693359375,
+              396.1271667480469,
+              683.1497192382812,
+              427.30828857421875
+            ],
+            "members": [
+              {
+                "metric_span": {
+                  "role": "metric",
+                  "char_start": 1341,
+                  "char_end": 1348,
+                  "quote": "영업이익률3)",
+                  "bbox": [
+                    688.9717407226562,
+                    398.1713562011719,
+                    727.0438232421875,
+                    408.3382568359375
+                  ],
+                  "source": "native",
+                  "confidence": 100.0
+                },
+                "row_bbox": [
+                  683.1497192382812,
+                  396.1271667480469,
+                  773.858249830163,
+                  411.7177734375
+                ],
+                "metric_ownership_id": "e57298f7178d0603a4ea3a10"
+              },
+              {
+                "metric_span": {
+                  "role": "metric",
+                  "char_start": 1371,
+                  "char_end": 1377,
+                  "quote": "순이익률3)",
+                  "bbox": [
+                    688.9700317382812,
+                    413.761962890625,
+                    720.203857421875,
+                    423.93096923828125
+                  ],
+                  "source": "native",
+                  "confidence": 100.0
+                },
+                "row_bbox": [
+                  683.1497192382812,
+                  411.7177734375,
+                  773.858249830163,
+                  427.30828857421875
+                ],
+                "metric_ownership_id": "8182d26654df0a56cd58d576"
+              }
+            ],
+            "context_spans": [
+              {
+                "role": "metric_context",
+                "char_start": 1335,
+                "char_end": 1340,
+                "quote": "수익성지표",
+                "bbox": [
+                  640.7797241210938,
+                  400.92230224609375,
+                  675.0198364257812,
+                  410.63427734375
+                ],
+                "source": "native",
+                "confidence": 100.0
+              },
+              {
+                "role": "metric_context",
+                "char_start": 1363,
+                "char_end": 1366,
+                "quote": "(연결",
+                "bbox": [
+                  640.7797241210938,
+                  411.92230224609375,
+                  657.0517578125,
+                  421.63427734375
+                ],
+                "source": "native",
+                "confidence": 100.0
+              },
+              {
+                "role": "metric_context",
+                "char_start": 1367,
+                "char_end": 1370,
+                "quote": "기준)",
+                "bbox": [
+                  658.851806640625,
+                  411.92230224609375,
+                  675.1238403320312,
+                  421.63427734375
+                ],
+                "source": "native",
+                "confidence": 100.0
+              }
+            ],
+            "checks": {
+              "source_span_ownership": true,
+              "vertical_containment": true,
+              "horizontal_continuity": true,
+              "independent_metric_rows": true,
+              "literal_context": true
+            },
+            "metric_ownership_id": "e57298f7178d0603a4ea3a10"
+          },
+          "candidate_metrics": [
+            {
+              "role": "metric",
+              "char_start": 1341,
+              "char_end": 1348,
+              "quote": "영업이익률3)",
+              "bbox": [
+                688.9717407226562,
+                398.1713562011719,
+                727.0438232421875,
+                408.3382568359375
+              ],
+              "source": "native",
+              "confidence": 100.0
+            },
+            {
+              "role": "metric",
+              "char_start": 1371,
+              "char_end": 1377,
+              "quote": "순이익률3)",
+              "bbox": [
+                688.9700317382812,
+                413.761962890625,
+                720.203857421875,
+                423.93096923828125
+              ],
+              "source": "native",
+              "confidence": 100.0
+            }
+          ],
+          "mode": "cell_geometry",
+          "checks": {
+            "source_span_ownership": true,
+            "vertical_containment": true,
+            "horizontal_continuity": true,
+            "independent_metric_rows": true,
+            "literal_context": true,
+            "downstream_row_chain": true
+          },
+          "context_spans": [
+            {
+              "role": "metric_context",
+              "char_start": 1335,
+              "char_end": 1340,
+              "quote": "수익성지표",
+              "bbox": [
+                640.7797241210938,
+                400.92230224609375,
+                675.0198364257812,
+                410.63427734375
+              ],
+              "source": "native",
+              "confidence": 100.0
+            },
+            {
+              "role": "metric_context",
+              "char_start": 1363,
+              "char_end": 1366,
+              "quote": "(연결",
+              "bbox": [
+                640.7797241210938,
+                411.92230224609375,
+                657.0517578125,
+                421.63427734375
+              ],
+              "source": "native",
+              "confidence": 100.0
+            },
+            {
+              "role": "metric_context",
+              "char_start": 1367,
+              "char_end": 1370,
+              "quote": "기준)",
+              "bbox": [
+                658.851806640625,
+                411.92230224609375,
+                675.1238403320312,
+                421.63427734375
+              ],
+              "source": "native",
+              "confidence": 100.0
+            }
+          ],
+          "ownership_id": "e57298f7178d0603a4ea3a10"
+        },
+        "row_group_id": "b200ec8a8f92ce3e9eab8fd3",
+        "row_group_reason": {
+          "vertical_overlap_min": 0.8,
+          "baseline_distance_max_height": 0.2,
+          "ordered_columns_verified": true,
+          "member_boxes": [
+            [
+              683.1497192382812,
+              396.1271667480469,
+              773.858249830163,
+              411.7177734375
+            ],
+            [
+              773.858249830163,
+              396.1271667480469,
+              816.3779907226562,
+              411.7177734375
+            ],
+            [
+              816.3779907226562,
+              396.1271667480469,
+              881.5748450237771,
+              411.7177734375
+            ],
+            [
+              881.5748450237771,
+              396.1271667480469,
+              946.771752398947,
+              411.7177734375
+            ],
+            [
+              946.771752398947,
+              396.1271667480469,
+              1011.9685483186141,
+              411.7177734375
+            ],
+            [
+              1011.9685483186141,
+              396.1271667480469,
+              1116.8509521484375,
+              411.7177734375
+            ]
+          ]
+        },
+        "unit_source": "same_row",
+        "unit_surface": "%",
+        "unit_span": {
+          "char_start": 1349,
+          "char_end": 1350,
+          "quote": "%",
+          "bbox": [
+            792.0020141601562,
+            398.6269836425781,
+            798.2340087890625,
+            408.3389587402344
+          ],
+          "boxes": [
+            [
+              792.0020141601562,
+              398.6269836425781,
+              798.2340087890625,
+              408.3389587402344
+            ]
+          ],
+          "source": "native"
+        },
+        "canonical_unit": "%",
+        "unit_association": {
+          "table_bbox": [
+            592.5204010009766,
+            130.7464662749192,
+            1116.8509521484375,
+            458.4893798828125
+          ],
+          "value_cell": {
+            "row": 17,
+            "column": 6,
+            "bbox": [
+              946.771752398947,
+              396.1271667480469,
+              1011.9685483186141,
+              411.7177734375
+            ],
+            "text": "9.3"
+          },
+          "unit_cell": {
+            "row": 17,
+            "column": 3,
+            "bbox": [
+              773.858249830163,
+              396.1271667480469,
+              816.3779907226562,
+              411.7177734375
+            ],
+            "text": "%"
+          }
+        },
+        "value_span": {
+          "char_start": 1359,
+          "char_end": 1362,
+          "quote": "9.3",
+          "bbox": [
+            995.18603515625,
+            399.0669860839844,
+            1006.1539916992188,
+            408.7789611816406
+          ],
+          "boxes": [
+            [
+              995.18603515625,
+              399.0669860839844,
+              1006.1539916992188,
+              408.7789611816406
+            ]
+          ],
+          "source": "native"
+        },
+        "metric_identity": {
+          "raw_label": "영업이익률3)",
+          "canonical_label": "영업이익률",
+          "annotation": "3)",
+          "raw_span": {
+            "char_start": 1341,
+            "char_end": 1348,
+            "quote": "영업이익률3)",
+            "bbox": [
+              688.9717407226562,
+              398.1713562011719,
+              727.0438232421875,
+              408.3382568359375
+            ],
+            "source": "native"
+          },
+          "marker_span": {
+            "char_start": 1346,
+            "char_end": 1348,
+            "quote": "3)",
+            "bbox": [
+              688.9717407226562,
+              398.1713562011719,
+              727.0438232421875,
+              408.3382568359375
+            ],
+            "source": "native"
+          },
+          "separate_marker": false,
+          "row": 17,
+          "unique_cell": true,
+          "proof_level": "verified_annotation",
+          "annotation_type": "footnote",
+          "definition_spans": [
+            {
+              "char_start": 1445,
+              "char_end": 1447,
+              "quote": "3)",
+              "bbox": [
+                592.440673828125,
+                462.9814758300781,
+                595.8115844726562,
+                467.9358215332031
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1448,
+              "char_end": 1453,
+              "quote": "2023년",
+              "bbox": [
+                597.345703125,
+                463.3801574707031,
+                618.28271484375,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1454,
+              "char_end": 1457,
+              "quote": "기말,",
+              "bbox": [
+                619.7877197265625,
+                463.3801574707031,
+                633.563720703125,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1458,
+              "char_end": 1465,
+              "quote": "Hyundai",
+              "bbox": [
+                635.0687866210938,
+                463.3801574707031,
+                660.5558471679688,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1466,
+              "char_end": 1471,
+              "quote": "Motor",
+              "bbox": [
+                662.0608520507812,
+                463.3801574707031,
+                680.6248168945312,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1472,
+              "char_end": 1485,
+              "quote": "Manufacturing",
+              "bbox": [
+                682.1298828125,
+                463.3801574707031,
+                726.9721069335938,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1486,
+              "char_end": 1489,
+              "quote": "Rus",
+              "bbox": [
+                728.4771118164062,
+                463.3801574707031,
+                739.8521728515625,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1490,
+              "char_end": 1493,
+              "quote": "LLC",
+              "bbox": [
+                741.357177734375,
+                463.3801574707031,
+                752.9212036132812,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1494,
+              "char_end": 1501,
+              "quote": "(HMMR)이",
+              "bbox": [
+                754.4262084960938,
+                463.3801574707031,
+                786.1432495117188,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1502,
+              "char_end": 1504,
+              "quote": "처분",
+              "bbox": [
+                787.6482543945312,
+                463.3801574707031,
+                799.6182861328125,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1505,
+              "char_end": 1509,
+              "quote": "자산집단",
+              "bbox": [
+                801.123291015625,
+                463.3801574707031,
+                824.9933471679688,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1510,
+              "char_end": 1511,
+              "quote": "및",
+              "bbox": [
+                826.4983520507812,
+                463.3801574707031,
+                832.5183715820312,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1512,
+              "char_end": 1518,
+              "quote": "중단영업으로",
+              "bbox": [
+                834.0233764648438,
+                463.3801574707031,
+                869.79345703125,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1519,
+              "char_end": 1523,
+              "quote": "분류됨에",
+              "bbox": [
+                871.2984619140625,
+                463.3801574707031,
+                895.1685180664062,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1524,
+              "char_end": 1527,
+              "quote": "따라,",
+              "bbox": [
+                896.6735229492188,
+                463.3801574707031,
+                910.4495239257812,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1528,
+              "char_end": 1530,
+              "quote": "비교",
+              "bbox": [
+                911.95458984375,
+                463.3801574707031,
+                923.9246215820312,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1531,
+              "char_end": 1533,
+              "quote": "공시",
+              "bbox": [
+                925.4296264648438,
+                463.3801574707031,
+                937.399658203125,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1534,
+              "char_end": 1536,
+              "quote": "대상",
+              "bbox": [
+                938.9046630859375,
+                463.3801574707031,
+                950.8746948242188,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1537,
+              "char_end": 1540,
+              "quote": "기간의",
+              "bbox": [
+                952.3796997070312,
+                463.3801574707031,
+                970.2997436523438,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1541,
+              "char_end": 1543,
+              "quote": "금액",
+              "bbox": [
+                971.8047485351562,
+                463.3801574707031,
+                983.7747802734375,
+                471.8781433105469
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1544,
+              "char_end": 1547,
+              "quote": "재작성",
+              "bbox": [
+                985.27978515625,
+                463.3801574707031,
+                1003.1998291015625,
+                471.8781433105469
+              ],
+              "source": "native"
+            }
+          ],
+          "proof_checks": {
+            "unique_footer_definition": true,
+            "unique_metric_cell": true,
+            "explicit_note": false,
+            "raised_definition_marker": true,
+            "repeated_table_convention": true,
+            "separate_superscript": false
+          },
+          "rejection_reason": "canonical_metric_collision",
+          "scope_metrics": [
+            {
+              "raw_label": "재무성과",
+              "candidate_label": "재무성과",
+              "canonical_label": "재무성과",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1116,
+                "char_end": 1120,
+                "quote": "재무성과",
+                "bbox": [
+                  592.4409790039062,
+                  297.16326904296875,
+                  619.841064453125,
+                  306.875244140625
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "재무상태표",
+              "candidate_label": "재무상태표",
+              "canonical_label": "재무상태표",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 765,
+                "char_end": 770,
+                "quote": "재무상태표",
+                "bbox": [
+                  640.7769775390625,
+                  159.1952362060547,
+                  675.01708984375,
+                  168.90724182128906
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "(연결",
+              "candidate_label": "(연결",
+              "canonical_label": "(연결",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 771,
+                "char_end": 774,
+                "quote": "(연결",
+                "bbox": [
+                  640.7769775390625,
+                  170.1952362060547,
+                  657.0490112304688,
+                  179.90724182128906
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "기준)",
+              "candidate_label": "기준)",
+              "canonical_label": "기준)",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 775,
+                "char_end": 778,
+                "quote": "기준)",
+                "bbox": [
+                  658.8490600585938,
+                  170.1952362060547,
+                  675.12109375,
+                  179.90724182128906
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "자산총계",
+              "candidate_label": "자산총계",
+              "canonical_label": "자산총계",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 731,
+                "char_end": 735,
+                "quote": "자산총계",
+                "bbox": [
+                  688.968994140625,
+                  149.1072235107422,
+                  716.3690795898438,
+                  158.81922912597656
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 736,
+                "char_end": 738,
+                "quote": "십억",
+                "bbox": [
+                  783.9210205078125,
+                  149.1072235107422,
+                  797.6410522460938,
+                  158.81922912597656
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "부채총계",
+              "candidate_label": "부채총계",
+              "canonical_label": "부채총계",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 779,
+                "char_end": 783,
+                "quote": "부채총계",
+                "bbox": [
+                  688.97705078125,
+                  164.77122497558594,
+                  716.3771362304688,
+                  174.4832305908203
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 784,
+                "char_end": 786,
+                "quote": "십억",
+                "bbox": [
+                  783.9290771484375,
+                  164.77122497558594,
+                  797.6491088867188,
+                  174.4832305908203
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "자본총계",
+              "candidate_label": "자본총계",
+              "canonical_label": "자본총계",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 813,
+                "char_end": 817,
+                "quote": "자본총계",
+                "bbox": [
+                  688.985107421875,
+                  180.3632354736328,
+                  716.3851928710938,
+                  190.0752410888672
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 818,
+                "char_end": 820,
+                "quote": "십억",
+                "bbox": [
+                  783.9371337890625,
+                  180.3632354736328,
+                  797.6571655273438,
+                  190.0752410888672
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "재무상태표",
+              "candidate_label": "재무상태표",
+              "canonical_label": "재무상태표",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 876,
+                "char_end": 881,
+                "quote": "재무상태표",
+                "bbox": [
+                  640.80908203125,
+                  206.04322814941406,
+                  675.0491943359375,
+                  215.75523376464844
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "(별도",
+              "candidate_label": "(별도",
+              "canonical_label": "(별도",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 882,
+                "char_end": 885,
+                "quote": "(별도",
+                "bbox": [
+                  640.80908203125,
+                  217.04322814941406,
+                  657.0811157226562,
+                  226.75523376464844
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "기준)",
+              "candidate_label": "기준)",
+              "canonical_label": "기준)",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 886,
+                "char_end": 889,
+                "quote": "기준)",
+                "bbox": [
+                  658.8811645507812,
+                  217.04322814941406,
+                  675.1531982421875,
+                  226.75523376464844
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "자산총계",
+              "candidate_label": "자산총계",
+              "canonical_label": "자산총계",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 845,
+                "char_end": 849,
+                "quote": "자산총계",
+                "bbox": [
+                  689.0010986328125,
+                  195.95521545410156,
+                  716.4011840820312,
+                  205.66722106933594
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 850,
+                "char_end": 852,
+                "quote": "십억",
+                "bbox": [
+                  783.953125,
+                  195.95521545410156,
+                  797.6731567382812,
+                  205.66722106933594
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "부채총계",
+              "candidate_label": "부채총계",
+              "canonical_label": "부채총계",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 890,
+                "char_end": 894,
+                "quote": "부채총계",
+                "bbox": [
+                  689.0091552734375,
+                  211.54722595214844,
+                  716.4092407226562,
+                  221.2592315673828
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 895,
+                "char_end": 897,
+                "quote": "십억",
+                "bbox": [
+                  783.961181640625,
+                  211.54722595214844,
+                  797.6812133789062,
+                  221.2592315673828
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "자본총계",
+              "candidate_label": "자본총계",
+              "canonical_label": "자본총계",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 921,
+                "char_end": 925,
+                "quote": "자본총계",
+                "bbox": [
+                  689.0172119140625,
+                  227.1392364501953,
+                  716.4172973632812,
+                  236.8512420654297
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 926,
+                "char_end": 928,
+                "quote": "십억",
+                "bbox": [
+                  783.96923828125,
+                  227.1392364501953,
+                  797.6892700195312,
+                  236.8512420654297
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "손익계산서",
+              "candidate_label": "손익계산서",
+              "canonical_label": "손익계산서",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1018,
+                "char_end": 1023,
+                "quote": "손익계산서",
+                "bbox": [
+                  640.8412475585938,
+                  268.4112548828125,
+                  675.0813598632812,
+                  278.12322998046875
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "(연결",
+              "candidate_label": "(연결",
+              "canonical_label": "(연결",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1024,
+                "char_end": 1027,
+                "quote": "(연결",
+                "bbox": [
+                  640.8412475585938,
+                  279.4112548828125,
+                  657.11328125,
+                  289.12322998046875
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "기준)",
+              "candidate_label": "기준)",
+              "canonical_label": "기준)",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1028,
+                "char_end": 1031,
+                "quote": "기준)",
+                "bbox": [
+                  658.913330078125,
+                  279.4112548828125,
+                  675.1853637695312,
+                  289.12322998046875
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "매출액3)",
+              "candidate_label": "매출액",
+              "canonical_label": "매출액",
+              "proof_level": "verified_annotation",
+              "raw_span": {
+                "char_start": 952,
+                "char_end": 957,
+                "quote": "매출액3)",
+                "bbox": [
+                  689.0332641601562,
+                  242.26577758789062,
+                  713.3642578125,
+                  252.44325256347656
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 958,
+                "char_end": 960,
+                "quote": "십억",
+                "bbox": [
+                  783.9182739257812,
+                  242.7213592529297,
+                  797.6383056640625,
+                  252.43336486816406
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "영업이익3)",
+              "candidate_label": "영업이익",
+              "canonical_label": "영업이익",
+              "proof_level": "verified_annotation",
+              "raw_span": {
+                "char_start": 987,
+                "char_end": 993,
+                "quote": "영업이익3)",
+                "bbox": [
+                  688.9742431640625,
+                  257.8563537597656,
+                  720.2041625976562,
+                  268.0253601074219
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 994,
+                "char_end": 996,
+                "quote": "십억",
+                "bbox": [
+                  783.9182739257812,
+                  258.3118896484375,
+                  797.6383056640625,
+                  268.02386474609375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "판매비와",
+              "candidate_label": "판매비와",
+              "canonical_label": "판매비와",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1032,
+                "char_end": 1036,
+                "quote": "판매비와",
+                "bbox": [
+                  688.9742431640625,
+                  273.9039001464844,
+                  716.3743286132812,
+                  283.6158752441406
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "관리비3)",
+              "candidate_label": "관리비",
+              "canonical_label": "관리비",
+              "proof_level": "verified_annotation",
+              "raw_span": {
+                "char_start": 1037,
+                "char_end": 1042,
+                "quote": "관리비3)",
+                "bbox": [
+                  718.1743774414062,
+                  273.4468688964844,
+                  742.5636596679688,
+                  283.6158752441406
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1043,
+                "char_end": 1045,
+                "quote": "십억",
+                "bbox": [
+                  783.9182739257812,
+                  273.9024963378906,
+                  797.6383056640625,
+                  283.6144714355469
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "당기순이익",
+              "candidate_label": "당기순이익",
+              "canonical_label": "당기순이익",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1069,
+                "char_end": 1074,
+                "quote": "당기순이익",
+                "bbox": [
+                  688.974365234375,
+                  289.4945068359375,
+                  723.2144775390625,
+                  299.20648193359375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1075,
+                "char_end": 1077,
+                "quote": "십억",
+                "bbox": [
+                  783.9263916015625,
+                  289.4945068359375,
+                  797.6464233398438,
+                  299.20648193359375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "EBITDA3)",
+              "candidate_label": "EBITDA",
+              "canonical_label": "EBITDA",
+              "proof_level": "verified_annotation",
+              "raw_span": {
+                "char_start": 1121,
+                "char_end": 1129,
+                "quote": "EBITDA3)",
+                "bbox": [
+                  688.9688720703125,
+                  304.6280517578125,
+                  719.1724243164062,
+                  314.7955627441406
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1130,
+                "char_end": 1132,
+                "quote": "십억",
+                "bbox": [
+                  783.9182739257812,
+                  305.0835876464844,
+                  797.6383056640625,
+                  314.7955627441406
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "손익계산서",
+              "candidate_label": "손익계산서",
+              "canonical_label": "손익계산서",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1222,
+                "char_end": 1227,
+                "quote": "손익계산서",
+                "bbox": [
+                  640.77978515625,
+                  346.35528564453125,
+                  675.0198974609375,
+                  356.0672607421875
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "(별도",
+              "candidate_label": "(별도",
+              "canonical_label": "(별도",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1228,
+                "char_end": 1231,
+                "quote": "(별도",
+                "bbox": [
+                  640.77978515625,
+                  357.35528564453125,
+                  657.0518188476562,
+                  367.0672607421875
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "기준)",
+              "candidate_label": "기준)",
+              "canonical_label": "기준)",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1232,
+                "char_end": 1235,
+                "quote": "기준)",
+                "bbox": [
+                  658.8518676757812,
+                  357.35528564453125,
+                  675.1239013671875,
+                  367.0672607421875
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "매출액",
+              "candidate_label": "매출액",
+              "canonical_label": "매출액",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1166,
+                "char_end": 1169,
+                "quote": "매출액",
+                "bbox": [
+                  688.9718017578125,
+                  320.67529296875,
+                  709.5318603515625,
+                  330.38726806640625
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1170,
+                "char_end": 1172,
+                "quote": "십억",
+                "bbox": [
+                  783.923828125,
+                  320.67529296875,
+                  797.6438598632812,
+                  330.38726806640625
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "영업이익",
+              "candidate_label": "영업이익",
+              "canonical_label": "영업이익",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1196,
+                "char_end": 1200,
+                "quote": "영업이익",
+                "bbox": [
+                  688.9798583984375,
+                  336.2673034667969,
+                  716.3799438476562,
+                  345.9792785644531
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1201,
+                "char_end": 1203,
+                "quote": "십억",
+                "bbox": [
+                  783.931884765625,
+                  336.2673034667969,
+                  797.6519165039062,
+                  345.9792785644531
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "판매비와",
+              "candidate_label": "판매비와",
+              "canonical_label": "판매비와",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1236,
+                "char_end": 1240,
+                "quote": "판매비와",
+                "bbox": [
+                  688.9879150390625,
+                  351.85931396484375,
+                  716.3880004882812,
+                  361.5712890625
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "관리비",
+              "candidate_label": "관리비",
+              "canonical_label": "관리비",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1241,
+                "char_end": 1244,
+                "quote": "관리비",
+                "bbox": [
+                  718.1880493164062,
+                  351.85931396484375,
+                  738.7481079101562,
+                  361.5712890625
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1245,
+                "char_end": 1247,
+                "quote": "십억",
+                "bbox": [
+                  783.93994140625,
+                  351.85931396484375,
+                  797.6599731445312,
+                  361.5712890625
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "당기순이익",
+              "candidate_label": "당기순이익",
+              "canonical_label": "당기순이익",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1268,
+                "char_end": 1273,
+                "quote": "당기순이익",
+                "bbox": [
+                  688.9959716796875,
+                  367.4513244628906,
+                  723.236083984375,
+                  377.1632995605469
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1274,
+                "char_end": 1276,
+                "quote": "십억",
+                "bbox": [
+                  783.947998046875,
+                  367.4513244628906,
+                  797.6680297851562,
+                  377.1632995605469
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "EBITDA",
+              "candidate_label": "EBITDA",
+              "canonical_label": "EBITDA",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1295,
+                "char_end": 1301,
+                "quote": "EBITDA",
+                "bbox": [
+                  689.0040283203125,
+                  383.0433349609375,
+                  715.3720092773438,
+                  392.75531005859375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "십억",
+              "candidate_label": "십억",
+              "canonical_label": "십억",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1302,
+                "char_end": 1304,
+                "quote": "십억",
+                "bbox": [
+                  783.9560546875,
+                  383.0433349609375,
+                  797.6760864257812,
+                  392.75531005859375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "수익성지표",
+              "candidate_label": "수익성지표",
+              "canonical_label": "수익성지표",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1335,
+                "char_end": 1340,
+                "quote": "수익성지표",
+                "bbox": [
+                  640.7797241210938,
+                  400.92230224609375,
+                  675.0198364257812,
+                  410.63427734375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "(연결",
+              "candidate_label": "(연결",
+              "canonical_label": "(연결",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1363,
+                "char_end": 1366,
+                "quote": "(연결",
+                "bbox": [
+                  640.7797241210938,
+                  411.92230224609375,
+                  657.0517578125,
+                  421.63427734375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "기준)",
+              "candidate_label": "기준)",
+              "canonical_label": "기준)",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1367,
+                "char_end": 1370,
+                "quote": "기준)",
+                "bbox": [
+                  658.851806640625,
+                  411.92230224609375,
+                  675.1238403320312,
+                  421.63427734375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "영업이익률3)",
+              "candidate_label": "영업이익률",
+              "canonical_label": "영업이익률",
+              "proof_level": "verified_annotation",
+              "raw_span": {
+                "char_start": 1341,
+                "char_end": 1348,
+                "quote": "영업이익률3)",
+                "bbox": [
+                  688.9717407226562,
+                  398.1713562011719,
+                  727.0438232421875,
+                  408.3382568359375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "순이익률3)",
+              "candidate_label": "순이익률",
+              "canonical_label": "순이익률",
+              "proof_level": "verified_annotation",
+              "raw_span": {
+                "char_start": 1371,
+                "char_end": 1377,
+                "quote": "순이익률3)",
+                "bbox": [
+                  688.9700317382812,
+                  413.761962890625,
+                  720.203857421875,
+                  423.93096923828125
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "수익성지표",
+              "candidate_label": "수익성지표",
+              "canonical_label": "수익성지표",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1392,
+                "char_end": 1397,
+                "quote": "수익성지표",
+                "bbox": [
+                  640.785888671875,
+                  432.04949951171875,
+                  675.0260009765625,
+                  441.761474609375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "(별도",
+              "candidate_label": "(별도",
+              "canonical_label": "(별도",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1418,
+                "char_end": 1421,
+                "quote": "(별도",
+                "bbox": [
+                  640.785888671875,
+                  443.04949951171875,
+                  657.0579223632812,
+                  452.761474609375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "기준)",
+              "candidate_label": "기준)",
+              "canonical_label": "기준)",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1422,
+                "char_end": 1425,
+                "quote": "기준)",
+                "bbox": [
+                  658.8579711914062,
+                  443.04949951171875,
+                  675.1300048828125,
+                  452.761474609375
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "영업이익률",
+              "candidate_label": "영업이익률",
+              "canonical_label": "영업이익률",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1398,
+                "char_end": 1403,
+                "quote": "영업이익률",
+                "bbox": [
+                  688.9779052734375,
+                  429.8014831542969,
+                  723.218017578125,
+                  439.5134582519531
+                ],
+                "source": "native"
+              }
+            },
+            {
+              "raw_label": "순이익률",
+              "candidate_label": "순이익률",
+              "canonical_label": "순이익률",
+              "proof_level": "not_annotated",
+              "raw_span": {
+                "char_start": 1426,
+                "char_end": 1430,
+                "quote": "순이익률",
+                "bbox": [
+                  688.9779052734375,
+                  445.3454895019531,
+                  716.3779907226562,
+                  455.0574645996094
+                ],
+                "source": "native"
+              }
+            }
+          ],
+          "collision_spans": [
+            {
+              "char_start": 1341,
+              "char_end": 1348,
+              "quote": "영업이익률3)",
+              "bbox": [
+                688.9717407226562,
+                398.1713562011719,
+                727.0438232421875,
+                408.3382568359375
+              ],
+              "source": "native"
+            },
+            {
+              "char_start": 1398,
+              "char_end": 1403,
+              "quote": "영업이익률",
+              "bbox": [
+                688.9779052734375,
+                429.8014831542969,
+                723.218017578125,
+                439.5134582519531
+              ],
+              "source": "native"
+            }
+          ]
+        }
+      }
+    ],
+    "requirements": [
+      {
+        "id": "structured_1",
+        "kind": "table",
+        "metric": {
+          "surface": "영업이익률",
+          "normalized": "영업이익",
+          "modifier": "ratio",
+          "is_rate": true,
+          "is_growth": false
+        },
+        "period": "2022",
+        "period_required": true,
+        "requested_periods": [
+          "2022",
+          "2023"
+        ],
+        "unit": null,
+        "unit_family": "ratio",
+        "numeric_value_required": true,
+        "comparison_required": true,
+        "comparison_target": "2023",
+        "entity": null,
+        "clause": "표의 연결 기준 2022년과 2023년 영업이익률을 비교해줘."
+      },
+      {
+        "id": "structured_2",
+        "kind": "table",
+        "metric": {
+          "surface": "영업이익률",
+          "normalized": "영업이익",
+          "modifier": "ratio",
+          "is_rate": true,
+          "is_growth": false
+        },
+        "period": "2023",
+        "period_required": true,
+        "requested_periods": [
+          "2022",
+          "2023"
+        ],
+        "unit": null,
+        "unit_family": "ratio",
+        "numeric_value_required": true,
+        "comparison_required": true,
+        "comparison_target": "2022",
+        "entity": null,
+        "clause": "표의 연결 기준 2022년과 2023년 영업이익률을 비교해줘."
+      }
+    ],
+    "requirement_checks": [
+      [
+        false,
+        [
+          {
+            "component": "metric_annotation",
+            "required": true,
+            "matched": false,
+            "reason": "canonical_metric_collision"
+          },
+          {
+            "component": "canonical_metric",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "metric",
+            "required": true,
+            "matched": false,
+            "reason": "metric_mismatch"
+          },
+          {
+            "component": "entity",
+            "required": false,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "period",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "unit",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "unit_surface",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "value",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "metric_row",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "metric_chain",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "comparison",
+            "required": true,
+            "matched": false,
+            "reason": "comparison_missing_or_mismatch"
+          }
+        ]
+      ],
+      [
+        false,
+        [
+          {
+            "component": "metric_annotation",
+            "required": true,
+            "matched": false,
+            "reason": "canonical_metric_collision"
+          },
+          {
+            "component": "canonical_metric",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "metric",
+            "required": true,
+            "matched": false,
+            "reason": "metric_mismatch"
+          },
+          {
+            "component": "entity",
+            "required": false,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "period",
+            "required": true,
+            "matched": false,
+            "reason": "period_mismatch"
+          },
+          {
+            "component": "unit",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "unit_surface",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "value",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "metric_row",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "metric_chain",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "comparison",
+            "required": true,
+            "matched": false,
+            "reason": "comparison_missing_or_mismatch"
+          }
+        ]
+      ],
+      [
+        false,
+        [
+          {
+            "component": "metric_annotation",
+            "required": true,
+            "matched": false,
+            "reason": "canonical_metric_collision"
+          },
+          {
+            "component": "canonical_metric",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "metric",
+            "required": true,
+            "matched": false,
+            "reason": "metric_mismatch"
+          },
+          {
+            "component": "entity",
+            "required": false,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "period",
+            "required": true,
+            "matched": false,
+            "reason": "period_mismatch"
+          },
+          {
+            "component": "unit",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "unit_surface",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "value",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "metric_row",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "metric_chain",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "comparison",
+            "required": true,
+            "matched": false,
+            "reason": "comparison_missing_or_mismatch"
+          }
+        ]
+      ],
+      [
+        false,
+        [
+          {
+            "component": "metric_annotation",
+            "required": true,
+            "matched": false,
+            "reason": "canonical_metric_collision"
+          },
+          {
+            "component": "canonical_metric",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "metric",
+            "required": true,
+            "matched": false,
+            "reason": "metric_mismatch"
+          },
+          {
+            "component": "entity",
+            "required": false,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "period",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "unit",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "unit_surface",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "value",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "metric_row",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "metric_chain",
+            "required": true,
+            "matched": true,
+            "reason": "matched"
+          },
+          {
+            "component": "comparison",
+            "required": true,
+            "matched": false,
+            "reason": "comparison_missing_or_mismatch"
+          }
+        ]
+      ]
+    ]
+  },
+  "production_modules_changed": [
+    "evidence_bundle.py",
+    "primitive_graph.py",
+    "evidence_requirements.py",
+    "table_evidence.py"
+  ],
+  "production_modules_added": [
+    "metric_annotations.py"
+  ],
+  "proof_rules": {
+    "syntax": "candidate only; never unconditional removal",
+    "verified": "located unique adjacent table footer plus explicit note anchor or raised definition/convention proof",
+    "probable": "insufficient structural annotation evidence; HOLD",
+    "unverified": "no located definition; HOLD",
+    "canonical": "verified raw prefix, exact query text and modifier, unique competing row scope",
+    "collisions": "all label columns before period headers; include bare and rejected/unverified row candidates"
+  },
+  "hyundai_before": {
+    "coverage_complete": false,
+    "reason": "metric_mismatch"
+  },
+  "hyundai_after": {
+    "annotation_verified": true,
+    "raw_label": "영업이익률3)",
+    "canonical_label": "영업이익률",
+    "annotation": "3)",
+    "annotation_type": "footnote",
+    "exact_canonical_query_match": true,
+    "canonical_collision": true,
+    "row_downstream_chain_preserved": true,
+    "query_equivalence_approved": false,
+    "coverage_complete": false,
+    "reason": "canonical_metric_collision; source scope selector not verified"
+  },
+  "development": {
+    "paddle_candidate_recall@5": [
+      10,
+      10
+    ],
+    "invariant_control_recall@5": [
+      2,
+      2
+    ],
+    "combined_comparison_recall@5": [
+      12,
+      12
+    ],
+    "compound_evidence_coverage@5_after": [
+      1,
+      1
+    ],
+    "single_fact_regression": []
+  },
+  "regressions": [
+    {
+      "id": "unseen-report-a-compound",
+      "cohort": "fixed_regression",
+      "coverage_complete": true,
+      "automatic_strict_pass": true,
+      "selected_pack_unchanged": true,
+      "prior_manual_strict_review_retained": false
+    },
+    {
+      "id": "unseen-report-b-comparison",
+      "cohort": "fixed_regression",
+      "coverage_complete": true,
+      "automatic_strict_pass": true,
+      "selected_pack_unchanged": true,
+      "prior_manual_strict_review_retained": false
+    },
+    {
+      "id": "holdout-kia-compound-01",
+      "cohort": "fixed_regression",
+      "coverage_complete": true,
+      "automatic_strict_pass": false,
+      "selected_pack_unchanged": true,
+      "prior_manual_strict_review_retained": true
+    },
+    {
+      "id": "holdout-sk-compound-01",
+      "cohort": "fixed_regression",
+      "coverage_complete": false,
+      "automatic_strict_pass": false,
+      "selected_pack_unchanged": true,
+      "prior_manual_strict_review_retained": false
+    },
+    {
+      "id": "new-period-cashflow",
+      "cohort": "challenge_set",
+      "coverage_complete": true,
+      "automatic_strict_pass": true,
+      "selected_pack_unchanged": true,
+      "prior_manual_strict_review_retained": false
+    },
+    {
+      "id": "new-mixed-valuation",
+      "cohort": "challenge_set",
+      "coverage_complete": false,
+      "automatic_strict_pass": false,
+      "selected_pack_unchanged": true,
+      "prior_manual_strict_review_retained": false
+    },
+    {
+      "id": "new-mixed-counts",
+      "cohort": "challenge_set",
+      "coverage_complete": null,
+      "automatic_strict_pass": false,
+      "selected_pack_unchanged": true,
+      "prior_manual_strict_review_retained": false
+    },
+    {
+      "id": "new-samsung-annual-pair",
+      "cohort": "challenge_set",
+      "coverage_complete": false,
+      "automatic_strict_pass": false,
+      "selected_pack_unchanged": true,
+      "prior_manual_strict_review_retained": false
+    },
+    {
+      "id": "new-hyundai-mixed-pair",
+      "cohort": "challenge_set",
+      "coverage_complete": false,
+      "automatic_strict_pass": false,
+      "selected_pack_unchanged": true,
+      "prior_manual_strict_review_retained": false
+    }
+  ],
+  "false_complete": 0,
+  "source_hashes": {
+    "graph-dev-run4-20261002.json": "a0023a586859967e9f2faf35e2e80bea8f24928ff864637dda1caaaf184de473",
+    "graph-regression-unseen-final-20261002.json": "8a9ddfaca60806e4448733781d0487f8d4b16a88dd789c8e2a4bb7ca8617f4ff",
+    "extraction-unseen-index-release2-20261002.json": "73aff002a6b054c558b8151060ca5fed4f3ec44349a78a146aeba8cf34aaac1f",
+    "graph-regression-holdout-run1-20261002.json": "d6be0cf1302463651798a7881124f2fb9b156f39cc69c5dad54a7f3af4b68865",
+    "extraction-holdout-index-release2-20261002.json": "66bc3ae7f110b481553a37fe85e741248b7850a681f60eed9c1c7b6942daec9a",
+    "graph-before-tables-20261002.json": "2c89af2239122a847e1400b7b6fe12f3db062ec85049e86c75f7bea155410066",
+    "graph-after-final-search-20261002.json": "d5ddfd31176d5381c3b1404af9c366cb7f6f3e0b4b84654992d39c1f168e9f0f",
+    "graph-new-observations-20261002.json": "6689322196ab4a7ba769fb5a331cec9de29b979cbf0955ebf4a5c1cfe5679c07",
+    "graph-new-search-20261002.json": "dee6f5b56e5a054dc1f7bb83b4d1581ac901d6db61ebc4f20fabc24460f1b713"
+  },
+  "protected_source_hashes_unchanged": true,
+  "checks": {
+    "annotation_cases": 39,
+    "targeted_passed": 156,
+    "backend_passed": 418,
+    "backend_skipped": 1,
+    "skip_reason": "optional google.genai unavailable",
+    "frontend_passed": 7,
+    "lint": "PASS",
+    "build": "PASS",
+    "hardcoding": "PASS",
+    "diff": "PASS",
+    "shared_ownership_tests_unchanged": true,
+    "row_column_geometry_unchanged": true,
+    "unit_validator_unchanged": true
+  },
+  "active_hash_live_verified": false,
+  "active_before": null,
+  "active_after": null,
+  "active_hash_status": "pending: PostgreSQL connection refused; Docker daemon unavailable",
+  "active_hash_prior_session": "READ ONLY equality observed, but temporary snapshots lost across session restart; not final verification",
+  "previous_persisted_live_baseline": "evals/results/paddle/shared-context-active-after-20261007.json",
+  "operations": {
+    "migration_called": false,
+    "reprocessing_called": false,
+    "ocr_called": false,
+    "embedding_called": false,
+    "generator_called": false,
+    "active_revision_switched": false,
+    "db_mutation": false,
+    "new_retrieval": false
+  },
+  "validation_artifacts": [
+    "evals/results/paddle/metric-annotation-check-20261008.log",
+    "evals/results/paddle/metric-annotation-targeted-20261008.log",
+    "evals/results/paddle/metric-annotation-replay-20261008.log",
+    "evals/results/paddle/metric-annotation-changes-20261008.diff"
+  ],
+  "limitations": [
+    "Frozen rank/observation replay; no new retrieval.",
+    "Active controls are frozen, not live search.",
+    "Kia automatic strict false remains; unchanged pack retains existing manual review.",
+    "Cross-page/unsupported annotations require new source proof; hold rather than guess."
+  ],
+  "remaining": [
+    "Final live DB hash verification requires Docker/PostgreSQL availability.",
+    "Query scope-to-row selector is not proven for canonical metric collisions."
+  ],
+  "next_candidates": [
+    "General source-backed query scope selector over shared context membership."
+  ]
+}

@@ -1,0 +1,290 @@
+[
+  {
+    "id": "new-samsung-annual-pair",
+    "filename": "samsung-sustainability-2024.pdf",
+    "pdf_sha256": "488884ff61339ada35db6dd3c70316ee106d0d315aeac99bdf132474a88baca0",
+    "page": 56,
+    "comparison_required": true,
+    "document_unseen": true,
+    "question": "표의 2022년과 2023년 영업이익을 비교해줘.",
+    "cells": [
+      {
+        "row_label": "영업이익",
+        "metric": "영업이익",
+        "period": "2022년",
+        "unit": "조원",
+        "value": "43.4",
+        "bbox_pdf_points": [
+          320.4744567871094,
+          101.28958892822266,
+          334.0216979980469,
+          111.18209075927734
+        ],
+        "gold_source_spans": [
+          {
+            "role": "metric",
+            "quote": "영업이익",
+            "bbox_pdf_points": [
+              43.866912841796875,
+              101.28958892822266,
+              69.14191436767578,
+              111.18209075927734
+            ],
+            "source": "original_native_pdf_word"
+          },
+          {
+            "role": "period",
+            "quote": "2022년",
+            "bbox_pdf_points": [
+              311.75189208984375,
+              72.93961334228516,
+              334.0268859863281,
+              82.83211517333984
+            ],
+            "source": "original_native_pdf_word"
+          },
+          {
+            "role": "unit",
+            "quote": "조",
+            "bbox_pdf_points": [
+              162.471923828125,
+              101.28958892822266,
+              168.846923828125,
+              111.18209075927734
+            ],
+            "source": "original_native_pdf_word"
+          },
+          {
+            "role": "unit",
+            "quote": "원",
+            "bbox_pdf_points": [
+              170.47442626953125,
+              101.28958892822266,
+              176.84942626953125,
+              111.18209075927734
+            ],
+            "source": "original_native_pdf_word"
+          },
+          {
+            "role": "value",
+            "quote": "43.4",
+            "bbox_pdf_points": [
+              320.4744567871094,
+              101.28958892822266,
+              334.0216979980469,
+              111.18209075927734
+            ],
+            "source": "original_native_pdf_word"
+          }
+        ]
+      },
+      {
+        "row_label": "영업이익",
+        "metric": "영업이익",
+        "period": "2023년",
+        "unit": "조원",
+        "value": "6.6",
+        "bbox_pdf_points": [
+          398.6544494628906,
+          101.28958892822266,
+          408.1944580078125,
+          111.18209075927734
+        ],
+        "gold_source_spans": [
+          {
+            "role": "metric",
+            "quote": "영업이익",
+            "bbox_pdf_points": [
+              43.866912841796875,
+              101.28958892822266,
+              69.14191436767578,
+              111.18209075927734
+            ],
+            "source": "original_native_pdf_word"
+          },
+          {
+            "role": "period",
+            "quote": "2023년",
+            "bbox_pdf_points": [
+              385.70941162109375,
+              72.93961334228516,
+              408.201904296875,
+              82.83211517333984
+            ],
+            "source": "original_native_pdf_word"
+          },
+          {
+            "role": "unit",
+            "quote": "조",
+            "bbox_pdf_points": [
+              162.471923828125,
+              101.28958892822266,
+              168.846923828125,
+              111.18209075927734
+            ],
+            "source": "original_native_pdf_word"
+          },
+          {
+            "role": "unit",
+            "quote": "원",
+            "bbox_pdf_points": [
+              170.47442626953125,
+              101.28958892822266,
+              176.84942626953125,
+              111.18209075927734
+            ],
+            "source": "original_native_pdf_word"
+          },
+          {
+            "role": "value",
+            "quote": "6.6",
+            "bbox_pdf_points": [
+              398.6544494628906,
+              101.28958892822266,
+              408.1944580078125,
+              111.18209075927734
+            ],
+            "source": "original_native_pdf_word"
+          }
+        ]
+      }
+    ],
+    "original_source_url": "https://www.samsung.com/sec/sustainability/media/pdf/Samsung_Electronics_Sustainability_Report_2024_KOR.pdf",
+    "table_type": "three_period",
+    "scope": "연결 재무제표 기준",
+    "production_freeze_sha256": "77bd1b2a994218ca8586e433d84049844e8f2469b663309fe7252bbd64cab22e"
+  },
+  {
+    "id": "new-hyundai-mixed-pair",
+    "filename": "hyundai-sustainability-2024.pdf",
+    "pdf_sha256": "5a195c926ebcf638352ce90f90e2ffe9e454fa2de1fe8712055dcd5e4a925dd0",
+    "page": 97,
+    "comparison_required": true,
+    "document_unseen": true,
+    "question": "표의 연결 기준 2022년과 2023년 영업이익률을 비교해줘.",
+    "cells": [
+      {
+        "row_label": "영업이익률3)",
+        "metric": "영업이익률3)",
+        "period": "2022",
+        "unit": "%",
+        "value": "6.9",
+        "bbox_pdf_points": [
+          929.9860229492188,
+          399.0669860839844,
+          940.9539794921875,
+          408.7789611816406
+        ],
+        "gold_source_spans": [
+          {
+            "role": "metric",
+            "quote": "영업이익률3)",
+            "bbox_pdf_points": [
+              688.9717407226562,
+              398.1713562011719,
+              727.0438232421875,
+              408.3382568359375
+            ],
+            "source": "original_native_pdf_word"
+          },
+          {
+            "role": "period",
+            "quote": "2022",
+            "bbox_pdf_points": [
+              906.6057739257812,
+              134.88787841796875,
+              921.7467651367188,
+              143.48388671875
+            ],
+            "source": "original_native_pdf_word"
+          },
+          {
+            "role": "unit",
+            "quote": "%",
+            "bbox_pdf_points": [
+              792.0020141601562,
+              398.6269836425781,
+              798.2340087890625,
+              408.3389587402344
+            ],
+            "source": "original_native_pdf_word"
+          },
+          {
+            "role": "value",
+            "quote": "6.9",
+            "bbox_pdf_points": [
+              929.9860229492188,
+              399.0669860839844,
+              940.9539794921875,
+              408.7789611816406
+            ],
+            "source": "original_native_pdf_word"
+          }
+        ]
+      },
+      {
+        "row_label": "영업이익률3)",
+        "metric": "영업이익률3)",
+        "period": "2023",
+        "unit": "%",
+        "value": "9.3",
+        "bbox_pdf_points": [
+          995.18603515625,
+          399.0669860839844,
+          1006.1539916992188,
+          408.7789611816406
+        ],
+        "gold_source_spans": [
+          {
+            "role": "metric",
+            "quote": "영업이익률3)",
+            "bbox_pdf_points": [
+              688.9717407226562,
+              398.1713562011719,
+              727.0438232421875,
+              408.3382568359375
+            ],
+            "source": "original_native_pdf_word"
+          },
+          {
+            "role": "period",
+            "quote": "2023",
+            "bbox_pdf_points": [
+              971.7757568359375,
+              134.88787841796875,
+              986.9727783203125,
+              143.48388671875
+            ],
+            "source": "original_native_pdf_word"
+          },
+          {
+            "role": "unit",
+            "quote": "%",
+            "bbox_pdf_points": [
+              792.0020141601562,
+              398.6269836425781,
+              798.2340087890625,
+              408.3389587402344
+            ],
+            "source": "original_native_pdf_word"
+          },
+          {
+            "role": "value",
+            "quote": "9.3",
+            "bbox_pdf_points": [
+              995.18603515625,
+              399.0669860839844,
+              1006.1539916992188,
+              408.7789611816406
+            ],
+            "source": "original_native_pdf_word"
+          }
+        ]
+      }
+    ],
+    "original_source_url": "https://org1.hyundai.com/content/dam/hyundai/kr/ko/data/company-report/2025/04/01/hmc-sr-kor-2024.pdf",
+    "table_type": "three_period_mixed_unit",
+    "scope": "연결 기준",
+    "production_freeze_sha256": "77bd1b2a994218ca8586e433d84049844e8f2469b663309fe7252bbd64cab22e"
+  }
+]

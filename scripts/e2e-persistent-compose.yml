@@ -1,0 +1,24 @@
+name: stock-brief-e2e-persistent
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: stock-brief-e2e-persistent-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: stock_brief_e2e_restore
+      POSTGRES_DB: stock_brief_e2e_restore
+      POSTGRES_PASSWORD: ${E2E_PERSISTENT_DB_PASSWORD:?Set E2E_PERSISTENT_DB_PASSWORD in root .env}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "127.0.0.1:55433:5432"
+    volumes:
+      - e2e_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stock_brief_e2e_restore -d stock_brief_e2e_restore"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+volumes:
+  e2e_data:
+    external: true
+    name: stock_brief_e2e_persistent_pgdata

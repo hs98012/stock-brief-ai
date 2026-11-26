@@ -1,0 +1,149 @@
+{
+  "artifact_sha256": "3f5a767c925084340d8335e28118666900f82ac75dff17d67200534a52d015a8",
+  "fixture_sha256": "50874005814a50fd48fbe0908dfadb72bfe15d356092dbe8872fbcfab36c5601",
+  "method": "기존 PDF 시각 대조 gold를 유지하고 새 top-5의 실제 span/좌표 표/본문 numeric evidence 확인. 페이지 검색만으로 성공 판정하지 않음. 재파싱 원시 산출물 변경 시 재검토 필요.",
+  "scope": "삼성전자 2단위 활성 공통 대조군; 나머지 10단위 실제 shadow 임베딩 검색. 생성·보류율 평가 없음.",
+  "units": [
+    {
+      "case": "old-miss",
+      "unit": "잠정 실적 하회",
+      "active_hit": true,
+      "shadow_hit": true,
+      "chunk_id": "4ffc6507-91c3-4e9f-a42c-92a09e6b44cb",
+      "page_number": 1,
+      "rank": 1
+    },
+    {
+      "case": "old-risk",
+      "unit": "HBM·파운드리 위험",
+      "active_hit": true,
+      "shadow_hit": true,
+      "chunk_id": "4ffc6507-91c3-4e9f-a42c-92a09e6b44cb",
+      "page_number": 1,
+      "rank": 1
+    },
+    {
+      "case": "lg-fact",
+      "unit": "2Q26 증가",
+      "active_hit": true,
+      "shadow_hit": true,
+      "literal_conditions": [
+        "2Q26연결영업이익은5,330억원",
+        "전년동기대비92.5%증가"
+      ],
+      "chunk_id": "3606f6bb-6851-493d-81e1-749b7ccfe181",
+      "page_number": 3,
+      "rank": 1
+    },
+    {
+      "case": "lg-period",
+      "unit": "2Q26 실제",
+      "active_hit": true,
+      "shadow_hit": true,
+      "literal_conditions": [
+        "2Q26실적Review",
+        "2Q26연결영업이익은5,330억원"
+      ],
+      "chunk_id": "3606f6bb-6851-493d-81e1-749b7ccfe181",
+      "page_number": 3,
+      "rank": 3
+    },
+    {
+      "case": "lg-period",
+      "unit": "2026F 연간 전망",
+      "active_hit": false,
+      "shadow_hit": true,
+      "table": {
+        "row_label": "영업이익",
+        "metric": "영업이익",
+        "period": "2026F",
+        "value": "1,643",
+        "unit": "십억원",
+        "status": "forecast"
+      },
+      "chunk_id": "3f78254a-cb4a-4d12-8fa8-a5c0f2947adc",
+      "page_number": 1,
+      "rank": 1
+    },
+    {
+      "case": "lg-table",
+      "unit": "CNS 지분가치",
+      "active_hit": false,
+      "shadow_hit": false,
+      "stage": "추출",
+      "reason": "p2 top1이나 LG 행 이름 confidence 35; 승인된 행 없음"
+    },
+    {
+      "case": "db-scan",
+      "unit": "2분기 순이익·컨센서스·상회율",
+      "active_hit": false,
+      "shadow_hit": true,
+      "numeric_values": [
+        "4,993",
+        "4,386",
+        "13.8"
+      ],
+      "chunk_id": "24f3755c-ee17-4900-a685-5143ce118d08",
+      "page_number": 1,
+      "rank": 1
+    },
+    {
+      "case": "db-table",
+      "unit": "1Q26 보험손익",
+      "active_hit": false,
+      "shadow_hit": false,
+      "stage": "추출",
+      "reason": "p2 top1이나 기간 1026 오독; 227을 1Q26에 연결할 수 없음"
+    },
+    {
+      "case": "db-table",
+      "unit": "2Q26F 보험손익",
+      "active_hit": true,
+      "shadow_hit": true,
+      "table": {
+        "row_label": "보험손익",
+        "metric": "보험손익",
+        "period": "2Q26F",
+        "value": "282",
+        "unit": "십억원",
+        "status": "forecast"
+      },
+      "chunk_id": "c785b61d-12bc-4e10-abc5-d4a0d159cd42",
+      "page_number": 2,
+      "rank": 1
+    },
+    {
+      "case": "posco-multi",
+      "unit": "철강 개선 이유 묶음",
+      "active_hit": false,
+      "shadow_hit": false,
+      "stage": "추출",
+      "reason": "p1 top4이나 옆 열과 원인 문장이 섞임; 전체 source span 인증 보류"
+    },
+    {
+      "case": "posco-multi",
+      "unit": "2Q26F 철강 영업이익",
+      "active_hit": true,
+      "shadow_hit": true,
+      "table": {
+        "row_label": "철강",
+        "metric": "영업이익",
+        "period": "2Q26F",
+        "value": "424",
+        "unit": "십억원",
+        "status": "forecast"
+      },
+      "chunk_id": "511f2204-80a4-472e-b5be-54d5843f2401",
+      "page_number": 2,
+      "rank": 1
+    },
+    {
+      "case": "posco-forecast",
+      "unit": "2Q26 영업이익·시장 예상치",
+      "active_hit": true,
+      "shadow_hit": false,
+      "stage": "추출",
+      "reason": "p1 top1에 숫자 7,570/7,097은 있지만 202614·AHO 익·영언이익으로 기간/지표 훼손; 기존 성공 회귀"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+[
+  {
+    "id": "holdout-kia-compound-01",
+    "filename": "20260727_기아 (000270_매수).pdf",
+    "pdf_sha256": "c0ca0d99eaea7405dfa64a3b15aa89dfee1fe231bc67f1fa1cb72746c04a7344",
+    "question": "2Q26 기아의 전기차 판매가 실적에 미친 영향과 표의 2Q26P 영업이익 발표치·컨센서스를 함께 알려줘.",
+    "gold_fact_bundle": [
+      {
+        "kind": "narrative",
+        "physical_page": 1,
+        "required_facts": ["전기차 판매 확대가 실적에 영향을 미침", "2Q26에는 인센티브·믹스 영향이 부정적"],
+        "source_excerpt": "인센티브/믹스는 전기차 영향이다. ... 전기차 판매 확대는 중장기적으로 경쟁력 요인"
+      },
+      {
+        "kind": "table",
+        "physical_page": 2,
+        "table_label": "기아 2Q26 발표치와 컨센서스 비교",
+        "row": "영업이익",
+        "period": "2Q26P",
+        "unit": "십억원",
+        "actual_or_forecast": "발표치",
+        "value": "2,629",
+        "comparison_basis": "컨센서스",
+        "comparison_value": "2,794"
+      }
+    ]
+  },
+  {
+    "id": "holdout-sk-compound-01",
+    "filename": "20260907_SK하이닉스 (000660_매수).pdf",
+    "pdf_sha256": "90672edb08c701b7b827f21823079d4e4239f27260ebf774c4e4d8ad61ccacd1",
+    "question": "SK하이닉스 보고서의 HBM 고객 다변화 근거와 표의 3Q26F 영업이익 새 추정치·기존 추정치를 함께 알려줘.",
+    "gold_fact_bundle": [
+      {
+        "kind": "narrative",
+        "physical_page": 1,
+        "required_facts": ["AMD MI455X에 HBM4가 탑재됨", "NVIDIA Rubin에도 HBM4 공급 기회가 기술됨"],
+        "source_excerpt": "AMD MI455X는 HBM4 12스택 432GB ... NVIDIA는 Rubin HBM4 288GB 탑재"
+      },
+      {
+        "kind": "table",
+        "physical_page": 2,
+        "table_label": "SK하이닉스 실적 추정치 변경",
+        "row": "영업이익",
+        "period": "3Q26F",
+        "unit": "조원",
+        "actual_or_forecast": "전망",
+        "value": "73.2",
+        "comparison_basis": "Old",
+        "comparison_value": "79.3"
+      }
+    ]
+  }
+]

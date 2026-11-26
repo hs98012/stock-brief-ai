@@ -1,0 +1,20 @@
+[
+  {
+    "filename": "20260710_DB손해보험 (005830_매수).pdf",
+    "sha256": "b4448fe38a9dda167b9a65caa5c53bb82151487495bb47a6f7bab8ee994c8266",
+    "prior_upload": true,
+    "blind_holdout": false
+  },
+  {
+    "filename": "20260713_POSCO홀딩스 (005490_매수).pdf",
+    "sha256": "a21946429a6980e28e88ac8b4289b8789d57e912fdc20360f5d246d31395e364",
+    "prior_upload": true,
+    "blind_holdout": false
+  },
+  {
+    "filename": "20260814_LG (003550_매수).pdf",
+    "sha256": "3489541bb393c16772ba3ed5d31c3f34a035ba36a472eabc884fa6ad60209808",
+    "prior_upload": true,
+    "blind_holdout": false
+  }
+]

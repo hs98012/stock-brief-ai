@@ -1,0 +1,141 @@
+{
+  "status": "SEALED_NOT_EVALUATED",
+  "documents": 5,
+  "questions": 15,
+  "positive": 10,
+  "negative": 5,
+  "unresolved": 0,
+  "factual_units": 15,
+  "question_type_distribution": {
+    "scalar_lookup": 2,
+    "period_comparison": 2,
+    "metric_ambiguity": 1,
+    "mixed_unit": 2,
+    "period_ambiguity": 1,
+    "estimate_revision_comparison": 1,
+    "source_conflict": 1,
+    "annotated_metric": 1,
+    "missing_source": 1,
+    "scope_lookup": 1,
+    "per_share_lookup": 1,
+    "scope_ambiguity": 1
+  },
+  "duplicate_checks": {
+    "repository": "0 duplicate hash/UUID/company/filename",
+    "active_db_documents": "0 duplicate hash/UUID/company/stock_code; 10 documents checked",
+    "existing_pages_reused": 0
+  },
+  "source_review": {
+    "physical_pages": 29,
+    "proof_components": 98,
+    "author_review": "VERIFIED",
+    "second_human_review": "NOT_PERFORMED",
+    "system_answers_used": false
+  },
+  "metrics_fixed_before_run": true,
+  "automatic_manual_review_separate": true,
+  "seal_verified": true,
+  "manifest_path": "evals/sealed-holdout-v1-manifest.json",
+  "manifest_sha256": "e953979e5413db83d4355b205ddfacf6abdfbb8ceef4cfaa2e84d1a5f5527b57",
+  "gold_sha256": "1c5ca16bab09b769fc0f65838d28cb76e060eb39baab1d88f5d75e4b65f450db",
+  "documents_sha256": {
+    "NAVER": "ff38863f1afc0d88ac09357ecbca3d0fcb92b14423cc9bec5823c84d89285186",
+    "카카오": "e694960de93b0568a020f17d83b51767ae4cb4ddccd4cd6e1f424443126b9a76",
+    "셀트리온": "c83e9c8be31727afb9784fe83fa5989b85e94dd4e6a5daa9fe6f24fafdc92399",
+    "오리온": "2735ae3e07425f90704ab0b04d15349053de9989f83f558f1b5ce04acb04e7ec",
+    "KT": "863b9b3af46d3b23091ff451a2cdb5413065e3aedd1903b0087881613f33f5c2"
+  },
+  "criteria_sha256": "0aaec2085aa0f208334a4cdae88e933620a7808613c4e67157171b408296f68a",
+  "configuration_sha256": "c1f343b76d45744d6ecc9cc603ade808d2dda8fb9fb62509ae75428595d615da",
+  "seal_timestamp_kst": "2026-10-10T20:19:09.586315+09:00",
+  "baseline_commit": "28061c63186020b3302b5918fda49f34ff42ab63",
+  "production_changed": false,
+  "baseline_code_and_config_hashes_unchanged": true,
+  "db": {
+    "status": "VERIFIED",
+    "before_after_baseline_all_equal": true,
+    "baseline_path": "evals/results/paddle/composite-unit-active-after-20261009.json",
+    "baseline_sha256": "64b3bdbbc66af3010a6c4703e070b1a0ab0093cbc3d43fb1a89d59a65cfdbe6c",
+    "active_hashes": {
+      "documents": {
+        "count": 10,
+        "sha256": "90a528749fa287d8614fe5383fa6c8a37f67498e778206108d5796860565f8b4"
+      },
+      "pages": {
+        "count": 75,
+        "sha256": "1cf7866151671415c87cc90b8a439c48969ebdc7a95611ba289fc041179cb575"
+      },
+      "chunks": {
+        "count": 231,
+        "sha256": "bce2ec67ef0b99dca798891b76998fedc9cbbe969c01a749906619198033bf0e"
+      },
+      "analysis_runs": {
+        "count": 311,
+        "sha256": "ce0bab08903d1fafb004361a493d67ff41ae332ca93563faf92715d5b70810fd"
+      },
+      "page_extractions": {
+        "count": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      }
+    },
+    "recovery": "docker start stock-brief-ai-postgres-1; existing initialized volume preserved",
+    "initial_failure": "Connection refused",
+    "schema_changes": false,
+    "data_restore": false
+  },
+  "calls": {
+    "holdout_production_parser": 0,
+    "holdout_embedding": 0,
+    "holdout_retrieval": 0,
+    "holdout_generator": 0,
+    "db_business_writes": 0
+  },
+  "checks": {
+    "backend_passed": 513,
+    "backend_skipped": 1,
+    "frontend_passed": 7,
+    "lint": true,
+    "build": true,
+    "seal_integrity_tests_passed": 7,
+    "diff_check": true,
+    "new_file_whitespace": true,
+    "collector_execution": "NOT_RUN; --help, syntax and seal-only path checked",
+    "gold_leakage_static_check": "No gold file load/company/answer constants in evaluation tools"
+  },
+  "preserved_baseline": {
+    "hyundai": "offline PASS",
+    "samsung": "offline PASS",
+    "kia": "manual review",
+    "sk": "mixed-unit association HOLD",
+    "counts": "HOLD",
+    "development": [
+      12,
+      12
+    ],
+    "posco": [
+      1,
+      1
+    ],
+    "selected_pack": [
+      20,
+      20
+    ],
+    "review_aware_false_complete": 0,
+    "note": "No challenge evaluation or score update in this task; preserved historical verdicts and unchanged code"
+  },
+  "gaps": [
+    "No qualifying ambiguous-unit attribution negative acquired",
+    "Independent human second gold review not performed",
+    "OCR worker currently stopped; health/fingerprint preflight required",
+    "Full generation blind adapter not implemented"
+  ],
+  "readiness": {
+    "corpus_and_criteria": true,
+    "seal": true,
+    "first_retrieval_evidence_collector": true,
+    "ocr_worker_available": false,
+    "full_generation_evaluation": false
+  },
+  "next_command": ".venv/bin/python scripts/verify_sealed_holdout.py --manifest evals/sealed-holdout-v1-manifest.json",
+  "later_authorized_first_run": ".venv/bin/python scripts/collect_sealed_holdout.py --manifest evals/sealed-holdout-v1-manifest.json --output-dir evals/results/sealed-holdout-v1-first-run --execute-first-run"
+}

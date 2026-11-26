@@ -1,0 +1,643 @@
+{
+  "mode": "READ ONLY offline unit diagnosis",
+  "case_id": "holdout-sk-compound-01",
+  "first_failure": {
+    "classification": "B. MULTIPLE_UNIT_CANDIDATES",
+    "secondary": [
+      "F. MIXED_UNIT_TABLE",
+      "C. UNIT_SCOPE_AMBIGUOUS"
+    ],
+    "structured": {
+      "function": "literal_units → _cell_topology",
+      "line": 500,
+      "false_predicate": "UNITS.fullmatch(canonical) for entire mixed declaration; then len(chosen) == 1",
+      "canonical": "원,조원,%,%pt",
+      "chosen_count": 0
+    },
+    "spatial": {
+      "function": "_unit → extract_spatial_facts",
+      "false_predicate": "len(amounts) == 1",
+      "amounts": [
+        "원",
+        "조원"
+      ],
+      "actual_count": 2,
+      "return_value": null
+    }
+  },
+  "unit_candidates": [
+    {
+      "id": "declared-unit-1",
+      "raw_unit_text": "원",
+      "canonical_unit": "원",
+      "semantic_unit": "원",
+      "source_span": {
+        "char_start": 425,
+        "char_end": 426,
+        "quote": "원",
+        "bbox": [
+          187.3291473388672,
+          469.6220397949219,
+          246.66114807128906,
+          480.95428466796875
+        ],
+        "boxes": [
+          [
+            187.3291473388672,
+            469.6220397949219,
+            246.66114807128906,
+            480.95428466796875
+          ]
+        ],
+        "source": "paddle_structure"
+      },
+      "bbox": [
+        187.3291473388672,
+        469.6220397949219,
+        246.66114807128906,
+        480.95428466796875
+      ],
+      "row": 0,
+      "column": 0,
+      "cell_id": null,
+      "diagnostic_cell_id": "p2:paddle:0:r0:c0",
+      "raw_declaration": {
+        "text": "(원,조원, %, %pt)",
+        "bbox": [
+          187.3291473388672,
+          469.6220397949219,
+          246.66114807128906,
+          480.95428466796875
+        ],
+        "confidence": 94.93110775947571,
+        "source": "paddle_structure",
+        "line_id": "paddle:66",
+        "model": "PP-StructureV3/PP-OCRv5_mobile_det/korean_PP-OCRv5_mobile_rec",
+        "bbox_granularity": "recognized_text_region",
+        "region_id": 9,
+        "ocr_stream": "paddle_structure",
+        "block_label": "table",
+        "block_order": null,
+        "observation_index": 66,
+        "observation_char_span": [
+          0,
+          14
+        ],
+        "char_start": 424,
+        "char_end": 438
+      },
+      "bbox_granularity": "shared recognized text region; no per-unit character bbox",
+      "page": 2,
+      "topology": [
+        {
+          "table_index": 0,
+          "row": 0,
+          "column": 0,
+          "rowspan": 2,
+          "colspan": 1,
+          "text": "(원,조원, %, %pt)",
+          "bbox": [
+            183.4569109963366,
+            462.0701051247621,
+            249.16620595769564,
+            488.0059951155445
+          ],
+          "cell_id": "p2:paddle:0:r0:c0",
+          "overlap_ratio": 1.0
+        }
+      ],
+      "scope": "table-level declaration in merged header cell",
+      "ownership_id": null,
+      "context_id": null,
+      "unit_primitive_id": null,
+      "ids_note": "cell_id is a diagnostic coordinate label; no production unit/ownership ID exists",
+      "header": true,
+      "table_level": true,
+      "parser_source": "paddle_structure",
+      "source_verified": true,
+      "association_verified": false,
+      "unit_dependency_verified": false,
+      "verification_status": "literal declaration observed; metric/value binding unresolved",
+      "eligible_whole_word_unit": []
+    },
+    {
+      "id": "declared-unit-2",
+      "raw_unit_text": "조원",
+      "canonical_unit": "조원",
+      "semantic_unit": "조원",
+      "source_span": {
+        "char_start": 427,
+        "char_end": 429,
+        "quote": "조원",
+        "bbox": [
+          187.3291473388672,
+          469.6220397949219,
+          246.66114807128906,
+          480.95428466796875
+        ],
+        "boxes": [
+          [
+            187.3291473388672,
+            469.6220397949219,
+            246.66114807128906,
+            480.95428466796875
+          ]
+        ],
+        "source": "paddle_structure"
+      },
+      "bbox": [
+        187.3291473388672,
+        469.6220397949219,
+        246.66114807128906,
+        480.95428466796875
+      ],
+      "row": 0,
+      "column": 0,
+      "cell_id": null,
+      "diagnostic_cell_id": "p2:paddle:0:r0:c0",
+      "raw_declaration": {
+        "text": "(원,조원, %, %pt)",
+        "bbox": [
+          187.3291473388672,
+          469.6220397949219,
+          246.66114807128906,
+          480.95428466796875
+        ],
+        "confidence": 94.93110775947571,
+        "source": "paddle_structure",
+        "line_id": "paddle:66",
+        "model": "PP-StructureV3/PP-OCRv5_mobile_det/korean_PP-OCRv5_mobile_rec",
+        "bbox_granularity": "recognized_text_region",
+        "region_id": 9,
+        "ocr_stream": "paddle_structure",
+        "block_label": "table",
+        "block_order": null,
+        "observation_index": 66,
+        "observation_char_span": [
+          0,
+          14
+        ],
+        "char_start": 424,
+        "char_end": 438
+      },
+      "bbox_granularity": "shared recognized text region; no per-unit character bbox",
+      "page": 2,
+      "topology": [
+        {
+          "table_index": 0,
+          "row": 0,
+          "column": 0,
+          "rowspan": 2,
+          "colspan": 1,
+          "text": "(원,조원, %, %pt)",
+          "bbox": [
+            183.4569109963366,
+            462.0701051247621,
+            249.16620595769564,
+            488.0059951155445
+          ],
+          "cell_id": "p2:paddle:0:r0:c0",
+          "overlap_ratio": 1.0
+        }
+      ],
+      "scope": "table-level declaration in merged header cell",
+      "ownership_id": null,
+      "context_id": null,
+      "unit_primitive_id": null,
+      "ids_note": "cell_id is a diagnostic coordinate label; no production unit/ownership ID exists",
+      "header": true,
+      "table_level": true,
+      "parser_source": "paddle_structure",
+      "source_verified": true,
+      "association_verified": false,
+      "unit_dependency_verified": false,
+      "verification_status": "literal declaration observed; metric/value binding unresolved",
+      "eligible_whole_word_unit": []
+    },
+    {
+      "id": "declared-unit-3",
+      "raw_unit_text": "%",
+      "canonical_unit": "%",
+      "semantic_unit": "%",
+      "source_span": {
+        "char_start": 431,
+        "char_end": 432,
+        "quote": "%",
+        "bbox": [
+          187.3291473388672,
+          469.6220397949219,
+          246.66114807128906,
+          480.95428466796875
+        ],
+        "boxes": [
+          [
+            187.3291473388672,
+            469.6220397949219,
+            246.66114807128906,
+            480.95428466796875
+          ]
+        ],
+        "source": "paddle_structure"
+      },
+      "bbox": [
+        187.3291473388672,
+        469.6220397949219,
+        246.66114807128906,
+        480.95428466796875
+      ],
+      "row": 0,
+      "column": 0,
+      "cell_id": null,
+      "diagnostic_cell_id": "p2:paddle:0:r0:c0",
+      "raw_declaration": {
+        "text": "(원,조원, %, %pt)",
+        "bbox": [
+          187.3291473388672,
+          469.6220397949219,
+          246.66114807128906,
+          480.95428466796875
+        ],
+        "confidence": 94.93110775947571,
+        "source": "paddle_structure",
+        "line_id": "paddle:66",
+        "model": "PP-StructureV3/PP-OCRv5_mobile_det/korean_PP-OCRv5_mobile_rec",
+        "bbox_granularity": "recognized_text_region",
+        "region_id": 9,
+        "ocr_stream": "paddle_structure",
+        "block_label": "table",
+        "block_order": null,
+        "observation_index": 66,
+        "observation_char_span": [
+          0,
+          14
+        ],
+        "char_start": 424,
+        "char_end": 438
+      },
+      "bbox_granularity": "shared recognized text region; no per-unit character bbox",
+      "page": 2,
+      "topology": [
+        {
+          "table_index": 0,
+          "row": 0,
+          "column": 0,
+          "rowspan": 2,
+          "colspan": 1,
+          "text": "(원,조원, %, %pt)",
+          "bbox": [
+            183.4569109963366,
+            462.0701051247621,
+            249.16620595769564,
+            488.0059951155445
+          ],
+          "cell_id": "p2:paddle:0:r0:c0",
+          "overlap_ratio": 1.0
+        }
+      ],
+      "scope": "table-level declaration in merged header cell",
+      "ownership_id": null,
+      "context_id": null,
+      "unit_primitive_id": null,
+      "ids_note": "cell_id is a diagnostic coordinate label; no production unit/ownership ID exists",
+      "header": true,
+      "table_level": true,
+      "parser_source": "paddle_structure",
+      "source_verified": true,
+      "association_verified": false,
+      "unit_dependency_verified": false,
+      "verification_status": "literal declaration observed; metric/value binding unresolved",
+      "eligible_whole_word_unit": []
+    },
+    {
+      "id": "declared-unit-4",
+      "raw_unit_text": "%pt",
+      "canonical_unit": "%pt",
+      "semantic_unit": "%pt",
+      "source_span": {
+        "char_start": 434,
+        "char_end": 437,
+        "quote": "%pt",
+        "bbox": [
+          187.3291473388672,
+          469.6220397949219,
+          246.66114807128906,
+          480.95428466796875
+        ],
+        "boxes": [
+          [
+            187.3291473388672,
+            469.6220397949219,
+            246.66114807128906,
+            480.95428466796875
+          ]
+        ],
+        "source": "paddle_structure"
+      },
+      "bbox": [
+        187.3291473388672,
+        469.6220397949219,
+        246.66114807128906,
+        480.95428466796875
+      ],
+      "row": 0,
+      "column": 0,
+      "cell_id": null,
+      "diagnostic_cell_id": "p2:paddle:0:r0:c0",
+      "raw_declaration": {
+        "text": "(원,조원, %, %pt)",
+        "bbox": [
+          187.3291473388672,
+          469.6220397949219,
+          246.66114807128906,
+          480.95428466796875
+        ],
+        "confidence": 94.93110775947571,
+        "source": "paddle_structure",
+        "line_id": "paddle:66",
+        "model": "PP-StructureV3/PP-OCRv5_mobile_det/korean_PP-OCRv5_mobile_rec",
+        "bbox_granularity": "recognized_text_region",
+        "region_id": 9,
+        "ocr_stream": "paddle_structure",
+        "block_label": "table",
+        "block_order": null,
+        "observation_index": 66,
+        "observation_char_span": [
+          0,
+          14
+        ],
+        "char_start": 424,
+        "char_end": 438
+      },
+      "bbox_granularity": "shared recognized text region; no per-unit character bbox",
+      "page": 2,
+      "topology": [
+        {
+          "table_index": 0,
+          "row": 0,
+          "column": 0,
+          "rowspan": 2,
+          "colspan": 1,
+          "text": "(원,조원, %, %pt)",
+          "bbox": [
+            183.4569109963366,
+            462.0701051247621,
+            249.16620595769564,
+            488.0059951155445
+          ],
+          "cell_id": "p2:paddle:0:r0:c0",
+          "overlap_ratio": 1.0
+        }
+      ],
+      "scope": "table-level declaration in merged header cell",
+      "ownership_id": null,
+      "context_id": null,
+      "unit_primitive_id": null,
+      "ids_note": "cell_id is a diagnostic coordinate label; no production unit/ownership ID exists",
+      "header": true,
+      "table_level": true,
+      "parser_source": "paddle_structure",
+      "source_verified": true,
+      "association_verified": false,
+      "unit_dependency_verified": false,
+      "verification_status": "literal declaration observed; metric/value binding unresolved",
+      "eligible_whole_word_unit": []
+    }
+  ],
+  "period_values": [
+    {
+      "period": "3Q26F",
+      "facet": "New",
+      "value": "73.2",
+      "associated_unit": null,
+      "approved": false,
+      "predicates": {
+        "explicit_single": false,
+        "percent_suffix": false,
+        "percent_point_suffix": false,
+        "rate_branch": false,
+        "candidate_subset": [
+          "원",
+          "조원"
+        ],
+        "unique_subset": false
+      }
+    },
+    {
+      "period": "3Q26F",
+      "facet": "Old",
+      "value": "79.3",
+      "associated_unit": null,
+      "approved": false,
+      "predicates": {
+        "explicit_single": false,
+        "percent_suffix": false,
+        "percent_point_suffix": false,
+        "rate_branch": false,
+        "candidate_subset": [
+          "원",
+          "조원"
+        ],
+        "unique_subset": false
+      }
+    },
+    {
+      "period": "3Q26F",
+      "facet": "변경율",
+      "value": "-7.6",
+      "associated_unit": null,
+      "approved": false,
+      "predicates": {
+        "explicit_single": false,
+        "percent_suffix": false,
+        "percent_point_suffix": false,
+        "rate_branch": true,
+        "candidate_subset": [
+          "%",
+          "%pt"
+        ],
+        "unique_subset": false
+      }
+    },
+    {
+      "period": "2026F",
+      "facet": "New",
+      "value": "255.2",
+      "associated_unit": null,
+      "approved": false,
+      "predicates": {
+        "explicit_single": false,
+        "percent_suffix": false,
+        "percent_point_suffix": false,
+        "rate_branch": false,
+        "candidate_subset": [
+          "원",
+          "조원"
+        ],
+        "unique_subset": false
+      }
+    },
+    {
+      "period": "2026F",
+      "facet": "Old",
+      "value": "268.1",
+      "associated_unit": null,
+      "approved": false,
+      "predicates": {
+        "explicit_single": false,
+        "percent_suffix": false,
+        "percent_point_suffix": false,
+        "rate_branch": false,
+        "candidate_subset": [
+          "원",
+          "조원"
+        ],
+        "unique_subset": false
+      }
+    },
+    {
+      "period": "2026F",
+      "facet": "변경율",
+      "value": "-4.8",
+      "associated_unit": null,
+      "approved": false,
+      "predicates": {
+        "explicit_single": false,
+        "percent_suffix": false,
+        "percent_point_suffix": false,
+        "rate_branch": true,
+        "candidate_subset": [
+          "%",
+          "%pt"
+        ],
+        "unique_subset": false
+      }
+    },
+    {
+      "period": "2027F",
+      "facet": "New",
+      "value": "386.2",
+      "associated_unit": null,
+      "approved": false,
+      "predicates": {
+        "explicit_single": false,
+        "percent_suffix": false,
+        "percent_point_suffix": false,
+        "rate_branch": false,
+        "candidate_subset": [
+          "원",
+          "조원"
+        ],
+        "unique_subset": false
+      }
+    },
+    {
+      "period": "2027F",
+      "facet": "Old",
+      "value": "409.0",
+      "associated_unit": null,
+      "approved": false,
+      "predicates": {
+        "explicit_single": false,
+        "percent_suffix": false,
+        "percent_point_suffix": false,
+        "rate_branch": false,
+        "candidate_subset": [
+          "원",
+          "조원"
+        ],
+        "unique_subset": false
+      }
+    },
+    {
+      "period": "2027F",
+      "facet": "변경율",
+      "value": "-5.6",
+      "associated_unit": null,
+      "approved": false,
+      "predicates": {
+        "explicit_single": false,
+        "percent_suffix": false,
+        "percent_point_suffix": false,
+        "rate_branch": true,
+        "candidate_subset": [
+          "%",
+          "%pt"
+        ],
+        "unique_subset": false
+      }
+    }
+  ],
+  "unit_scope": "table-level only",
+  "source_proof": {
+    "declaration": true,
+    "unique_metric_value_unit": false,
+    "pdf_page_2_directly_viewed": true,
+    "pdf_sha256": "90672edb08c701b7b827f21823079d4e4239f27260ebf774c4e4d8ad61ccacd1"
+  },
+  "association_vs_admission": "A. source association",
+  "mixed_unit_table": true,
+  "HOLD_justified": true,
+  "production_changed": false,
+  "counterfactuals": [
+    {
+      "policy": "first_unit",
+      "synthetic_unverified_count": 116,
+      "production_accepted_count": 0
+    },
+    {
+      "policy": "force_table_amount",
+      "synthetic_unverified_count": 116,
+      "production_accepted_count": 0
+    },
+    {
+      "policy": "nearest_unit",
+      "reason": "All four units share one OCR region bbox; a nearest choice requires an arbitrary tie-break"
+    }
+  ],
+  "regression": {
+    "development": [
+      12,
+      12
+    ],
+    "posco": [
+      1,
+      1
+    ],
+    "selected_pack_equal": [
+      20,
+      20
+    ],
+    "review_aware_false_complete": 0,
+    "hyundai_hash_bound_pass_outcomes": 15,
+    "samsung_offline_strict": true,
+    "samsung_literal_strict": false,
+    "kia_manual_review": true,
+    "SK_HOLD": true,
+    "backend_passed": 496,
+    "backend_skipped": 1,
+    "frontend_passed": 7,
+    "targeted_passed": 210,
+    "baseline_targeted_subset": 168,
+    "lint": true,
+    "build": true,
+    "diff_check": true
+  },
+  "db": {
+    "live_hash_verified": false,
+    "reason": "localhost PostgreSQL connection refused; enforced read-only attempt; no startup/write"
+  },
+  "calls": {
+    "db_write": false,
+    "ocr": false,
+    "embedding": false,
+    "llm": false,
+    "migration": false
+  },
+  "artifacts": {
+    "evals/results/paddle/sk-unit-association-final-20261010.json": "4c7d7ecbba17641ab135bb93a6b23656d65fb1efda49482414e97f458a874fc3",
+    "evals/results/paddle/sk-unit-regression-20261010.json": "94245208355c44f7814fdfdec0f03bfbb0c0afaf8709f228592be949f64fd801",
+    "evals/results/paddle/sk-unit-composite-verification-20261010.json": "de960752708f15cf956ee678f8e657c7528134d96bc23c215ca5e06e590eee19",
+    "scripts/audit_sk_unit_association.py": "757181d722a8908527c1d7d465acdbb0e98cfc3351f520560d95c2348c66bba1",
+    "docs/sk-unit-association-audit-20261010.md": "b1f02aa5ab72d51a7b9321ccacf89223e9aedabb126991b7ed5158b62069f5c8"
+  }
+}
