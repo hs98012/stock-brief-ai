@@ -19,6 +19,12 @@ engine = create_engine(DATABASE_URL, **engine_options)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
 
+def require_postgresql(bind) -> None:
+    """Measurement scripts refuse to run against a non-PostgreSQL DB (e.g. a missing DATABASE_URL)."""
+    if bind.dialect.name != "postgresql":
+        raise SystemExit(f"DB dialect가 {bind.dialect.name}입니다. DATABASE_URL을 PostgreSQL로 지정하세요.")
+
+
 def get_db() -> Generator[Session, None, None]:
     with SessionLocal() as session:
         yield session

@@ -20,7 +20,7 @@ sys.path.insert(0, str(ROOT / "backend"))
 sys.path.insert(0, str(ROOT / "scripts"))
 from sqlalchemy import text  # noqa: E402
 
-from app.database import SessionLocal  # noqa: E402
+from app.database import SessionLocal, engine, require_postgresql  # noqa: E402
 from app.evaluation import DocumentSelector, evaluate_case, match_document, validate_fixture  # noqa: E402
 from app.generation_metrics import (  # noqa: E402
     classify_outcome, reevaluate_row, refusal_outcome, response_citation_report, summarize_generation)
@@ -172,6 +172,7 @@ def main() -> int:
     parser.add_argument("--rescore-name", default="rescored",
         help="재채점 결과 파일 이름(report-<name>.json, summary-<name>.md). 기존 파일은 덮어쓰지 않는다")
     args = parser.parse_args()
+    require_postgresql(engine)  # before any API call: citation checks must read the real DB
     if args.rescore:
         return _rescore(args.rescore, args.fixtures, args.rescore_name)
     out = args.output_dir
