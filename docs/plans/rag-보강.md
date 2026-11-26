@@ -1015,3 +1015,16 @@
 - 한계: test-v2에는 insufficient 케이스가 없어 과허용은 dev 기준 2(5/5)로만 확인했다. gold 단위는 literal 조건을 모두 담아야 포함으로 치므로, dev의 기대 페이지 단위 포함률(10/12)과 직접 비교하지 않는다.
 - [x] 13단계 채택 기준 1~5 모두 충족(기준 5는 "낮지 않음"만 충족, 개선 없음).
 - `./scripts/check.sh` 통과 (2026-11-26, test-v2 측정 기록 후, HEAD `1690d4c` + 플랜 변경): backend 809 passed, frontend 17 passed, lint, build. 임시 worktree 2개는 측정 후 제거했다.
+
+### 후속 과제: test-v2 미포함 9개 unit 원인 분석 (미착수)
+- [ ] 대상: test-v2에서 분석 packet에 들어가지 않은 gold unit 9개. 보강 전후(`79699a8`, `1690d4c`) 모두 미포함이다.
+  - cj-bio, cj-2028-op, sb-growth, sb-tp-cut, sb-4q-op, isu-backlog, isu-4q-op, hs-3q-op, hs-shock
+- **전제**: 원인을 분석하면 test-v2를 개발에 쓰게 된다. 그 시점부터 test-v2는 개발용(dev)으로 전환하고, 일반화 확인용 결과로 더 이상 보고하지 않는다.
+- **새 봉인셋이 필요하다**: 분석 결과로 수정한 효과를 확인하려면 새 봉인셋(test-v3)이 필요하다. 9단계와 같은 절차를 따른다.
+  - 사용자가 제공한 미수집 실제 PDF를 쓰고, 기존 문서와 SHA-256이 겹치지 않는지 확인한다.
+  - gold는 사람이 승인하고 봉인한다.
+  - 이번 한계를 보완하도록 insufficient 케이스를 포함한다.
+- 전환 여부와 새 봉인셋 준비는 사용자 결정 사항이다.
+
+**README 반영 (2026-11-26)**: README "RAG 보강 평가"에 "분석 필터 보강" 표와 측정 조건을 추가했다. 담은 내용은 dev 통과 10→12, 잘못된 거절 4/12→0/12, 관점 불일치 1/12→2/12, 근거 부족 거절 5/5, citation 16/16→21/21, test-v2 4/13→4/13이다. dev 개선이 특정 문서 표현(ASP, Foundry 표기)에 한정되고 봉인셋에서 효과가 없었다는 점도 함께 적었다.
+- `./scripts/check.sh` 통과 (2026-11-26, README 반영 후): backend 809 passed, frontend 17 passed, lint, build.
