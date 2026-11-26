@@ -18,6 +18,13 @@
 - API나 데이터 모델 변경 시 `api-contract.md`, `acceptance.md`, `qa-rules.md`를 함께 갱신한다.
 - 완료 전 `./scripts/check.sh`를 실행한다.
 
+## macOS 및 E2E 프로세스 보호
+
+- 사용자 승인 없이 `kill`, `pkill`, `killall`, `sudo`, `launchctl bootout/kickstart`를 실행하지 않는다. 시스템 서비스는 읽기 전용으로 관측한다.
+- PID 파일, 포트 점유, 명령 문자열 일치만으로 종료 소유권을 인정하지 않는다. 이전 세션에서 실행한 서버도 현재 세션 소유로 간주하지 않는다.
+- 직접 생성한 개발 프로세스의 실행 핸들, 부모 관계, 사용자, 시작 시각, 실행 명령을 함께 확인한다. 소유권 또는 PID 재사용 여부가 불명확하면 종료하지 않고 `BLOCKED`로 기록한다.
+- `scripts/audit_e2e_processes.py`는 읽기 전용 후보 관측 도구이며 종료 권한을 부여하지 않는다. 시스템 프로세스 재시작, 공유 Ollama/Docker 설정 변경, 다른 프로젝트 정리는 별도 승인 대상이다.
+
 ## 데이터 모델 계약
 
 현재 migration은 Ollama `bge-m3` 기준 1024차원 embedding을 사용한다. 차원 변경 시 비어 있지 않은 기존 벡터를 자동 삭제·변환하지 않는다.

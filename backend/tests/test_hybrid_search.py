@@ -110,6 +110,57 @@ def test_metadata_filter_is_applied_before_search(client, db) -> None:
     assert payload["applied_filters"] == {"ticker": "000660", "document_type": "dart_filing", "publisher": "기관B"}
 
 
+def _embedded_hbm_chunk(db):
+    provider = FakeEmbeddingProvider()
+    document, chunk = seed_chunk(db, "HBM 출하 관련 원문 인용문")
+    chunk.embedding = provider.embed([chunk.content])[0]; chunk.embedding_provider = provider.provider_name
+    chunk.embedding_model = provider.model; chunk.embedding_dimensions = provider.dimensions
+    db.commit()
+    return document, provider
+
+
+def test_hybrid_search_uses_bm25_and_vector_by_default(db) -> None:
+    from app.search import SearchFilters, hybrid_search
+    document, provider = _embedded_hbm_chunk(db)
+    result = hybrid_search(db, "HBM", 5, SearchFilters(document_id=document.id), provider, rerank=False).results[0]
+    assert result["bm25_rank"] == 1 and result["vector_rank"] == 1
+
+
+def test_vector_only_mode_skips_bm25(db) -> None:
+    from app.search import SearchFilters, hybrid_search
+    document, provider = _embedded_hbm_chunk(db)
+    execution = hybrid_search(db, "HBM", 5, SearchFilters(document_id=document.id), provider,
+                              rerank=False, use_bm25=False)
+    result = execution.results[0]
+    assert result["bm25_rank"] is None and result["vector_rank"] == 1
+    assert execution.vector_search_used is True
+
+
+def test_vector_only_mode_with_diagnostics_reports_no_bm25_rank(db) -> None:
+    from app.search import SearchFilters, hybrid_search
+    document, provider = _embedded_hbm_chunk(db)
+    execution = hybrid_search(db, "HBM", 5, SearchFilters(document_id=document.id), provider,
+                              rerank=False, diagnostics=True, use_bm25=False)
+    assert [chunk["bm25_rank"] for chunk in execution.diagnostics["chunks"]] == [None]
+
+
+def test_char_bigram_tokenizer_splits_hangul_runs_only() -> None:
+    from app.search import char_bigram_tokenize
+    assert char_bigram_tokenize("영업이익이 7,570억원 HBM 및") == [
+        "영업", "업이", "이익", "익이", "7", "570", "억원", "hbm", "및"]
+
+
+def test_bigram_tokenizer_matches_particle_attached_term(db) -> None:
+    from app.search import SearchFilters, char_bigram_tokenize, hybrid_search
+    document, _ = seed_chunk(db, "영업이익이 크게 증가했다")
+    filters = SearchFilters(document_id=document.id)
+    provider = UnavailableEmbeddingProvider()
+    assert hybrid_search(db, "영업이익", 5, filters, provider, rerank=False).results == []
+    result = hybrid_search(db, "영업이익", 5, filters, provider, rerank=False,
+                           bm25_tokenizer=char_bigram_tokenize).results[0]
+    assert result["bm25_rank"] == 1
+
+
 def test_rrf_combines_ranks_deterministically() -> None:
     from uuid import uuid4
     first, second, third = uuid4(), uuid4(), uuid4()
@@ -169,3 +220,42 @@ def test_ollama_migration_contract() -> None:
     migration = (Path(__file__).parents[1] / "alembic/versions/20260823_0003_ollama_embeddings.py").read_text()
     assert "embedding IS NOT NULL" in migration and "vector(1024)" in migration
     assert "ix_chunks_embedding_hnsw" in migration and "자동 삭제·변환하지 않습니다" in migration
+
+
+def test_rrf_bm25_weight_scales_only_bm25_contribution() -> None:
+    from uuid import uuid4
+    filler, bm25_only, vector_only = uuid4(), uuid4(), uuid4()
+    default = reciprocal_rank_fusion([filler, bm25_only], [vector_only])
+    assert [item[0] for item in default].index(vector_only) < [item[0] for item in default].index(bm25_only)
+    weighted = {item[0]: item[1] for item in reciprocal_rank_fusion([filler, bm25_only], [vector_only], bm25_weight=2.0)}
+    assert weighted[bm25_only] == pytest.approx(2 / 62)
+    assert weighted[vector_only] == pytest.approx(1 / 61)
+    assert weighted[bm25_only] > weighted[vector_only]
+
+
+def test_rrf_default_weight_matches_unweighted_call() -> None:
+    from uuid import uuid4
+    ids = [uuid4() for _ in range(4)]
+    assert reciprocal_rank_fusion(ids[:3], ids[1:], bm25_weight=1.0) == reciprocal_rank_fusion(ids[:3], ids[1:])
+
+
+@pytest.mark.parametrize("weight", [0, -1.0])
+def test_rrf_rejects_non_positive_bm25_weight(weight: float) -> None:
+    from uuid import uuid4
+    with pytest.raises(ValueError):
+        reciprocal_rank_fusion([uuid4()], [uuid4()], bm25_weight=weight)
+
+
+def test_hybrid_search_passes_bm25_weight_to_fusion(db, monkeypatch) -> None:
+    from app import search
+    document, provider = _embedded_hbm_chunk(db)
+    seen = []
+    original = search.reciprocal_rank_fusion
+    def spy(*args, **kwargs):
+        seen.append(kwargs.get("bm25_weight", 1.0))
+        return original(*args, **kwargs)
+    monkeypatch.setattr(search, "reciprocal_rank_fusion", spy)
+    filters = search.SearchFilters(document_id=document.id)
+    search.hybrid_search(db, "HBM", 5, filters, provider, rerank=False)
+    search.hybrid_search(db, "HBM", 5, filters, provider, rerank=False, bm25_weight=2.0)
+    assert seen == [1.0, 2.0]

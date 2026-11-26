@@ -1,4 +1,6 @@
 from datetime import date
+from app.evidence_facts import economic_facts
+from app.analysis_retrieval import evidence_spans
 import json
 from uuid import uuid4
 
@@ -15,7 +17,7 @@ from app.generation import (GenerationConnectionError, GenerationHTTPError, Gene
     get_generation_provider)
 from app.main import app
 from app.analysis_service import (_grounded_polarity_fallback, _item_supported_by_quotes,
-    _persist_run)
+    _persist_run, _prompt)
 from app.models import AnalysisRun, DocumentType, EmbeddingStatus
 from app.schemas import GeneratedAnalysis, GeneratedItem
 from tests.test_hybrid_search import FakeEmbeddingProvider, UnavailableEmbeddingProvider, seed_chunk
@@ -29,6 +31,18 @@ class FakeGenerationProvider:
         self.calls += 1
         assert "evidence packet" in prompt and "positive_candidates" in prompt and "negative_candidates" in prompt and "rrf_score" not in prompt
         return self.result
+
+
+def test_prompt_excludes_geometry_audit_payload_but_preserves_literal_facts(db):
+    document, _ = ready_document(db)
+    packet = {'positive_candidates': [{'chunk_id':str(uuid4()),'text':'원문 매출 증가',
+        'table_evidence':[{'metric':'매출액','period':'2026F','value':'3.42','unit':'조원',
+            'scope':'연결','source_spans':[{'audit':'oversized-proof-must-stay-local'}]}]}],
+        'negative_candidates':[], 'neutral_candidates':[]}
+    prompt = _prompt(document, '호재 악재 요약', packet)
+    assert 'oversized-proof-must-stay-local' not in prompt
+    assert all(x in prompt for x in ['매출액','2026F','3.42','조원','연결','원문 매출 증가'])
+    assert len(prompt) < 3500
 
 
 class UnavailableGenerationProvider:
@@ -62,7 +76,7 @@ def test_quote_support_validation_accepts_explicit_korean_english_business_alias
     item = GeneratedItem(title="파운드리 적자", reason="보고서는 파운드리 영업손실을 부담으로 제시합니다.",
         evidence_chunk_ids=[chunk_id])
     allowed = {chunk_id: {"quote": "표 2. 부문별 실적 전망 2026 3Q26F 4Q26F 영업이익 (조원) Foundry/LS -1.4 -2.2 -0.9"}}
-    assert _item_supported_by_quotes(item, allowed)
+    assert not _item_supported_by_quotes(item, allowed)  # unverified table/translated label
 
 
 def test_quote_support_validation_rejects_unquoted_price_and_competition_causes() -> None:
@@ -74,23 +88,41 @@ def test_quote_support_validation_rejects_unquoted_price_and_competition_causes(
 
 
 def test_general_summary_fallback_uses_only_available_polarity_candidate() -> None:
-    positive_id = uuid4(); negative_id = uuid4(); used = set()
-    evidence = [
-        {"chunk_id": positive_id, "analysis_perspective": "positive", "quote": "HBM 가격 상승"},
-        {"chunk_id": negative_id, "analysis_perspective": "negative",
-            "quote": "표 2. 부문별 실적 전망 2026 3Q26F 4Q26F 영업이익률 (%) Foundry/LS -20.0 -33.3"},
-    ]
+    evidence = evidence_spans({"chunk_id": uuid4(), "page_number": 1,
+        "quote": "판매량은 증가했습니다. 원가는 증가했습니다."}, "")
+    used = set()
     positive = _grounded_polarity_fallback(evidence, "positive", used, "증권사 리포트 해석")
     negative = _grounded_polarity_fallback(evidence, "negative", used, "증권사 리포트 해석")
-    assert positive and positive.evidence_chunk_ids == [positive_id]
-    assert negative and negative.evidence_chunk_ids == [negative_id]
-    assert negative.title == "파운드리 수익성 부담" and "보고서는" in negative.reason
+    assert positive and positive.title == "판매량 증가"
+    assert negative and negative.title == "원가 증가"
+    assert positive.evidence_chunk_ids != negative.evidence_chunk_ids
     assert _grounded_polarity_fallback(evidence, "negative", used, "증권사 리포트 해석") is None
 
 
 def test_general_summary_fallback_does_not_create_missing_polarity() -> None:
     evidence = [{"chunk_id": uuid4(), "analysis_perspective": "neutral", "quote": "회사 연혁"}]
     assert _grounded_polarity_fallback(evidence, "positive", set(), "증권사 리포트 해석") is None
+    assert _grounded_polarity_fallback(evidence, "negative", set(), "증권사 리포트 해석") is None
+
+
+def test_hanwha_2q25_valid_span_is_restored_as_negative_fallback() -> None:
+    chunk_id = uuid4(); span_id = uuid4()
+    evidence = [{"chunk_id": span_id, "source_chunk_id": chunk_id, "page_number": 1,
+        "char_start": 100, "char_end": 220, "quality_status": "valid", "span_kind": "text",
+        "analysis_perspective": "negative",
+        "quote": "2Q25 잠정실적 매출액 74조원(-6% QoQ), 영업이익 4.6조원(-31% QoQ)으로 시장 기대치 영업이익 6.2조원을 하회."}]
+    evidence[0]["facts"] = economic_facts(evidence[0]["quote"])
+    item = _grounded_polarity_fallback(evidence, "negative", set(), "증권사 리포트 해석")
+    assert item and item.title == "영업이익 시장 기대치 하회"
+    assert item.evidence_chunk_ids == [span_id]
+    assert "보고서는" in item.reason and all(term not in item.reason for term in ("매수", "매도", "주가"))
+
+
+def test_incomplete_table_or_invalid_span_cannot_be_used_for_fallback() -> None:
+    evidence = [{"chunk_id": uuid4(), "source_chunk_id": uuid4(), "page_number": 4,
+        "char_start": 0, "char_end": 80, "quality_status": "valid", "span_kind": "table",
+        "table_verified": False, "analysis_perspective": "negative",
+        "quote": "영업이익 Foundry/LS -7.6 -5.1 -2.8"}]
     assert _grounded_polarity_fallback(evidence, "negative", set(), "증권사 리포트 해석") is None
 
 
@@ -162,7 +194,7 @@ def test_summary_in_service_voice_with_investment_judgment_is_replaced_when_cite
     assert payload["positives"] and payload["citations"]
 
 
-def test_attributed_neutral_report_summary_is_kept(client, db) -> None:
+def test_summary_is_rebuilt_from_surviving_specific_titles(client, db) -> None:
     document, chunk = ready_document(db)
     summary = ("보고서는 HBM 수요 증가 가능성을 긍정 요인으로 언급합니다. "
         "초보자는 이 내용이 향후 실적에 영향을 줄 수 있는 근거라는 점을 확인할 수 있습니다.")
@@ -171,7 +203,7 @@ def test_attributed_neutral_report_summary_is_kept(client, db) -> None:
         evidence_chunk_ids=[chunk.id])], negatives=[])
     set_providers(FakeGenerationProvider(result))
     payload = client.post("/api/v1/analyses", json={"document_id": str(document.id), "question": "HBM 전망"}).json()
-    assert payload["summary"] == summary
+    assert payload["summary"] == "보고서는 HBM 수요 증가 전망을 긍정 요인으로 언급합니다."
 
 
 def test_unattributed_outlook_in_summary_is_replaced_when_cited(client, db) -> None:
@@ -205,7 +237,7 @@ def test_unattributed_item_inference_is_replaced_with_citation_bound_attribution
         evidence_chunk_ids=[chunk.id])], negatives=[])
     set_providers(FakeGenerationProvider(result))
     payload = client.post("/api/v1/analyses", json={"document_id": str(document.id), "question": "HBM 전망"}).json()
-    assert payload["positives"][0]["reason"] == "보고서는 인용된 원문에서 HBM 수요 관련 내용을 제시합니다."
+    assert payload["positives"][0]["reason"] == "보고서는 ‘HBM 수요 증가 전망’ 내용을 제시합니다."
     assert payload["citations"][0]["chunk_id"] == str(chunk.id)
 
 
@@ -221,11 +253,73 @@ def test_english_item_is_removed_for_korean_question(client, db) -> None:
 def test_same_chunk_is_not_reused_across_items(client, db) -> None:
     document, chunk = ready_document(db)
     result = GeneratedAnalysis(summary="근거 중복을 제거한 요약입니다.", positives=[GeneratedItem(
-        title="첫 번째 호재", reason="실적 전망이 개선된다는 리포트 해석입니다.", evidence_chunk_ids=[chunk.id]), GeneratedItem(
-        title="두 번째 호재", reason="같은 근거를 다시 사용한 설명입니다.", evidence_chunk_ids=[chunk.id])], negatives=[])
+        title="HBM 수요 증가", reason="보고서는 HBM 수요 증가를 실적 요인으로 제시합니다.", evidence_chunk_ids=[chunk.id]), GeneratedItem(
+        title="HBM 수요 확대", reason="보고서는 같은 HBM 수요 근거를 제시합니다.", evidence_chunk_ids=[chunk.id])], negatives=[])
     set_providers(FakeGenerationProvider(result))
     payload = client.post("/api/v1/analyses", json={"document_id": str(document.id), "question": "HBM 전망"}).json()
     assert len(payload["positives"]) == 1 and len(payload["citations"]) == 1
+
+
+def test_disjoint_spans_from_same_chunk_can_support_both_polarities(client, db, monkeypatch) -> None:
+    document, chunk = ready_document(db, "HBM 시장 점유율 확대가 예상됩니다. AIDC Capex 감소 위험이 있습니다.")
+    positive_id = uuid4(); negative_id = uuid4()
+    base = {"source_chunk_id": chunk.id, "document_id": document.id,
+        "document_name": document.filename, "company_name": document.company_name,
+        "publisher": document.issuer, "published_at": document.published_at,
+        "document_type": document.document_type, "page_number": 1, "section_title": None,
+        "quality_status": "valid", "exclusion_reason": None}
+    evidence = [
+        {**base, "chunk_id": positive_id, "char_start": 0, "char_end": 22,
+            "quote": "HBM 시장 점유율 확대가 예상됩니다.", "analysis_perspective": "positive"},
+        {**base, "chunk_id": negative_id, "char_start": 24, "char_end": 49,
+            "quote": "AIDC Capex 감소 위험이 있습니다.", "analysis_perspective": "negative"},
+    ]
+    for row in evidence:
+        row["char_start"] = chunk.content.index(row["quote"])
+        row["char_end"] = row["char_start"] + len(row["quote"])
+        row["facts"] = economic_facts(row["quote"])
+    monkeypatch.setattr("app.analysis_service.collect_analysis_evidence", lambda *args, **kwargs: evidence)
+    generated = GeneratedAnalysis(summary="요약", positives=[GeneratedItem(
+        title="HBM 시장 점유율 확대 전망", reason="보고서는 HBM 시장 점유율 확대를 전망합니다.",
+        evidence_chunk_ids=[positive_id])], negatives=[GeneratedItem(
+        title="AI 데이터센터 투자 축소 위험", reason="보고서는 AIDC Capex 감소 위험을 언급합니다.",
+        evidence_chunk_ids=[negative_id])])
+    set_providers(FakeGenerationProvider(generated))
+    response = client.post("/api/v1/analyses", json={"document_id": str(document.id),
+        "question": "이 보고서를 읽고 주식 초보자 관점에서 호재와 악재를 각각 최대 3개까지 요약해줘."})
+    assert response.status_code == 200
+    payload = response.json()
+    assert len(payload["positives"]) == len(payload["negatives"]) == 1
+    assert {citation["source_chunk_id"] for citation in payload["citations"]} == {str(chunk.id)}
+    assert {citation["char_start"] for citation in payload["citations"]} == {row["char_start"] for row in evidence}
+
+
+def test_empty_positive_reports_extraction_limit_without_exposing_ocr_text(client, db, monkeypatch) -> None:
+    document, chunk = ready_document(db, "Foundry/LS 영업이익 -7.6 -5.1 -2.8")
+    negative_id = uuid4()
+    evidence = [{"chunk_id": negative_id, "source_chunk_id": chunk.id, "page_number": 4,
+        "char_start": 0, "char_end": len(chunk.content), "quality_status": "valid",
+        "span_kind": "table", "table_verified": True, "analysis_perspective": "negative",
+        "quote": "영업이익 Foundry/LS -7.6 -5.1 -2.8", "document_name": document.filename,
+        "company_name": document.company_name, "publisher": document.issuer,
+        "published_at": document.published_at, "document_type": document.document_type,
+        "section_title": None}]
+
+    def fake_collect(*args, **kwargs):
+        diagnostics = args[-1]
+        diagnostics["excluded_pages"] = {"positive": {1}}
+        return evidence
+
+    monkeypatch.setattr("app.analysis_service.collect_analysis_evidence", fake_collect)
+    generated = GeneratedAnalysis(summary="요약", positives=[], negatives=[GeneratedItem(
+        title="파운드리 수익성 부담", reason="보고서는 Foundry/LS 영업이익 수치를 수익성 부담으로 제시합니다.",
+        evidence_chunk_ids=[negative_id])])
+    set_providers(FakeGenerationProvider(generated))
+    payload = client.post("/api/v1/analyses", json={"document_id": str(document.id),
+        "question": "이 보고서를 읽고 주식 초보자 관점에서 호재와 악재를 각각 최대 3개까지 요약해줘."}).json()
+    assert payload["positive_empty_state"] == {"reason": "extraction_limited",
+        "message": "표시 가능한 호재 근거를 원문에서 신뢰성 있게 추출하지 못했습니다.", "page_number": 1}
+    assert "Bae enue" not in json.dumps(payload, ensure_ascii=False)
 
 
 def test_item_cannot_borrow_specific_fact_from_another_quote(client, db) -> None:
@@ -343,7 +437,7 @@ def test_ollama_generation_http_error_is_distinct(caplog) -> None:
         lambda request: httpx.Response(400, json={"error": "failed to parse grammar"})))
     with pytest.raises(GenerationHTTPError, match="HTTP 400"):
         provider.generate("prompt")
-    assert "failed to parse grammar" in caplog.text
+    assert "status=400" in caplog.text and "failed to parse grammar" not in caplog.text
 
 
 def test_ollama_generation_connection_error_is_distinct() -> None:
@@ -358,7 +452,7 @@ def test_invalid_generation_json_is_rejected(caplog) -> None:
         lambda request: httpx.Response(200, json={"response": "not-json"})))
     with pytest.raises(GenerationJSONError, match="JSON 파싱"):
         provider.generate("prompt")
-    assert "not-json" in caplog.text
+    assert "JSON parse error" in caplog.text and "not-json" not in caplog.text
 
 
 def test_invalid_ollama_envelope_is_rejected() -> None:
@@ -376,7 +470,7 @@ def test_ollama_schema_uses_supported_inline_types() -> None:
 
 class GeminiResponse:
     def __init__(self, text: str, *, blocked: bool = False) -> None:
-        self.output_text = text
+        self.text = text
         self.status = "blocked" if blocked else "completed"
 
 
@@ -384,7 +478,7 @@ class GeminiInteractions:
     def __init__(self, outcome):
         self.outcomes = list(outcome) if isinstance(outcome, list) else [outcome]
         self.calls = 0; self.kwargs = None
-    def create(self, **kwargs):
+    def generate_content(self, **kwargs):
         self.calls += 1; self.kwargs = kwargs
         outcome = self.outcomes[min(self.calls - 1, len(self.outcomes) - 1)]
         if isinstance(outcome, Exception): raise outcome
@@ -392,7 +486,7 @@ class GeminiInteractions:
 
 
 class GeminiClient:
-    def __init__(self, outcome): self.interactions = GeminiInteractions(outcome)
+    def __init__(self, outcome): self.models = GeminiInteractions(outcome)
 
 
 class GeminiAPIError(Exception):
@@ -411,12 +505,12 @@ def test_gemini_provider_returns_existing_schema_and_structured_config() -> None
     provider = GeminiGenerationProvider(api_key="test-only", model="configured-model", timeout_seconds=12, client=client)
     result = provider.generate("evidence prompt")
     assert isinstance(result, GeneratedAnalysis) and result.summary.startswith("보고서는")
-    assert client.interactions.kwargs["model"] == "configured-model"
-    assert client.interactions.kwargs["store"] is False
-    assert client.interactions.kwargs["timeout"] == 12
-    response_format = client.interactions.kwargs["response_format"]
-    assert response_format["mime_type"] == "application/json"
-    assert response_format["schema"] == OLLAMA_ANALYSIS_SCHEMA
+    assert client.models.kwargs["model"] == "configured-model"
+    config = client.models.kwargs['config']
+    assert config['http_options']['timeout'] == 12000
+    assert config['http_options']['retry_options']['attempts'] == 1
+    assert config['response_mime_type'] == 'application/json'
+    assert config['response_json_schema'] == OLLAMA_ANALYSIS_SCHEMA
 
 
 class CountingProvider:
@@ -440,7 +534,7 @@ def test_gemini_retryable_http_errors_attempt_twice_then_fallback_once(code) -> 
     ollama = CountingProvider("ollama", result)
     provider = FallbackGenerationProvider(gemini, ollama)
     assert provider.generate("prompt") is result
-    assert client.interactions.calls == 2 and delays == [1] and ollama.calls == 1
+    assert client.models.calls == 2 and delays == [1] and ollama.calls == 1
     assert provider.provider_name == "ollama"
     assert provider.generation_trace["primary_attempts"] == 2
     assert provider.generation_trace["fallback_used"] is True
@@ -457,7 +551,7 @@ def test_gemini_connection_and_timeout_retry_then_fallback_once(error) -> None:
     provider = FallbackGenerationProvider(GeminiGenerationProvider(api_key="test-only", client=client,
         max_attempts=2, retry_base_delay_seconds=0, sleep_fn=lambda _: None), ollama)
     assert provider.generate("prompt") is result
-    assert client.interactions.calls == 2 and ollama.calls == 1
+    assert client.models.calls == 2 and ollama.calls == 1
 
 
 def test_gemini_success_never_calls_ollama() -> None:
@@ -476,7 +570,7 @@ def test_fallback_none_retries_gemini_but_never_calls_ollama() -> None:
     provider = FallbackGenerationProvider(GeminiGenerationProvider(api_key="test-only", client=client,
         max_attempts=2, retry_base_delay_seconds=0, sleep_fn=lambda _: None))
     with pytest.raises(GenerationServerError): provider.generate("prompt")
-    assert client.interactions.calls == 2 and ollama.calls == 0
+    assert client.models.calls == 2 and ollama.calls == 0
     assert provider.generation_trace["fallback_used"] is False
 
 
@@ -487,7 +581,7 @@ def test_failed_ollama_fallback_trace_records_final_provider_once() -> None:
         max_attempts=2, retry_base_delay_seconds=0, sleep_fn=lambda _: None), ollama)
     with pytest.raises(GenerationOutputError, match="fallback failed"):
         provider.generate("prompt")
-    assert client.interactions.calls == 2 and ollama.calls == 1
+    assert client.models.calls == 2 and ollama.calls == 1
     assert provider.generation_trace["final_provider"] == "ollama"
     assert provider.generation_trace["fallback_used"] is True
 
@@ -534,17 +628,20 @@ def test_gemini_invalid_json_safety_and_auth_never_retry_or_fallback() -> None:
         primary = GeminiGenerationProvider(api_key="test-only", client=client, max_attempts=2,
             retry_base_delay_seconds=0, sleep_fn=lambda _: None)
         with pytest.raises(error_type): FallbackGenerationProvider(primary, ollama).generate("prompt")
-        assert client.interactions.calls == 1 and ollama.calls == 0
+        assert client.models.calls == 1 and ollama.calls == 0
 
 
-def test_citation_validation_failure_does_not_trigger_provider_fallback(client, db) -> None:
+def test_citation_validation_failure_does_not_trigger_provider_fallback(client, db, monkeypatch) -> None:
+    monkeypatch.setenv('ANALYSIS_EXTERNAL_ENABLED', '1')
+    monkeypatch.setenv('ANALYSIS_OLLAMA_FALLBACK_ENABLED', '1')
     document, _ = ready_document(db)
     invalid = GeneratedAnalysis(summary="보고서는 근거를 설명합니다.", positives=[GeneratedItem(
         title="실적", reason="보고서는 실적을 제시합니다.", evidence_chunk_ids=[uuid4()])], negatives=[])
     primary = CountingProvider("gemini", invalid); fallback = CountingProvider("ollama", invalid)
     provider = FallbackGenerationProvider(primary, fallback)
     set_providers(provider)
-    response = client.post("/api/v1/analyses", json={"document_id": str(document.id), "question": "실적"})
+    response = client.post("/api/v1/analyses", json={"document_id": str(document.id), "question": "실적",
+        'execution_mode': 'FALLBACK_ALLOWED', 'external_consent': True})
     assert response.status_code == 502
     assert primary.calls == 1 and fallback.calls == 0
     run = db.query(AnalysisRun).one()
@@ -553,11 +650,13 @@ def test_citation_validation_failure_does_not_trigger_provider_fallback(client, 
 
 
 def test_provider_selection_supports_gemini_and_existing_ollama(monkeypatch) -> None:
-    monkeypatch.setenv("ANALYSIS_LLM_PROVIDER", "gemini"); monkeypatch.setenv("ANALYSIS_LLM_FALLBACK_PROVIDER", "none")
+    from app.schemas import AnalysisRequest
+    monkeypatch.setenv('ANALYSIS_EXTERNAL_ENABLED', '1')
     monkeypatch.setenv("GEMINI_API_KEY", "test-only")
     monkeypatch.setattr("app.generation.GeminiGenerationProvider", lambda: CountingProvider("gemini", None))
-    selected = get_generation_provider()
+    selected = get_generation_provider(AnalysisRequest(document_id=uuid4(),
+        execution_mode='EXTERNAL_WITH_CONSENT', external_consent=True))
     assert selected.provider_name == "gemini"
     monkeypatch.setenv("ANALYSIS_LLM_PROVIDER", "ollama")
     monkeypatch.setattr("app.generation.OllamaGenerationProvider", lambda: CountingProvider("ollama", None))
-    assert get_generation_provider().provider_name == "ollama"
+    assert get_generation_provider(AnalysisRequest(document_id=uuid4())).provider_name == "ollama"

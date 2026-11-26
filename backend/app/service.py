@@ -8,8 +8,8 @@ from pathlib import Path
 from fastapi import HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
-from .chunking import split_page
-from .models import Chunk, Document, DocumentStatus, DocumentType, Page
+from .chunking import split_page, structured_spans
+from .models import Chunk, Document, DocumentStatus, DocumentType, Page, PageExtraction
 from .pdf_pipeline import extract_pdf
 
 MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_BYTES", str(50 * 1024 * 1024)))
@@ -63,9 +63,23 @@ def ingest_document(db: Session, file: UploadFile, company_name: str, stock_code
             page = Page(document_id=document.id, page_number=result.page_number, native_text=result.native_text, ocr_text=result.ocr_text,
                 final_text=result.final_text, text_source=result.text_source, page_image_path=result.page_image_path, ocr_error=result.ocr_error)
             db.add(page); db.flush()
-            for span in split_page(result.final_text):
+            for span in (structured_spans(result.final_text, result.provenance)
+                         if result.provenance.get("parser_version", "").startswith("fact-fusion-")
+                         else split_page(result.final_text)):
                 db.add(Chunk(document_id=document.id, page_id=page.id, page_number=result.page_number, section_title=None,
                     content=span.content, char_start=span.char_start, char_end=span.char_end, embedding=None))
+            db.flush()
+            if result.provenance:
+                chunks = db.query(Chunk).filter(Chunk.page_id == page.id).all()
+                facts = []
+                for fact in result.table_facts:
+                    ids = {str(c.id) for span in fact["source_spans"] for c in chunks
+                           if c.char_start < span["char_end"] and c.char_end > span["char_start"]}
+                    facts.append({**fact, "source_chunk_ids": sorted(ids)})
+                page.extraction = PageExtraction(parser_version=result.provenance["parser_version"],
+                    final_text_sha256=hashlib.sha256(result.final_text.encode()).hexdigest(),
+                    provenance=result.provenance, table_facts=facts)
+
         document.total_pages = len(extracted)
         document.status = DocumentStatus.completed_with_errors if any(page.ocr_error for page in extracted) else DocumentStatus.completed
         db.commit(); db.refresh(document)

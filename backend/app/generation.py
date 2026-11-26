@@ -3,12 +3,47 @@ import logging
 import os
 import re
 import time
+from contextvars import ContextVar
+from datetime import datetime, timezone
+from functools import wraps
 from typing import Any, Protocol
 
 import httpx
 from pydantic import ValidationError
 
-from .schemas import GeneratedAnalysis
+from .schemas import AnalysisRequest, GeneratedAnalysis
+from .local_inference import serial_local_inference
+
+generation_request_id = ContextVar("generation_request_id", default=None)
+generation_event_sink = ContextVar('generation_event_sink', default=None)
+
+
+def generation_event(stage: str, provider: str | None = None):
+    sink = generation_event_sink.get()
+    if sink is not None:
+        sink({'type': 'status', 'stage': stage, 'provider': provider})
+
+
+def observed_generation(function):
+    @wraps(function)
+    def wrapped(self, prompt):
+        started = time.monotonic()
+        self._trace = {"request_id": generation_request_id.get(), "provider": self.provider_name,
+            "model": self.model, "purpose": "analysis_cards", "started_at": datetime.now(timezone.utc).isoformat(),
+            "prompt_chars": len(prompt)}
+        context = dict(self._trace)
+        status = "success"
+        try:
+            return function(self, prompt)
+        except Exception as exc:
+            status = type(exc).__name__
+            raise
+        finally:
+            self._trace.update(context)
+            self._trace.update(ended_at=datetime.now(timezone.utc).isoformat(), status=status,
+                latency_ms=round((time.monotonic() - started) * 1000, 2))
+            logger.info("generation_call %s", json.dumps(self._trace, ensure_ascii=False))
+    return wrapped
 
 logger = logging.getLogger(__name__)
 GENERATION_HELP = "맥에서 Ollama를 실행하고 `ollama pull gemma3:4b` 후 `ollama list`로 모델을 확인하세요."
@@ -43,6 +78,7 @@ OLLAMA_ANALYSIS_SCHEMA = {
 
 class GenerationTransientError(RuntimeError): pass
 class GenerationConfigurationError(RuntimeError): pass
+class GenerationPolicyError(GenerationConfigurationError): pass
 class GenerationConnectionError(GenerationConfigurationError, GenerationTransientError): pass
 class GenerationOutputError(RuntimeError): pass
 class GenerationHTTPError(GenerationOutputError): pass
@@ -66,7 +102,8 @@ class GenerationProvider(Protocol):
 
 
 def _response_excerpt(response: httpx.Response) -> str:
-    return " ".join(response.text[:RESPONSE_LOG_LIMIT].split())
+    # Error bodies can echo prompts, source text, or credentials.
+    return "응답 본문은 기록하지 않습니다"
 
 
 def _strip_json_fence(raw: str) -> str:
@@ -99,6 +136,7 @@ def _normalize_evidence_ids(decoded: object) -> object:
     return decoded
 
 
+
 class OllamaGenerationProvider:
     provider_name = "ollama"
 
@@ -109,6 +147,7 @@ class OllamaGenerationProvider:
         self.temperature = float(os.getenv("GENERATION_TEMPERATURE", "0"))
         self.client = client or httpx.Client(base_url=self.base_url, timeout=httpx.Timeout(self.timeout_seconds, connect=5.0))
         self._unavailable_reason: str | None = None
+        self._trace: dict[str, Any] = {}
 
     @property
     def model(self) -> str: return self._model
@@ -143,9 +182,17 @@ class OllamaGenerationProvider:
     @property
     def unavailable_reason(self) -> str | None: return self._unavailable_reason
 
+    @property
+    def generation_trace(self) -> dict[str, Any]: return dict(self._trace)
+
+    @serial_local_inference
+    @observed_generation
     def generate(self, prompt: str) -> GeneratedAnalysis:
         payload = {"model": self.model, "system": KOREAN_ANALYSIS_SYSTEM_PROMPT, "prompt": prompt, "stream": False,
             "format": OLLAMA_ANALYSIS_SCHEMA, "options": {"temperature": self.temperature}}
+        if os.getenv("STOCK_BRIEF_LOW_MEMORY") == "1":
+            payload["keep_alive"] = "60s"
+            payload["options"]["num_ctx"] = 4096
         try:
             response = self.client.post("/api/generate", json=payload)
         except httpx.TimeoutException as exc:
@@ -169,6 +216,16 @@ class OllamaGenerationProvider:
             logger.error("Ollama generation envelope JSON error status=%s body=%r", response.status_code, _response_excerpt(response))
             raise GenerationResponseError("Ollama 생성 응답 본문이 올바른 JSON 형식이 아닙니다.") from exc
         raw = envelope.get("response") if isinstance(envelope, dict) else None
+        self._trace = {key: envelope[key] for key in ('model', 'prompt_eval_count', 'eval_count',
+            'load_duration', 'prompt_eval_duration', 'eval_duration', 'total_duration')
+            if isinstance(envelope, dict) and key in envelope}
+        self._trace['keep_alive'] = payload.get('keep_alive', 'server_default')
+        self._trace['num_ctx'] = payload['options'].get('num_ctx', 'server_default')
+        self._trace['num_batch'] = payload['options'].get('num_batch', 'server_default')
+        self._trace['wire_prompt_chars'] = len(prompt)
+        duration = self._trace.get('eval_duration', 0)
+        if duration:
+            self._trace['tokens_per_second'] = self._trace.get('eval_count', 0) / (duration / 1e9)
         if not isinstance(raw, str):
             logger.error("Ollama generation response field missing status=%s body=%r", response.status_code, _response_excerpt(response))
             raise GenerationResponseError("Ollama 생성 응답에 문자열 `response` 필드가 없습니다.")
@@ -176,13 +233,12 @@ class OllamaGenerationProvider:
         try:
             decoded = _normalize_evidence_ids(json.loads(cleaned))
         except json.JSONDecodeError as exc:
-            logger.error("Ollama model JSON parse error model=%s response_excerpt=%r", self.model, cleaned[:RESPONSE_LOG_LIMIT])
+            logger.error("Ollama model JSON parse error model=%s line=%s column=%s", self.model, exc.lineno, exc.colno)
             raise GenerationJSONError(f"Ollama 모델 응답의 JSON 파싱에 실패했습니다(line {exc.lineno}, column {exc.colno}).") from exc
         try:
             return GeneratedAnalysis.model_validate(decoded)
         except ValidationError as exc:
-            logger.error("Ollama model schema validation error model=%s errors=%s details=%r response_excerpt=%r",
-                self.model, exc.error_count(), exc.errors(include_input=False), cleaned[:RESPONSE_LOG_LIMIT])
+            logger.error("Ollama model schema validation error model=%s errors=%s", self.model, exc.error_count())
             raise GenerationResponseError(f"Ollama 모델 응답이 분석 JSON Schema와 일치하지 않습니다({exc.error_count()}개 검증 오류).") from exc
 
 
@@ -219,10 +275,16 @@ class GeminiGenerationProvider:
         self._trace: dict[str, Any] = {}
         self.client = client
         if self.client is None and self.api_key:
-            from google import genai
-            from google.genai import types
+            try:
+                from google import genai
+                from google.genai import types
+            except ImportError as exc:
+                raise GenerationConfigurationError('Gemini SDK가 없습니다. backend/requirements.txt의 고정 dependency를 설치하세요.') from exc
             self.client = genai.Client(api_key=self.api_key,
-                http_options=types.HttpOptions(timeout=int(self.timeout_seconds * 1000)))
+                http_options=types.HttpOptions(timeout=int(self.timeout_seconds * 1000),
+                    # GenerateContent counts the original request as attempt 1.
+                    # The application loop alone owns transient retries.
+                    retry_options=types.HttpRetryOptions(attempts=1)))
 
     @property
     def model(self) -> str: return self._model
@@ -246,7 +308,7 @@ class GeminiGenerationProvider:
             raise GenerationConnectionError("Gemini API 네트워크 연결에 실패했습니다.") from exc
         if status == 429:
             raise GenerationRateLimitError("Gemini API 요청 한도를 초과했습니다(HTTP 429).") from exc
-        if status in (503, 504):
+        if status in (500, 502, 503, 504):
             raise GenerationServerError(f"Gemini API가 일시적인 서버 오류를 반환했습니다(HTTP {status}).") from exc
         if status in (401, 403):
             raise GenerationConfigurationError(f"Gemini API 인증에 실패했습니다(HTTP {status}). GEMINI_API_KEY를 확인하세요.") from exc
@@ -256,26 +318,29 @@ class GeminiGenerationProvider:
             raise GenerationOutputError("Gemini 요청 입력 또는 SDK 설정이 올바르지 않습니다.") from exc
         raise GenerationOutputError(f"Gemini API 요청이 거부되었습니다(HTTP {status}). 요청과 모델 설정을 확인하세요.") from exc
 
+    @observed_generation
     def generate(self, prompt: str) -> GeneratedAnalysis:
         if not self.available:
             raise GenerationConfigurationError(self.unavailable_reason or "Gemini 설정이 올바르지 않습니다.")
         started = self._monotonic()
         self._trace = {"provider": self.provider_name, "model": self.model, "attempts": 0,
-            "http_statuses": [], "fallback_used": False, "latency_ms": 0}
+            "http_statuses": [], "fallback_used": False, "latency_ms": 0, "calls": []}
         response = None
         for attempt in range(1, self.max_attempts + 1):
             attempt_started = self._monotonic()
             self._trace["attempts"] = attempt
             try:
-                response = self.client.interactions.create(
+                response = self.client.models.generate_content(
                     model=self.model,
-                    input=prompt,
-                    system_instruction=KOREAN_ANALYSIS_SYSTEM_PROMPT,
-                    generation_config={"temperature": self.temperature},
-                    response_format={"type": "text", "mime_type": "application/json", "schema": OLLAMA_ANALYSIS_SCHEMA},
-                    store=False,
-                    timeout=self.timeout_seconds,
+                    contents=prompt,
+                    config={"temperature": self.temperature,
+                        "system_instruction": KOREAN_ANALYSIS_SYSTEM_PROMPT,
+                        "response_mime_type": "application/json", "response_json_schema": OLLAMA_ANALYSIS_SCHEMA,
+                        "http_options": {"timeout": int(self.timeout_seconds * 1000),
+                            "retry_options": {"attempts": 1}}},
                 )
+                self._trace['calls'].append({"attempt": attempt, "status": "success",
+                    "latency_ms": round((self._monotonic() - attempt_started) * 1000, 2)})
                 logger.info("generation_attempt provider=gemini model=%s attempt=%s status=success latency_ms=%s",
                     self.model, attempt, round((self._monotonic() - attempt_started) * 1000, 2))
                 break
@@ -290,6 +355,11 @@ class GeminiGenerationProvider:
                     else:
                         self._trace["http_statuses"].append(type(exc).__name__)
                     retry = isinstance(classified, GenerationTransientError) and attempt < self.max_attempts
+                    self._trace['calls'].append({"attempt": attempt, "status": type(classified).__name__,
+                        "http_status": status_code, "retry": retry,
+                        "timeout": isinstance(classified, GenerationConnectionError) and
+                            (isinstance(exc, httpx.TimeoutException) or "timeout" in type(exc).__name__.casefold()),
+                        "latency_ms": round((self._monotonic() - attempt_started) * 1000, 2)})
                     self._trace["latency_ms"] = round((self._monotonic() - started) * 1000, 2)
                     logger.warning(
                         "generation_attempt provider=gemini model=%s attempt=%s http_status=%s error_type=%s retry=%s latency_ms=%s",
@@ -300,12 +370,20 @@ class GeminiGenerationProvider:
                     self._sleep(self.retry_base_delay_seconds * (2 ** (attempt - 1)))
         self._trace["latency_ms"] = round((self._monotonic() - started) * 1000, 2)
         assert response is not None
+        usage = getattr(response, 'usage_metadata', None)
+        self._trace['usage'] = {key: getattr(usage, key, None) for key in
+            ('prompt_token_count', 'candidates_token_count', 'thoughts_token_count')}
         status = str(getattr(response, "status", "")).casefold()
-        if status in ("blocked", "failed", "cancelled"):
+        feedback = getattr(response, 'prompt_feedback', None)
+        blocked = getattr(feedback, 'block_reason', None)
+        unsafe_finish = any(str(getattr(item, 'finish_reason', '')).split('.')[-1] in
+            ('SAFETY', 'BLOCKLIST', 'PROHIBITED_CONTENT', 'SPII', 'RECITATION')
+            for item in (getattr(response, 'candidates', None) or []))
+        if status in ("blocked", "failed", "cancelled") or blocked or unsafe_finish:
             logger.warning("Gemini generation safety blocked provider=gemini model=%s", self.model)
             raise GenerationSafetyError("Gemini 안전 필터가 분석 생성을 차단했습니다.")
         try:
-            raw = response.output_text
+            raw = response.text
         except Exception as exc:
             raise GenerationResponseError("Gemini 응답에서 텍스트를 읽을 수 없습니다.") from exc
         if not isinstance(raw, str) or not raw.strip():
@@ -358,11 +436,13 @@ class FallbackGenerationProvider:
             primary_trace = getattr(self.primary, "generation_trace", {})
             self._trace.update({"primary_attempts": primary_trace.get("attempts", 1),
                 "http_statuses": primary_trace.get("http_statuses", []),
+                'final_runtime': primary_trace,
                 "latency_ms": round((time.monotonic() - started) * 1000, 2)})
             return result
         except GenerationTransientError as exc:
             primary_trace = getattr(self.primary, "generation_trace", {})
             self._trace.update({"primary_attempts": primary_trace.get("attempts", 1),
+                "primary_runtime": primary_trace,
                 "http_statuses": primary_trace.get("http_statuses", []),
                 "latency_ms": round((time.monotonic() - started) * 1000, 2)})
             if self.fallback is None:
@@ -375,23 +455,35 @@ class FallbackGenerationProvider:
             self._active = self.fallback
             self._trace.update({"final_provider": self.fallback.provider_name,
                 "final_model": self.fallback.model, "fallback_used": True})
+            generation_event('fallback', self.fallback.provider_name)
             try:
                 return self.fallback.generate(prompt)
             finally:
+                self._trace['final_runtime'] = dict(getattr(self.fallback, 'generation_trace', {}))
                 self._trace["latency_ms"] = round((time.monotonic() - started) * 1000, 2)
 
 
-def get_generation_provider() -> GenerationProvider:
-    provider_name = os.getenv("ANALYSIS_LLM_PROVIDER", os.getenv("GENERATION_PROVIDER", "gemini")).casefold()
-    fallback_name = os.getenv("ANALYSIS_LLM_FALLBACK_PROVIDER", "none").casefold()
-    if provider_name == "gemini":
-        primary: GenerationProvider = GeminiGenerationProvider()
-    elif provider_name == "ollama":
-        primary = OllamaGenerationProvider()
-    else:
-        raise GenerationConfigurationError("ANALYSIS_LLM_PROVIDER는 `gemini` 또는 `ollama`여야 합니다.")
-    if fallback_name == "none":
-        return FallbackGenerationProvider(primary)
-    if fallback_name == "ollama" and provider_name == "gemini":
-        return FallbackGenerationProvider(primary, OllamaGenerationProvider())
-    raise GenerationConfigurationError("ANALYSIS_LLM_FALLBACK_PROVIDER는 `none` 또는 Gemini 기본 provider에서 `ollama`여야 합니다.")
+def check_generation_policy(request: AnalysisRequest, provider: GenerationProvider | None = None):
+    external = request.execution_mode != 'LOCAL_ONLY'
+    if external and (not request.external_consent or os.getenv('ANALYSIS_EXTERNAL_ENABLED') != '1'):
+        raise GenerationPolicyError('외부 분석은 서버 정책 활성화와 이번 요청의 전송 동의가 필요합니다.')
+    if request.execution_mode == 'FALLBACK_ALLOWED' and os.getenv('ANALYSIS_OLLAMA_FALLBACK_ENABLED') != '1':
+        raise GenerationPolicyError('서버 정책에서 로컬 fallback을 허용하지 않았습니다.')
+    if provider is not None:
+        primary = getattr(provider, 'primary', provider)
+        fallback = getattr(provider, 'fallback', None)
+        expected = 'gemini' if external else 'ollama'
+        if primary.provider_name != expected:
+            raise GenerationPolicyError('요청 실행 모드와 provider가 일치하지 않습니다.')
+        if fallback is not None and (request.execution_mode != 'FALLBACK_ALLOWED' or fallback.provider_name != 'ollama'):
+            raise GenerationPolicyError('이번 요청에서 허용하지 않은 fallback provider입니다.')
+
+
+def get_generation_provider(request: AnalysisRequest) -> GenerationProvider:
+    # Environment/key presence never supplies consent or changes the default mode.
+    check_generation_policy(request)
+    if request.execution_mode == 'LOCAL_ONLY':
+        return FallbackGenerationProvider(OllamaGenerationProvider())
+    primary = GeminiGenerationProvider()
+    fallback = OllamaGenerationProvider() if request.execution_mode == 'FALLBACK_ALLOWED' else None
+    return FallbackGenerationProvider(primary, fallback)

@@ -5,6 +5,7 @@ from typing import Protocol
 import httpx
 
 from .models import EMBEDDING_DIMENSIONS
+from .local_inference import serial_local_inference
 
 OLLAMA_HELP = "맥에서 Ollama를 실행하고 `ollama pull bge-m3` 후 `ollama list`로 모델을 확인하세요."
 
@@ -70,9 +71,13 @@ class OllamaEmbeddingProvider:
     def unavailable_reason(self) -> str | None:
         return self._unavailable_reason
 
+    @serial_local_inference
     def embed(self, texts: Sequence[str]) -> list[list[float]]:
         try:
-            response = self.client.post("/api/embed", json={"model": self.model, "input": list(texts)})
+            payload = {"model": self.model, "input": list(texts)}
+            if os.getenv("STOCK_BRIEF_LOW_MEMORY") == "1":
+                payload["keep_alive"] = 0
+            response = self.client.post("/api/embed", json=payload)
             if response.status_code == 404:
                 raise EmbeddingConfigurationError(f"Ollama에 `{self.model}` 모델이 없습니다. {OLLAMA_HELP}")
             response.raise_for_status()

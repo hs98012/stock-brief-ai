@@ -24,6 +24,9 @@ services:
       DATA_DIR: /data
       MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-52428800}
       OCR_MIN_NATIVE_TEXT_CHARS: ${OCR_MIN_NATIVE_TEXT_CHARS:-80}
+      OCR_DPI: ${OCR_DPI:-300}
+      PADDLE_STRUCTURE_URL: http://ocr-worker:8090
+      PADDLE_STRUCTURE_TIMEOUT_SECONDS: 600
       EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-ollama}
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-bge-m3}
@@ -32,8 +35,8 @@ services:
       GENERATION_MODEL: ${GENERATION_MODEL:-gemma3:4b}
       GENERATION_TEMPERATURE: ${GENERATION_TEMPERATURE:-0}
       OLLAMA_GENERATION_TIMEOUT_SECONDS: ${OLLAMA_GENERATION_TIMEOUT_SECONDS:-600}
-      ANALYSIS_LLM_PROVIDER: ${ANALYSIS_LLM_PROVIDER:-gemini}
-      ANALYSIS_LLM_FALLBACK_PROVIDER: ${ANALYSIS_LLM_FALLBACK_PROVIDER:-none}
+      ANALYSIS_EXTERNAL_ENABLED: ${ANALYSIS_EXTERNAL_ENABLED:-0}
+      ANALYSIS_OLLAMA_FALLBACK_ENABLED: ${ANALYSIS_OLLAMA_FALLBACK_ENABLED:-0}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.7-flash}
       GEMINI_TIMEOUT_SECONDS: ${GEMINI_TIMEOUT_SECONDS:-30}
@@ -48,6 +51,8 @@ services:
       - "${BACKEND_HOST_PORT:-8001}:8000"
     depends_on:
       postgres:
+        condition: service_healthy
+      ocr-worker:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
@@ -68,6 +73,20 @@ services:
       backend:
         condition: service_healthy
 
+  ocr-worker:
+    build: ./ocr-worker
+    ports:
+      - "127.0.0.1:8090:8090"
+    volumes:
+      - paddle_models:/root/.paddlex
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8090/health')"]
+      interval: 20s
+      timeout: 5s
+      start_period: 15m
+      retries: 5
+
 volumes:
   postgres_data:
   uploads_data:
+  paddle_models:

@@ -2,7 +2,7 @@ from datetime import date, datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
 
 from .models import DocumentStatus, DocumentType, EmbeddingStatus, TextSource
 
@@ -24,6 +24,7 @@ class DocumentList(BaseModel):
 
 class PageResult(BaseModel):
     document_id: UUID; page_number: int; final_text: str; text_source: TextSource; ocr_error: str | None
+    extraction: dict[str, object] | None = None
 
 
 class Citation(BaseModel):
@@ -65,11 +66,18 @@ class SearchResultItem(BaseModel):
     chunk_id: UUID; document_id: UUID; document_name: str; company_name: str; ticker: str | None
     publisher: str; published_at: date; document_type: DocumentType; page_number: int
     section_title: str | None; quote: str
+    rrf_rank: int | None = None
+    retrieval_reason: str = "hybrid_rrf"
+    table_evidence: list[dict[str, object]] = Field(default_factory=list)
+    numeric_evidence: list[dict[str, object]] = Field(default_factory=list)
 
 
 class SearchResponse(BaseModel):
     query: str; status: str; applied_filters: dict[str, object]
     vector_search_used: bool; vector_search_unavailable_reason: str | None; results: list[SearchResultItem]
+    requirements: list[dict[str, object]] | None = None
+    evidence_pack: list[dict[str, object]] | None = None
+    coverage_complete: bool | None = None
 
 
 class DocumentMetadataPatch(BaseModel):
@@ -88,6 +96,24 @@ class AnalysisRequest(BaseModel):
     document_id: UUID
     question: str = Field(default=DEFAULT_ANALYSIS_QUESTION, min_length=1, max_length=1000)
     top_k: int = Field(default=10, ge=1, le=15)
+    execution_mode: Literal['LOCAL_ONLY', 'EXTERNAL_WITH_CONSENT', 'FALLBACK_ALLOWED'] = 'LOCAL_ONLY'
+    external_consent: StrictBool = False
+
+    @model_validator(mode='after')
+    def explicit_request_consent(self):
+        if self.execution_mode != 'LOCAL_ONLY' and not self.external_consent:
+            raise ValueError('이번 문서·질문·검증 근거의 Gemini 전송에 명시적으로 동의해야 합니다.')
+        if self.execution_mode == 'LOCAL_ONLY' and self.external_consent:
+            raise ValueError('LOCAL_ONLY는 외부 전송 동의를 사용하지 않습니다.')
+        return self
+
+
+class AnalysisExecution(BaseModel):
+    requested_mode: Literal['LOCAL_ONLY', 'EXTERNAL_WITH_CONSENT', 'FALLBACK_ALLOWED']
+    external_consent: bool
+    external_request_attempted: bool = False
+    final_provider: Literal['ollama', 'gemini'] | None = None
+    fallback_used: bool = False
 
 
 class GeneratedItem(BaseModel):
@@ -124,16 +150,35 @@ class TableFacts(BaseModel):
 class AnalysisCitation(BaseModel):
     chunk_id: UUID; filename: str; company_name: str; published_at: date; issuer: str
     document_type: DocumentType; page_number: int; quote: str
-    display_kind: Literal["text", "table"] = "text"
-    citation_type: Literal["text", "table"] = "text"
+    source_chunk_id: UUID | None = None
+    source_chunk_ids: list[UUID] = Field(default_factory=list)
+    char_start: int | None = None
+    char_end: int | None = None
+    display_kind: Literal["text", "table", "table_fallback"] = "text"
+    citation_type: Literal["text", "table", "table_fallback"] = "text"
     display_quote: str | None = None
     table_labels: list[str] = Field(default_factory=list)
     display_note: str | None = None
     table_facts: TableFacts | None = None
+    source_boxes: list[list[float]] = Field(default_factory=list)
+    page_size: list[float] | None = None
+    coordinate_system: Literal['unrotated_pdf_points'] | None = None
+
+
+class PolarityEmptyState(BaseModel):
+    reason: Literal["no_evidence", "extraction_limited"]
+    message: str
+    page_number: int | None = Field(default=None, ge=1)
 
 
 class AnalysisResult(BaseModel):
     analysis_status: str; generation_model: str | None; generated_at: datetime
     summary: str; positives: list[AnalysisItem]; negatives: list[AnalysisItem]
     citations: list[AnalysisCitation]; insufficient_evidence_note: str | None
+    positive_empty_state: PolarityEmptyState | None = None
+    negative_empty_state: PolarityEmptyState | None = None
     disclaimer: str
+    run_id: UUID | None = None
+    requirement_status: str | None = None
+    coverage_complete: bool | None = None
+    execution: AnalysisExecution | None = None

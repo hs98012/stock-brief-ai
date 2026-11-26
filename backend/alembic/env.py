@@ -5,6 +5,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from app.models import Base
+from app import shadow_models  # register isolated migration metadata
 
 config = context.config
 if config.config_file_name:

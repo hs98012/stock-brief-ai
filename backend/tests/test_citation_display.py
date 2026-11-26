@@ -13,7 +13,7 @@ def test_table_fragment_without_headers_hides_numeric_blob() -> None:
     raw = ("영업이익 53.7 89.2 117.2 123.4 131.3 137.9\nDRAM 43.2 70.4 90.6\n"
         "NAND 11.9 21.0 27.5\nFoundry/LS -1.4 -2.2 -0.9 -0.6")
     display = citation_display(raw, 3)
-    assert display.kind == "table" and display.display_quote is None and display.table_labels == []
+    assert display.kind == "table_fallback" and display.display_quote is None and display.table_labels == []
     assert display.note == "표 수치는 원문 PDF 3페이지에서 확인할 수 있습니다."
 
 
@@ -21,7 +21,7 @@ def test_table_labels_are_shown_only_when_title_and_period_exist_in_source() -> 
     raw = ("표 2. DS 부문 실적\n(조원, %)\n1Q26 2Q26 3Q26F 4Q26F\n"
         "영업이익 53.7 89.2 117.2 123.4\nDRAM 43.2 70.4\nNAND 11.9 21.0\nFoundry/LS -1.4 -2.2")
     display = citation_display(raw, 3)
-    assert display.kind == "table" and "표 2. DS 부문 실적" in display.table_labels
+    assert display.kind == "table_fallback" and "표 2. DS 부문 실적" in display.table_labels
     assert "(조원, %)" in display.table_labels and "3Q26F" in display.table_labels
     assert display.display_quote is None
 

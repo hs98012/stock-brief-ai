@@ -53,6 +53,7 @@ class Page(Base):
     native_text: Mapped[str | None] = mapped_column(Text); ocr_text: Mapped[str | None] = mapped_column(Text)
     final_text: Mapped[str] = mapped_column(Text, default=""); text_source: Mapped[TextSource] = mapped_column(Enum(TextSource, name="text_source"))
     page_image_path: Mapped[str | None] = mapped_column(Text); ocr_error: Mapped[str | None] = mapped_column(Text)
+    extraction: Mapped["PageExtraction | None"] = relationship(cascade="all, delete-orphan", uselist=False, lazy="selectin")
     chunks: Mapped[list["Chunk"]] = relationship(cascade="all, delete-orphan", order_by="Chunk.char_start")
 
 
@@ -75,3 +76,13 @@ class AnalysisRun(Base):
     generated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True)); error_reason: Mapped[str | None] = mapped_column(Text)
     result: Mapped[dict | None] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PageExtraction(Base):
+    """New-upload observations only. Missing row means unchanged legacy extraction."""
+    __tablename__ = "page_extractions"
+    page_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("pages.id", ondelete="CASCADE"), primary_key=True)
+    parser_version: Mapped[str] = mapped_column(String(64))
+    final_text_sha256: Mapped[str] = mapped_column(String(64))
+    provenance: Mapped[dict] = mapped_column(JSON)
+    table_facts: Mapped[list] = mapped_column(JSON)

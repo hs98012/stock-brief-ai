@@ -13,6 +13,8 @@ engine_options = {
 }
 if not DATABASE_URL.startswith("sqlite"):
     engine_options["pool_recycle"] = int(os.getenv("DB_POOL_RECYCLE_SECONDS", "300"))
+    if os.getenv("STOCK_BRIEF_LOW_MEMORY") == "1":
+        engine_options.update(pool_size=2, max_overflow=0, pool_timeout=30)
 engine = create_engine(DATABASE_URL, **engine_options)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 

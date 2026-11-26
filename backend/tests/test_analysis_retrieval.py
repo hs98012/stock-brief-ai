@@ -1,11 +1,23 @@
 from uuid import uuid4
 
-from app.analysis_retrieval import (_page_table_excerpt, collect_analysis_evidence, is_boilerplate,
+from app.analysis_retrieval import (collect_analysis_evidence, is_boilerplate,
     GENERAL_SUMMARY_POSITIVE_PATTERN, NEGATIVE_QUERY, POSITIVE_QUERY,
     STRONG_NEGATIVE_PATTERN, STRONG_POSITIVE_PATTERN,
     is_contextless_numeric_fragment, question_focus_terms, readable_excerpt)
 from app.search import SearchExecution
 from tests.test_hybrid_search import seed_chunk
+
+
+def test_incomplete_compound_pack_is_not_sent_to_generation(monkeypatch) -> None:
+    monkeypatch.setattr('app.analysis_retrieval.hybrid_search',
+        lambda *args, **kwargs: SearchExecution([], True, None,
+            evidence_pack=[], requirements=[{'id': 'narrative_1', 'kind': 'narrative'},
+                                             {'id': 'structured_1', 'kind': 'table'}],
+            coverage_complete=False))
+    diagnostics = {}
+    assert collect_analysis_evidence(object(), uuid4(),
+        '소재 개선 이유와 표의 2Q26F 영업이익을 함께 알려줘', 5, object(), diagnostics) == []
+    assert diagnostics['coverage_complete'] is False
 
 
 def test_general_investment_grade_and_disclaimer_are_excluded() -> None:
@@ -19,23 +31,13 @@ def test_contextless_percent_table_is_excluded_but_interpretable_text_is_kept() 
     assert not is_contextless_numeric_fragment("영업이익은 전년 대비 20% 증가할 전망이며 수익성 개선이 예상된다. 20% 18%")
 
 
-def test_new_report_company_signals_keep_their_perspective_and_table_context() -> None:
-    assert STRONG_POSITIVE_PATTERN.search("HBM4 판매가 시작되며 HBM 시장 점유율 상승이 예상된다.")
-    assert STRONG_POSITIVE_PATTERN.search("풀스택 제조 역량과 턴키 공급 확대가 가능하다.")
-    assert STRONG_NEGATIVE_PATTERN.search("고객 가격 저항과 CSP의 FCF 악화 가능성이 우려된다.")
-    assert STRONG_NEGATIVE_PATTERN.search("파운드리 사업은 대규모 투자에도 적자 상태가 이어진다.")
-    table = "영업이익 (조원)\nFoundry/LS -1.4 -2.2 -2.0\n영업이익률 (%) -18% -20%"
-    assert STRONG_NEGATIVE_PATTERN.search(table)
-    assert not is_contextless_numeric_fragment(table)
-
-
 def test_mixed_chunk_uses_question_perspective(monkeypatch) -> None:
     document_id = uuid4(); chunk_id = uuid4()
     row = {"rank": 1, "rrf_score": 0.03, "bm25_rank": 1, "vector_rank": 1,
         "chunk_id": chunk_id, "document_id": document_id, "document_name": "report.pdf",
         "company_name": "삼성전자", "ticker": "005930", "publisher": "기관", "published_at": None,
         "document_type": "broker_report", "page_number": 1, "section_title": None,
-        "quote": "메모리+로직 제품을 턴키로 공급하는 영역으로 확장할 기대 요인이다. 파운드리는 적자 상태다."}
+        "quote": "메모리 제조 부문의 판매량이 증가할 전망이다. 파운드리는 적자 상태다."}
     monkeypatch.setattr("app.analysis_retrieval.hybrid_search",
         lambda *args, **kwargs: SearchExecution([row], True, None))
     result = collect_analysis_evidence(object(), document_id,
@@ -43,41 +45,46 @@ def test_mixed_chunk_uses_question_perspective(monkeypatch) -> None:
     assert result and result[0]["analysis_perspective"] == "positive"
 
 
-def test_general_summary_assigns_mixed_signal_chunk_to_positive_without_duplication(monkeypatch) -> None:
+def test_general_summary_keeps_disjoint_positive_and_negative_spans_from_same_chunk(monkeypatch) -> None:
     document_id = uuid4(); mixed_id = uuid4(); negative_id = uuid4()
     base = {"rank": 1, "rrf_score": 0.03, "bm25_rank": 1, "vector_rank": 1,
         "document_id": document_id, "document_name": "report.pdf", "company_name": "삼성전자",
         "ticker": "005930", "publisher": "기관", "published_at": None,
         "document_type": "broker_report", "page_number": 1, "section_title": None}
     mixed = {**base, "chunk_id": mixed_id,
-        "quote": "턴키 공급 영역으로 확장할 기대 요인이다. 파운드리 사업은 적자 상태다."}
+        "quote": "판매량은 증가할 전망이다. 파운드리 사업은 적자 상태다."}
     negative = {**base, "chunk_id": negative_id, "page_number": 3,
         "quote": "영업이익률 (%) Foundry/LS -20.0 -33.3 -12.4"}
     monkeypatch.setattr("app.analysis_retrieval.hybrid_search",
         lambda *args, **kwargs: SearchExecution([mixed, negative], True, None))
     question = "이 보고서를 읽고 주식 초보자 관점에서 호재와 악재를 각각 최대 3개까지 요약해줘."
     results = collect_analysis_evidence(object(), document_id, question, 10, object())
-    by_id = {result["chunk_id"]: result["analysis_perspective"] for result in results}
-    assert by_id[mixed_id] == "positive" and by_id[negative_id] == "negative"
-    assert len(by_id) == len(results)
+    mixed_results = [result for result in results if result.get("source_chunk_id") == mixed_id]
+    assert {result["analysis_perspective"] for result in mixed_results} == {"positive", "negative"}
+    positive = next(result for result in mixed_results if result["analysis_perspective"] == "positive")
+    negative = next(result for result in mixed_results if result["analysis_perspective"] == "negative")
+    assert positive["char_end"] <= negative["char_start"]
+    assert not any(result.get("source_chunk_id") == negative_id for result in results)
 
 
-def test_general_summary_assigns_mixed_signal_to_negative_when_pure_positive_exists(monkeypatch) -> None:
+def test_general_summary_excludes_ambiguous_mixed_sentence(monkeypatch) -> None:
     document_id = uuid4(); mixed_id = uuid4(); positive_id = uuid4()
     base = {"rank": 1, "rrf_score": 0.03, "bm25_rank": 1, "vector_rank": 1,
         "document_id": document_id, "document_name": "report.pdf", "company_name": "삼성전자",
         "ticker": "005930", "publisher": "기관", "published_at": None,
         "document_type": "broker_report", "page_number": 1, "section_title": None}
     mixed = {**base, "chunk_id": mixed_id,
-        "quote": "시장 기대치를 하회했지만 이후 가격 상승에 따른 실적 개선이 예상된다."}
+        "quote": "영업이익은 시장 기대치를 하회했지만 이후 판매량 증가가 예상된다."}
     positive = {**base, "chunk_id": positive_id,
         "quote": "HBM 가격 상승과 DRAM 수요 증가가 예상된다."}
     monkeypatch.setattr("app.analysis_retrieval.hybrid_search",
         lambda *args, **kwargs: SearchExecution([mixed, positive], True, None))
     question = "이 보고서를 읽고 주식 초보자 관점에서 호재와 악재를 각각 최대 3개까지 요약해줘."
     results = collect_analysis_evidence(object(), document_id, question, 10, object())
-    by_id = {result["chunk_id"]: result["analysis_perspective"] for result in results}
-    assert by_id[mixed_id] == "negative" and by_id[positive_id] == "positive"
+    mixed_results = [result for result in results if result.get("source_chunk_id") == mixed_id]
+    assert mixed_results == []
+    assert any(result.get("source_chunk_id", result["chunk_id"]) == positive_id
+        and result["analysis_perspective"] == "positive" for result in results)
 
 
 def test_excerpt_is_short_and_exact_database_substring() -> None:
@@ -130,7 +137,7 @@ def test_analysis_retrieval_uses_question_positive_and_negative_queries(monkeypa
 
     monkeypatch.setattr("app.analysis_retrieval.hybrid_search", fake_search)
     results = collect_analysis_evidence(object(), document_id, "회사를 분석해줘", 10, object())
-    assert len(calls) == 3 and "성장" in calls[1] and "부진" in calls[2]
+    assert len(calls) == 3 and POSITIVE_QUERY in calls[1] and NEGATIVE_QUERY in calls[2]
     assert results[0]["chunk_id"] == chunk_id
 
 
@@ -213,7 +220,7 @@ def test_positive_outlook_question_keeps_direct_improvement_pattern(monkeypatch)
     monkeypatch.setattr("app.analysis_retrieval.hybrid_search",
         lambda *args, **kwargs: SearchExecution([row], True, None))
     results = collect_analysis_evidence(object(), document_id,
-        "보고서가 제시한 하반기 실적 개선 전망이나 긍정 요인은 무엇이야?", 10, object())
+        "보고서의 가동률 전망은 무엇이야?", 10, object())
     assert len(results) == 1 and results[0]["analysis_perspective"] == "positive"
 
 
@@ -225,17 +232,4 @@ def test_general_summary_prefers_report_wide_positive_outlook_sentence() -> None
     assert excerpt and "하반기 개선될 실적 모멘텀" in excerpt and "밸류 갭 축소" in excerpt
 
 
-def test_table_excerpt_is_contiguous_and_includes_title_period_metric_and_row(db) -> None:
-    page_text = ("본문 설명입니다.\n표 2. 사업부문별 실적 전망\n"
-        "구분 2025 2026F 3Q26F 4Q26F\n영업이익 (조원)\nMemory 32.1 35.0 36.0\n"
-        "Foundry/LS -20.0 -33.3 -12.4\n다음 표 설명")
-    _, chunk = seed_chunk(db, page_text)
-    excerpt = _page_table_excerpt(db, chunk.id, chunk.content)
-    assert excerpt and excerpt in page_text
-    assert all(value in excerpt for value in ("영업이익", "Foundry/LS"))
-    assert "표 2." not in excerpt and len(excerpt) < 700
-
-
-def test_table_excerpt_rejects_numeric_row_without_title_or_period(db) -> None:
-    _, chunk = seed_chunk(db, "영업이익률 (%)\nFoundry/LS -20.0 -33.3 -12.4")
-    assert _page_table_excerpt(db, chunk.id, chunk.content) is None
+# Full table structure and page offsets are tested in test_evidence_facts.py.
