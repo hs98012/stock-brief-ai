@@ -372,7 +372,7 @@
   - `evals/results/generation-eval-20261124/`(Ollama): 7번째 케이스부터 백엔드에 연결되지 않아 pass 3 / fail 14로 끝까지 돌지 못했다.
   - `evals/results/rag-run-20261125/`: pass 10 / fail 7이고 실패한 케이스가 이번과 같다. 그 결과 파일에는 provider와 모델이 없어 "provider 확인 안 됨"이다.
 
-## 7단계. 설명 가능한 코드 구조로 정리 (동작 변경 없음) (마감 이후로 보류)
+## 7단계. 설명 가능한 코드 구조로 정리 (동작 변경 없음)
 
 - [x] `rank_rows`를 후보 생성 → 융합 → 승격 → evidence pack → 결과 조립 단계 함수로 나눈다.
 - [x] `analyze_document`를 근거 수집 → 프롬프트 → 생성 → 검증 → citation 조립 → 저장으로 나눈다.
