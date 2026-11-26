@@ -374,9 +374,9 @@
 
 ## 7단계. 설명 가능한 코드 구조로 정리 (동작 변경 없음) (마감 이후로 보류)
 
-- [ ] `rank_rows`를 후보 생성 → 융합 → 승격 → evidence pack → 결과 조립 단계 함수로 나눈다.
-- [ ] `analyze_document`를 근거 수집 → 프롬프트 → 생성 → 검증 → citation 조립 → 저장으로 나눈다.
-- [ ] 리팩터링 전후 테스트가 모두 통과하는지 확인하고, 2단계 스크립트의 dev 수치가 같은지 확인한다.
+- [x] `rank_rows`를 후보 생성 → 융합 → 승격 → evidence pack → 결과 조립 단계 함수로 나눈다.
+- [x] `analyze_document`를 근거 수집 → 프롬프트 → 생성 → 검증 → citation 조립 → 저장으로 나눈다.
+- [x] 리팩터링 전후 테스트가 모두 통과하는지 확인하고, 2단계 스크립트의 dev 수치가 같은지 확인한다.
 
 **완료 조건**
 - `./scripts/check.sh`가 통과한다. 분리한 각 함수는 50줄 이하이다.
@@ -386,6 +386,29 @@
 기록:
 
 - 2026-11-25 사용자 결정: 12/6 마감 이후로 보류. 9·10단계를 먼저 진행한다.
+- 2026-11-26 진행(사용자 요청). 기준 커밋 `2e06f56`. 10단계 BM25 옵션(`use_bm25`, `bm25_tokenizer`, `bm25_weight`), 관점 변형 A, focus F1의 파라미터와 동작은 바꾸지 않았다. test-v2는 쓰지 않았다. API·데이터 모델 변경이 없어 계약 문서는 갱신하지 않았다.
+- 분리 결과(ast로 데코레이터 포함 줄 수를 셈, 모두 50줄 이하):
+  - `search.py`: `rank_rows` 123→31줄. 나눈 함수는 `_collect_candidates`(9), `_bm25_candidates`(10), `_vector_candidates`(15), `_pgvector_ids`(11), `_cosine_ranked`(6), `_verified_facts`(9), `_promote_fused`(8), `_query_requirements`(6), `_evidence_pack`(16), `_result_rows`(17), `_diagnostics_trace`(13)와 작은 보조 함수들이다. 후보 묶음은 frozen dataclass `_Candidates`로 넘긴다. 정확 cosine 정렬과 BM25 정렬이 비-PostgreSQL 경로와 diagnostics에 똑같이 중복돼 있어 각각 `_cosine_ranked`·`_bm25_ranked` 하나로 합쳤다. pgvector 경로는 `by_id`를 고치지 않고 새 dict를 반환한다.
+  - `analysis_service.py`: `analyze_document` 200→43줄. 나눈 함수는 `_start_run`(8), `_collect_evidence`(17), `_insufficient_result`(12), `_candidate_packet`(7), `_generate`(17), `_check_supplied_ids`(5), `_validated_items`(37, 중첩 함수를 모듈로 올림), `_items_with_fallback`(29), `_citation`(23), `_citations`(9), `_summary_text`(14), `_generated_result`(13), `_with_run_metadata`(7)다. `try/except`가 감싸는 범위, `generation_event` 순서, `timings` 키 순서는 원래와 같다.
+  - 분리 중 발견: `generation_items_changed`는 계산만 되고 어디서도 읽히지 않는다. 동작 변경 금지라 그대로 두었다.
+- 비교 방법: `evals/results/step7-refactor-20261126/`(git 제외 폴더). 보조 스크립트는 `tools/`에 있다. 같은 조건(PostgreSQL `stock-brief-ai-postgres-1`, Ollama `bge-m3`)으로 기준 2회(`before-1`, `before-2`), `rank_rows` 분리 후(`after-rank-rows`), 두 함수 분리 후(`after`)를 실행했다. `tools/compare.py`는 실행 메타(`measured_at`, `finished_at`, `commit`, `worktree_dirty`)와 케이스별 `seconds`(실행 시간)를 빼고 JSON 전체를 비교한다.
+  - 검색: `measure_retrieval.py --query-types evals/query-types-dev.json`, 4개 모드와 `hybrid_rrf_with_promotion --tokenizer char_bigram`, `--bm25-weight 0.5`. 6개 출력의 케이스별 결과까지 비교했다.
+  - packet: `measure_analysis_packet.py --split dev`(report.json), 그리고 `tools/dump_packets.py`(dev 17케이스 packet 전체: chunk_id·순서·page·quote·관점·facts와 diagnostics).
+  - 분석: `tools/analyze_golden.py`. dev 17케이스 × 결정적 fake 생성기 4종(`first3`, `cross`, `invalid`, `empty`) = 68회. 외부 트랜잭션 안에서 실행한 뒤 rollback해 DB에 남기지 않았다. 결과·저장 결과(run_id·시각·timings 제외)·프롬프트를 비교했다. 기준 분포는 completed 25, insufficient_evidence 31, AnalysisValidationError 12, 인용 42건이다.
+- 결과: `before-1`과 `before-2`가 같았다(기준이 결정적). `before-1` 대비 `after-rank-rows`와 `after` 모두 9개 출력 파일이 같았다(지표·케이스별 결과·packet 내용·분석 결과 차이 0).
+
+  | dev 검색 (근거 일치, 전후 동일) | hit@1 | hit@3 | hit@5 | unit_recall@5 | MRR@5 |
+  |---|---:|---:|---:|---:|---:|
+  | bm25 | 6/9 | 6/9 | 6/9 | 7/12 | 0.6667 |
+  | vector | 4/9 | 5/9 | 6/9 | 7/12 | 0.5093 |
+  | hybrid_rrf | 4/9 | 5/9 | 6/9 | 7/12 | 0.5093 |
+  | hybrid_rrf_with_promotion | 5/9 | 6/9 | 7/9 | 8/12 | 0.6204 |
+  | promotion + char_bigram | 5/9 | 7/9 | 7/9 | 8/12 | 0.6296 |
+  | promotion + bm25_weight 0.5 | 5/9 | 6/9 | 6/9 | 7/12 | 0.5926 |
+
+  dev packet(전후 동일): 답변 가능 12건 중 기대 페이지 포함 10/12, 기대 관점까지 포함 9/12, 빈 packet 0. 근거 부족 5건은 모두 packet 0개.
+- 측정이 다루지 못한 부분: 측정은 PostgreSQL 경로만 탄다. `rank_rows`의 비-PostgreSQL 정확 cosine 경로, `diagnostics=True` trace, 임베딩 실패 경로는 backend 테스트로만 확인했다.
+- `./scripts/check.sh`는 리팩터링 전후 모두 통과했다(backend 809 passed, frontend 17 passed, lint·build 통과).
 
 ## 9단계. 평가셋 확대와 dev/test 분리
 
