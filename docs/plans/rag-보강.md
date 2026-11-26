@@ -688,3 +688,87 @@
 - README의 `## 구성` 목록에 `docs/architecture.md` 링크를 추가했다.
 - `./scripts/check.sh` 통과: backend 754 passed, frontend 17 passed, lint, build.
 - Mermaid 렌더링은 확인하지 않았다(GitHub 등 Mermaid를 지원하는 뷰어에서만 그림으로 보인다).
+
+## 12단계. 검색 실패 진단 (코드 변경 없음)
+
+6단계에서 검색 실패로 분류된 7건의 원인을 확인한다. 진단만 하고 검색·분류기 코드는 바꾸지 않는다.
+
+- [x] 2026-08-10/08-14 질문 4건이 분석 후보 0개가 된 원인을 찾는다. 원시 검색 결과 수, 필터 조건, 청크·임베딩 적재 여부, 필터 단계별로 남는 개수를 확인한다.
+- [x] topic 키워드 때문에 검색 실패로 분류된 3건이 실제로 맞는 근거를 찾았는지 인용문과 기대 페이지를 대조한다.
+
+기록: (2026-11-26)
+
+- 방법: scratchpad의 읽기 전용 스크립트(`SET TRANSACTION READ ONLY`, 마지막에 rollback)로 운영 로컬 DB(`localhost:5432`)에서 `collect_analysis_evidence`의 단계를 재현했다. 질의 임베딩은 Ollama `bge-m3`. 재현한 packet은 4건 모두 0개로 6단계 trace(`candidates: []`)와 같다. 저장소 파일은 이 기록 말고는 바꾸지 않았다.
+- 구조 확인: 분석 후보는 `hybrid_search` 결과가 아니라 `document_candidates`(문서 전체 페이지를 문장 단위로 나눈 것)에서 나온다. 검색 결과는 정렬 점수로만 쓰인다. `hybrid_search`에는 점수 임계값이 없고 top_k 자르기만 있으며, 재순위(표·수치 승격)는 순서만 바꾼다.
+
+**적재 상태**
+
+| 문서 | 페이지 | 청크 | 임베딩 | 모델 | 임베딩 오류 |
+|---|---|---|---|---|---|
+| 2026-08-10 (`339509a7`) | 7 (OCR 6, native 1) | 28 | 28 | ollama/bge-m3/1024 | 0 |
+| 2026-08-14 (`8fcb63b3`) | 9 (OCR 9) | 35 | 35 | ollama/bge-m3/1024 | 0 |
+
+**단계별 남은 개수 (후보 0개 4건)**
+
+| 케이스 | requirement | 검색 결과(질의 3개) | 기대 페이지 첫 순위(질의 0) | document_candidates | 품질 valid | positive/negative | focus 통과 | packet |
+|---|---|---|---|---|---|---|---|---|
+| 08-10 full-stack-positive | no_factual | 20/20/20 | p1 1위 | 38 | 35 | 2 | 0 | 0 |
+| 08-10 foundry-loss-negative | no_factual | 20/20/20 | p1 1위 | 38 | 35 | 2 | 0 | 0 |
+| 08-14 dram-hbm-pricing-positive | no_factual | 20/20/20 | p1 2위 | 51 | 40 | 4 | 0 | 0 |
+| 08-14 foundry-loss-negative | no_factual | 20/20/20 | p3 8위 | 51 | 40 | 4 | 0 | 0 |
+
+- 연도 검사(`missing_requested_years`)는 4건 모두 통과했다. 표 구조 경로(`structured`)는 두 문서 모두 `table_evidence`가 있는 span이 0개라 0이다.
+- 결론: 검색이나 적재 문제가 아니다. 기대 근거 문장은 후보에 있다. 빠지는 곳은 `analysis_retrieval.py`의 두 필터다. (1) 관점 필터는 `analysis_perspective`가 positive/negative인 것만 남긴다. (2) focus-term 필터는 질문 토큰 중 하나가 인용문에 그대로 있어야 통과시킨다.
+- 케이스별 원인:
+  - 08-10 full-stack-positive: 기대 문장("…풀스택 제조 역량이다.", "…메모리+로직 결합 제품…턴키로 공급…기대 요인이다.")은 valid이지만 `economic_facts`가 fact를 찾지 못해 관점이 neutral이다. 그래서 관점 필터에서 빠진다. positive/negative로 남은 2개(p1 수주잔고 문장, p4 영업이익 표 행)에는 focus 단어가 없다.
+  - 08-10 foundry-loss-negative: 기대 문장("비록 파운드리 사업은 대규모 투자 금액과…적자상태를 지속하고…")이 2단 레이아웃 OCR에서 옆 칸의 숫자·라벨(`seer) 90008`, `Bea enue 750`, `52주최저가`)과 섞였다. 그래서 `ocr_noise`로 제외됐고 관점도 ambiguous다(적자 지속 negative와 점유율 확대 positive가 함께 있음).
+  - 08-14 dram-hbm-pricing-positive: 기대 문장("28년까지 DRAM 수급이 타이트할 것으로 추정되며, HBM 가격 인상 효과를 주도로 DRAM ASPS 상승세를…")은 valid이다. 하지만 `가격 인상`이 ambiguous/forecast fact로 판정돼 관점이 ambiguous가 되고, 관점 필터에서 빠진다.
+  - 08-14 foundry-loss-negative: 기대 근거인 p3 `Foundry/LS` 행 2개(영업이익, 영업이익률)는 valid이고 negative라서 관점 필터를 통과한다. 하지만 required focus `[lsi, 부담, 부문, 수익성, 적자, 파운드리]` 중 어느 것도 인용문에 없다(원문 표기는 `Foundry/LS`). 그래서 focus 필터에서 빠진다.
+  - focus 토큰에 조사·어미가 남는 경우도 확인했다: `실적에`, `주는`, `설명돼`, `보유한`, `전망이나`.
+- 보조 관찰: `analysis_service`는 `retrieval_diagnostics`(`candidate_count`, `valid_count`)를 계산하지만 `_evaluation_trace`에 저장하지 않는다. 그래서 trace에는 빈 배열만 남는다. 이번 재현에서는 4건 모두 `candidate_count` 38/38/51/51, `valid_count` 0이었다.
+
+**topic 키워드 실패 3건 대조**
+
+| 케이스 | 기대(페이지 / topic) | 실제 인용(페이지) | 판정 |
+|---|---|---|---|
+| 2025-07-09 summary-positive | p1 / `하반기 개선\|밸류 갭 축소\|악재 해소` | p1 "3Q25 컨벤셔널 디램 가격 상승으로 인한 이익 개선이 극대화될 것으로 예상…", p1 "파운드리에서도 가동률 상승에 따라 점진적 적자 축소가 진행될 것으로 판단" | 맞는 근거. fixture notes의 조건("1페이지 기업 직접 연결 긍정 요인 최소 하나")을 충족한다. 키워드만 달라서 실패했다. 원문 "악재를 해소하고"도 공백 제거 후 `악재해소`와 일치하지 않는다 |
+| 2025-07-09 improvement-outlook | p1 / `하반기 개선\|실적 모멘텀\|적자 축소` | p1 "3Q25 컨벤셔널 디램 가격 상승으로 인한 이익 개선이 극대화될 것으로 예상…" | 부분적으로 맞다. 같은 페이지의 하반기 이익 개선 전망이다. 더 직접적인 문장 "하반기 개선될 실적 모멘텀…"(neutral)과 "…적자 축소가 진행될 것으로 판단"(positive, focus `개선/전망이나/하반기` 불일치)은 위의 두 필터에서 빠졌다 |
+| 2026-06-29 second-quarter-cost-burden | p1 negative / `성과급 충당금\|예상을 하회\|영업이익 전망` | positive 항목 1개만 있다. p1 "Micron의 실적과 Guidance를 감안할 때 영업이익률은 80%를 상회…수익성 급상승으로 귀결" | 실제 실패. negative 항목이 없고 인용은 타사 수익성이다. 기대 문장 2개("…성과급 충당금을 2분기에 모두 반영…12.2% 하회하는 81.3조원…", "…2026년 영업이익 전망을 기존 대비 3.9% 하향")는 valid이고 focus도 통과하지만 관점이 neutral이라 관점 필터에서 빠졌다 |
+
+- 분류기 문제: `classify_failure_stage`는 trace 후보 인용문에 topic 키워드가 없으면 단계를 `retrieval_candidate_excluded`로 둔다. summary-positive는 후보·생성·검증 선택이 모두 기대 페이지의 맞는 근거였는데도 검색 실패로 셌다. 후보가 0개인 4건도 원인이 검색이 아니라 분석 필터인데 같은 단계로 묶인다.
+- 정리(케이스별 주원인): 관점 필터 3건(08-10 full-stack, 08-14 dram, 06-29 cost-burden), focus 필터 1건(08-14 foundry), OCR 레이아웃 혼입 1건(08-10 foundry), 분류기 오분류 1건(summary-positive, 근거는 맞음), 부분 성공 1건(improvement-outlook, 근거는 맞지만 더 직접적인 문장은 관점·focus 필터에서 빠짐). 7건 중 검색(hybrid_search)이나 적재가 원인인 경우는 없다.
+- 수정안(미실행, 사용자 결정 필요): 아래 순서로 제안한다. 이 fixture들은 6단계 "dev 기준"이므로 규칙을 이 문장들에 맞추면 dev 과적합이 된다. 개선 효과는 test셋에서 따로 확인해야 한다.
+  1. trace에 `retrieval_diagnostics`와 필터별 탈락 사유를 남긴다(평가 전용, 동작 불변).
+  2. 분류기에 `analysis_filter_excluded`(perspective/focus/quality) 단계를 추가하고 topic 키워드 검사와 단계 판정을 분리한다. topic 판정은 키워드 대신 승인된 gold 페이지·문장 범위로 하는 방식을 검토한다.
+  3. focus 필터를 hard filter에서 정렬 가산점으로 낮추거나, 토큰의 조사·어미 처리와 영문·한글 별칭(파운드리↔Foundry, LSI↔LS)을 보강한다.
+  4. 관점 필터: neutral/ambiguous라도 focus가 일치하는 문장은 packet에 넣고, 관점은 생성 결과를 기존 evidence 검증으로 확인하게 한다. 또는 `economic_facts` 규칙(가격 인상→ASP 상승, 충당금 반영·하회, 적자상태 지속)을 테스트와 함께 보강한다.
+  5. OCR 2단 레이아웃 혼입은 수집 단계(열 분리) 과제로 따로 둔다.
+
+**수정안 1·2 실행 (2026-11-26, 사용자 결정: 진단 개선만 먼저, 필터 동작은 바꾸지 않음)**
+- 테스트를 먼저 추가하고 실패를 확인했다(새 테스트 10개 실패, 기존 85개 통과). 그 뒤 구현해 통과시켰다.
+- 1번 trace 보강: `collect_analysis_evidence`는 diagnostics dict를 받았을 때만 다음을 기록한다.
+  - `filter_exclusions`: span마다 `page_number`, `filter`(`quality`/`perspective`/`focus`), `reason`. 인용문은 넣지 않는다.
+  - `filter_counts`, `required_focus_terms`
+  - `early_exit`: `requirement_unsupported`, `requirement_unmatched`, `coverage_incomplete`, `missing_years`, `compound_pack_incomplete` 중 하나
+- `analysis_service`는 이 값을 JSON으로 저장할 수 있게 바꿔 `_evaluation_trace.retrieval_diagnostics`에 넣는다. 집합은 정렬된 목록으로 바꾼다. 같은 입력에서 diagnostics를 넘길 때와 넘기지 않을 때 packet이 같은지 테스트로 확인했다.
+- 2번 분류기: 단계 판정에서 topic 키워드를 뺐고, 기대 페이지와 관점만 본다. topic은 `evaluate_case`의 `topic` 검사에만 남는다.
+  - 기대 페이지 후보가 없고 trace에 기대 페이지의 필터 제외나 `early_exit`가 있으면 `analysis_filter_excluded`로 판정하고 `filter_reasons`를 붙인다. 결과 묶음은 `analysis_filter`이다.
+  - 진단 기록이 없는 trace는 기존처럼 `retrieval_candidate_excluded`로 판정한다.
+  - 참고값으로 `topic_in_expected_page_candidates`를 남긴다.
+- `scripts/measure_generation.py --rescore`는 이제 저장된 응답과 trace를 현재 `evaluate_case`로 다시 판정한다. fixture SHA-256이 `run.json`과 다르면 실행하지 않는다. 출력 이름은 `--rescore-name`으로 정하며(기본 `rescored`), 기존 파일은 덮어쓰지 않는다.
+
+**6단계 저장 응답 재채점 (API·생성 재호출 없음)**
+- 실행: `--rescore evals/results/generation-faithfulness-20261126 --rescore-name reclassified`, 2026-11-26T05:19:39Z. 기준 커밋 `52fbf2b`에 작업 트리 변경이 있는 상태였다. 출력은 `report-reclassified.json`/`summary-reclassified.md`이다. 같은 폴더의 기존 파일 8개는 SHA-256이 실행 전과 같다.
+
+| 묶음 | 6단계 (rescored) | 재채점 (reclassified) |
+|---|---|---|
+| passed | 10 | 10 |
+| retrieval | 7 | 5 |
+| judged_mismatch | 0 | 2 |
+| analysis_filter | 0 | 0 |
+
+- 바뀐 케이스: 07-09 summary-positive와 improvement-outlook이 `retrieval_candidate_excluded`에서 `selected`로 바뀌었다. 실패 항목은 `topic`만 남아 `judged_mismatch`로 묶인다.
+- 06-29 second-quarter-cost-burden은 `retrieval_wrong_perspective`로 바뀌었다. 기대 페이지 후보는 positive 1개뿐이다.
+- 08-10·08-14 4건은 `retrieval_candidate_excluded` 그대로다. 6단계 trace에는 `retrieval_diagnostics`가 없어서(이번 변경 전에 저장됨) 필터 원인을 trace만으로 판정할 수 없다. 이 4건을 `analysis_filter_excluded`로 보려면 분석을 다시 실행해야 한다(생성 호출 포함). 이번에는 실행하지 않았다.
+- pass/fail 판정, citation 유효율 16/16, 거절 지표(5/5, 잘못된 거절 4/12)는 6단계와 같다.
+- `./scripts/check.sh` 통과 (2026-11-26): backend 779 passed, frontend 17 passed, lint, build.
