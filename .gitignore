@@ -13,5 +13,19 @@ backend/data/pages/*
 !backend/data/raw/README.md
 !backend/data/pages/.gitkeep
 .coverage
+stock_brief.db
 evals/results/
 .DS_Store
+
+# Local original evaluation PDFs must not enter Git.
+holdout-v1/*.pdf
+test-v2/*.pdf
+
+# Local Claude Code session config (launch configs may point outside this project).
+.claude/
+
+# Persistent isolated E2E artifacts, PDFs, and backups stay local.
+.e2e-persistent/
+.next-e2e/
+.next-check/
+.next-provider/
