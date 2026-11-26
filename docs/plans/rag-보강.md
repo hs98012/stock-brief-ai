@@ -772,3 +772,75 @@
 - 08-10·08-14 4건은 `retrieval_candidate_excluded` 그대로다. 6단계 trace에는 `retrieval_diagnostics`가 없어서(이번 변경 전에 저장됨) 필터 원인을 trace만으로 판정할 수 없다. 이 4건을 `analysis_filter_excluded`로 보려면 분석을 다시 실행해야 한다(생성 호출 포함). 이번에는 실행하지 않았다.
 - pass/fail 판정, citation 유효율 16/16, 거절 지표(5/5, 잘못된 거절 4/12)는 6단계와 같다.
 - `./scripts/check.sh` 통과 (2026-11-26): backend 779 passed, frontend 17 passed, lint, build.
+
+**새 trace로 dev 생성 평가 재실행 (2026-11-26, 6단계와 같은 조건)**
+- 조건: dev `evals/fixtures/` 17케이스, `LOCAL_ONLY`, fallback 꺼짐, 관측 provider/model `ollama/gemma3:4b`. 백엔드는 `.claude/launch.json`의 `rag-eval-backend-8001`로 띄웠다. fixture SHA-256은 6단계 `run.json`과 같다.
+- 커밋 `ecc060a`, 작업 트리 깨끗함. 2026-11-26 07:23:55 ~ 07:29:05 UTC. 출력은 `evals/results/generation-faithfulness-20261126-diag/`이다. 6단계 폴더는 건드리지 않았다.
+- 실행 중 문제: API 17건 수집(분석·trace 모두 저장)은 끝났지만, 마지막 DB citation 채점이 스크립트 셸에 `DATABASE_URL`이 없어 sqlite로 붙어 실패했다. API를 다시 부르지 않고 저장된 `cases.jsonl`을 PostgreSQL 읽기 전용 조회로 채점했다. `run.json`의 `scoring_note`에 남겼다.
+
+| 묶음 | 6단계 재채점 (reclassified) | 새 trace |
+|---|---|---|
+| passed | 10 | 10 |
+| retrieval | 5 | 1 |
+| analysis_filter | 0 | 4 |
+| judged_mismatch | 2 | 2 |
+
+- 바뀐 것은 08-10·08-14 4건뿐이다(`retrieval_candidate_excluded` → `analysis_filter_excluded`). 나머지 13건의 결과 묶음과 실패 항목은 같다.
+- citation 16/16 유효, insufficient 거절 5/5, 답변 가능 케이스 잘못된 거절 4/12. 6단계와 같다.
+- 기대 페이지에서의 필터 제외 수(trace `filter_exclusions`, 기대 페이지만):
+
+| 케이스 | 기대 페이지 | perspective | focus | quality |
+|---|---|---|---|---|
+| 08-10 full-stack-positive | 1 | neutral 20 | 1 | ocr_noise 1, contact_or_metadata 1 |
+| 08-10 foundry-loss-negative | 1 | neutral 20 | 1 | ocr_noise 1, contact_or_metadata 1 |
+| 08-14 dram-hbm-pricing-positive | 1 | neutral 13, ambiguous 1 | 2 | ocr_noise 1, boilerplate 1, contact_or_metadata 1 |
+| 08-14 foundry-loss-negative | 3 | ambiguous 10 | 2 | 0 |
+
+- 4건 모두 `early_exit`는 없다. 진단 단계에서 찾은 원인(관점 neutral/ambiguous, OCR 혼입, focus 표기 불일치)과 trace가 일치한다.
+
+## 13단계. 분석 필터 수정 (수정안 3·4번) — 채택 기준 사전 등록
+
+결과를 보기 전에 기준을 적는다(2026-11-26, 사용자 요청). 아래 기준을 모두 만족해야 기본 동작으로 채택한다. 기준은 결과를 본 뒤 바꾸지 않는다.
+
+- [x] **측정 도구 먼저**: 생성 없이 gold 근거가 분석 packet(`collect_analysis_evidence` 결과)에 들어가는지 재는 읽기 전용 스크립트를 만든다. 집계 함수는 테스트를 먼저 쓴다. 필터 수정 전 커밋에서 dev 기준선을 측정해 기록한다.
+
+**측정 도구 (2026-11-26)**
+- `backend/app/packet_metrics.py`(판정·집계 순수 함수)와 `scripts/measure_analysis_packet.py`를 추가했다. 테스트 `tests/test_packet_metrics.py` 13개를 먼저 쓰고 모듈이 없어 실패하는 것을 확인한 뒤 구현했다.
+- 스크립트는 `READ ONLY` 트랜잭션 안에서 `collect_analysis_evidence`만 호출한다. 생성은 부르지 않고, Ollama는 질문 임베딩에만 쓴다. 출력 폴더가 이미 있으면 실행하지 않는다. 입력 파일 SHA-256과 커밋을 기록한다.
+- `--split test-v2`는 `--confirm-final` 없이는 실행되지 않는다. 결과 라벨에 "두 번째 사용"을 넣는다. 그 밖의 split 이름은 거부한다.
+- DB가 PostgreSQL이 아니면 실행 전에 중단한다(`app.database.require_postgresql`). 같은 검사를 `measure_generation.py`의 시작(`--rescore` 포함, API 호출 전)에도 넣었다. `DATABASE_URL`을 빼고 두 스크립트를 실행해 출력 폴더 없이 중단되는 것을 확인했다.
+
+**판정 단위 차이 (dev 포함률이 실제보다 높게 나올 수 있음)**
+- dev fixture에는 gold 원문 조건이 없어서 **기대 페이지 단위**로 판정한다. 기대 페이지에 packet span이 하나라도 있으면 포함으로 센다. 그 span이 질문의 근거 문장이 아니어도 포함이다.
+- test-v2는 **gold 단위**로 판정한다. 같은 페이지 span이 gold의 `literal_conditions`를 모두 담아야 포함이다.
+- 따라서 dev 포함률은 같은 조건의 gold 단위 수치보다 높게 나올 수 있고, 두 수치를 직접 비교하지 않는다. 보조 지표로 dev에 "기대 페이지 + 기대 관점 일치"를 함께 적는다.
+
+**dev 기준선 (필터 수정 전)**
+- 실행: `scripts/measure_analysis_packet.py --split dev`, 2026-11-26 07:36:04 ~ 07:36:18 UTC. 기준 커밋 `ecc060a`이고, 측정 도구 파일이 커밋 전이라 worktree_dirty=true였다. 필터·분석 코드는 `ecc060a`와 같다. embedding `ollama/bge-m3/1024`, top_k=10(분석 요청 기본값). 출력은 `evals/results/analysis-packet-dev-20261126/`.
+
+| 지표 | 값 |
+|---|---|
+| 답변 가능 케이스 기대 페이지 포함 | 8/12 |
+| 기대 페이지 + 기대 관점 일치 | 7/12 |
+| packet이 빈 답변 가능 케이스 | 4 (08-10 2건, 08-14 2건) |
+| insufficient 케이스 packet 크기 | 5건 모두 0 |
+
+- 관점 불일치 1건은 06-29 second-quarter-cost-burden이다. 기대 페이지 span이 positive 1개뿐이다. 생성 평가의 `retrieval_wrong_perspective`와 일치한다.
+
+**08-10 foundry-loss-negative는 필터 수정 대상이 아니다**
+- 12단계 진단에서 이 케이스의 기대 근거는 OCR 2단 레이아웃이 섞여 `ocr_noise`로 빠졌다. 원인은 수집 단계(열 분리)이고, 관점·focus 필터를 고쳐도 올바른 근거 문장이 생기지 않는다.
+- 그래서 필터 수정(3·4번)으로 기대할 수 있는 최대 개선은 packet이 빈 4건 중 **3건**(08-10 full-stack, 08-14 dram, 08-14 foundry)이다. dev 기대 페이지 포함 상한은 11/12이다. 08-10 foundry가 필터 수정 뒤 포함으로 바뀌면 OCR 잡음 문장이 통과한 것인지 먼저 확인한다(과허용 의심).
+- `./scripts/check.sh` 통과 (2026-11-26): backend 792 passed, frontend 17 passed, lint, build.
+- [ ] **dev 개발**: 수정은 dev 생성 fixture(17건)와 dev 검색셋에서만 한다. 시도한 필터 변형 수와 각 결과를 모두 기록한다(과적합 위험 공개).
+
+**채택 기준 (모두 충족)**
+1. **packet 근거 포함률 증가**: dev 답변 가능 12케이스에서 기대 페이지 근거가 packet에 들어간 케이스 비율이 기준선보다 높다. 기준선에서 포함되던 케이스가 빠지면 안 된다.
+2. **insufficient 거절 유지**: dev 생성 평가(6단계와 같은 조건)에서 insufficient 5/5를 올바르게 거절한다.
+3. **citation 유효율 유지**: 같은 생성 평가에서 모든 citation이 유효하다(rate 1.0, 원문 span 검증).
+4. **회귀 없음**: 6단계 통과 10건 중 실패로 바뀌는 케이스가 없다. 답변 가능 케이스 잘못된 거절 수(현재 4/12)는 늘지 않는다.
+5. **test-v2 최종 확인**: dev에서 1~4를 충족한 설정 하나만 test-v2로 한 번 확인한다. 대상은 수정 전 기준선 커밋과 채택 후보 두 개이며, 지표는 gold unit의 packet 포함률이다. 기준은 "후보가 기준선보다 낮지 않다"이다. 결과를 본 뒤 설정을 바꾸지 않고, test-v2 결과로 다시 튜닝하지 않는다.
+
+**test-v2 사용 기록 규칙**
+- 이번 측정은 test-v2의 **두 번째 사용**이다. 첫 사용은 10단계 검색 지표 측정(BM25 가중치 1.0/2.0)이다. 결과 표와 문서에 이 사실을 함께 적는다.
+- test-v2에는 insufficient 케이스가 없으므로, 완화로 엉뚱한 근거가 통과하는지(과허용)는 test-v2로 판정하지 않는다. 기준 2와 dev 결과로만 본다. 이 한계를 결과와 함께 공개한다.
+- `sealed-holdout-v1`은 재실행·재채점하지 않는다(`acceptance.md:211`, `:222`). `holdout-v1/` 폴더 PDF는 dev와 겹쳐 사용하지 않는다(9단계 판정).
