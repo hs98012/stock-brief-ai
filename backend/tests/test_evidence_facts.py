@@ -38,6 +38,49 @@ def test_no_clear_direction_no_card(quote):
         assert grounded_card(span, 'negative') is None
 
 
+def _price_fact(quote: str) -> dict:
+    return next(fact for fact in economic_facts(quote) if fact['metric'] == '가격')
+
+
+def test_price_increase_with_asp_context_is_selling_price():
+    # ASP (average selling price) in the same clause marks 가격 as a selling price.
+    quote = '가람 부문은 HBM 가격 인상 효과로 DRAM ASP 상승세를 이어갈 전망입니다.'
+
+    assert _price_fact(quote)['polarity'] == 'positive'
+    span = next(span for span in evidence_spans({'chunk_id': uuid4(), 'quote': quote, 'page_number': 1}, '')
+        if span['quality_status'] == 'valid')
+    assert span['analysis_perspective'] == 'positive'
+    title, _ = grounded_card(span, 'positive')
+    assert '가격' in title and '인상' in title
+
+
+def test_price_with_asp_and_cost_context_stays_cost():
+    quote = '원재료 가격 인상으로 ASP 상승 효과가 상쇄될 전망입니다.'
+
+    assert _price_fact(quote)['polarity'] == 'negative'
+
+
+@pytest.mark.parametrize('quote', [
+    '가람 부문은 메모리 가격 인하로 ASP 하락이 이어질 전망입니다.',
+    '가람 부문은 메모리 가격 하락으로 ASPs 약세가 예상됩니다.',
+])
+def test_price_decrease_with_asp_context_is_negative(quote):
+    assert _price_fact(quote)['polarity'] == 'negative'
+
+
+def test_price_with_plural_asps_is_selling_price():
+    assert _price_fact('HBM 가격 인상으로 DRAM ASPs가 오를 전망입니다.')['polarity'] == 'positive'
+
+
+@pytest.mark.parametrize('quote', [
+    'HBM 가격 인상이 ASPECT 분석에 반영될 전망입니다.',
+    'WASP 가격 인상이 예상됩니다.',
+    'GASPED 가격 인상이 예상됩니다.',
+])
+def test_asp_inside_other_word_is_not_selling_context(quote):
+    assert _price_fact(quote)['polarity'] == 'ambiguous'
+
+
 def test_same_paragraph_separate_sentences_and_mixed_sentence():
     row = {'chunk_id': uuid4(), 'page_number': 2, 'quote': '매출은 증가했습니다. 비용은 증가했습니다.'}
     spans = evidence_spans(row, '')

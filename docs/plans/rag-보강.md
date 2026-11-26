@@ -844,3 +844,65 @@
 - 이번 측정은 test-v2의 **두 번째 사용**이다. 첫 사용은 10단계 검색 지표 측정(BM25 가중치 1.0/2.0)이다. 결과 표와 문서에 이 사실을 함께 적는다.
 - test-v2에는 insufficient 케이스가 없으므로, 완화로 엉뚱한 근거가 통과하는지(과허용)는 test-v2로 판정하지 않는다. 기준 2와 dev 결과로만 본다. 이 한계를 결과와 함께 공개한다.
 - `sealed-holdout-v1`은 재실행·재채점하지 않는다(`acceptance.md:211`, `:222`). `holdout-v1/` 폴더 PDF는 dev와 겹쳐 사용하지 않는다(9단계 판정).
+
+### 13단계 관점 변형 기록 (dev 전용, focus 필터·test-v2 미사용)
+
+**수정 전 확인: 관점을 뒤 단계에서 다시 확인하는가 (2026-11-26)**
+- 확인한다. 관점 필터를 그냥 완화해 neutral/ambiguous span을 packet에 넣어도 최종 출력에는 들어갈 수 없다.
+  - `analysis_service.analyze_document`의 `validated_items`는 생성 결과의 evidence ID가 `perspective_ids[perspective]` 안에 있을 때만 받는다. 이 집합은 `analysis_perspective`가 positive/negative인 span으로만 만든다.
+  - `evidence_facts.grounded_card`는 `candidate["analysis_perspective"] == perspective`이고, 같은 polarity의 fact가 있으며 `fact_title`이 만들어질 때만 카드를 만든다. 일반 요약 질문 fallback(`_grounded_polarity_fallback`)도 같은 함수를 쓴다.
+- 08-10·08-14 기대 페이지의 neutral/ambiguous span을 읽기 전용으로 분해했다(`document_candidates`).
+  - neutral은 모두 fact가 0개다.
+  - ambiguous는 모두 fact 자체의 polarity가 ambiguous다. 방향이 섞인 span은 없었다.
+  - 따라서 순수 완화는 packet 지표만 올리고 답변은 바꾸지 못한다. 대신 관점이 확인되지 않은 문장이 생성 프롬프트에 들어간다. 지표 부풀리기라 시도하지 않았다(변형 0, 미실행).
+- 결론: 바꿀 곳은 필터가 아니라 관점 **부여**(`economic_facts`)다. 부여된 관점은 위 두 검증을 그대로 거친다.
+
+**변형 목록**
+- 변형 0 (순수 필터 완화): 위 근거로 미실행.
+- 변형 A (시도): 문맥 지표 `가격`의 판매가 문맥에 `ASP`를 추가한다. 같은 절에 원재료/매입/원가가 있으면 적용하지 않는다. 대상은 08-14 dram의 "HBM 가격 인상 … DRAM ASP(S) 상승세" 문장이다.
+- 변형 B (제안만, 미실행): 정성적 경쟁력 문장(08-10 full-stack "핵심 경쟁력은 … 풀스택 제조 역량이다")에 관점을 부여한다. 이 문장에는 지표·방향 표현이 없어, 보수적 fact 규칙으로는 잡을 수 없다. 새 fact 유형이 필요하다. 문장 앞부분에 OCR 잡음("MKT EPS 성장률(2685.80 …")이 섞여 있어 citation 품질 위험도 있다.
+- **시도한 변형 수: 1 (A)**
+
+**변형 A 결과**
+- 테스트 먼저: `test_price_increase_with_asp_context_is_selling_price`가 `ambiguous`로 실패하는 것을 확인했다. `test_price_with_asp_and_cost_context_stays_cost`는 기존 동작을 고정하는 가드라 처음부터 통과한다. 구현 뒤 backend 794 passed.
+- 관찰: 구현 전 전체 실행 1회에서 `test_provider_consent.py::test_stream_all_modes_share_grounding_and_citations[LOCAL_ONLY-False-ollama]`가 한 번 실패했다. 이후 전체 실행과 단독 3회에서는 재현되지 않았다. 원인은 확인하지 않았다.
+- 과적합 공개: 실제 문장은 OCR로 `ASPS`라 `ASP` 지표 자체로는 잡히지 않는다. 변형 A의 문맥 검사는 단어 경계 없이 `ASP`를 찾기 때문에 이 문장에 적용된다. 깨끗한 문장이면 `ASP 상승`이 따로 positive fact가 된다.
+- packet 측정: 커밋 `79699a8`에 변형 A가 커밋 전 상태(worktree_dirty=true)로 실행했다. 2026-11-26. 출력 `evals/results/analysis-packet-dev-20261126-varA/`.
+
+| 지표 | 기준선 | 변형 A |
+|---|---|---|
+| 답변 가능 기대 페이지 포함 | 8/12 | 9/12 |
+| 기대 페이지 + 관점 일치 | 7/12 | 8/12 |
+| packet이 빈 답변 가능 케이스 | 4 | 3 |
+| insufficient packet 크기 | 0,0,0,0,0 | 0,0,0,0,0 |
+
+- 바뀐 케이스는 08-14 dram뿐이다(packet 0 → 1). 기준선 포함 8건은 모두 유지됐고, 다른 케이스의 packet 크기도 같다.
+- 생성 평가: 6단계와 같은 조건(dev 17, `LOCAL_ONLY`, fallback 꺼짐, 관측 `ollama/gemma3:4b`, `rag-eval-backend-8001`). 커밋 `79699a8` + 변형 A(worktree_dirty=true). 2026-11-26 07:45:16 ~ 07:57:08 UTC. 출력 `evals/results/generation-faithfulness-20261126-varA/`.
+
+| 지표 | 새 trace 기준선 (-diag) | 변형 A |
+|---|---|---|
+| passed | 10 | 11 |
+| analysis_filter | 4 | 3 |
+| retrieval / judged_mismatch | 1 / 2 | 1 / 2 |
+| citation 유효 | 16/16 | 17/17 |
+| insufficient 거절 | 5/5 | 5/5 |
+| 답변 가능 잘못된 거절 | 4/12 | 3/12 |
+
+- 바뀐 케이스는 08-14 dram-hbm-pricing-positive뿐이다(`analysis_filter_excluded` → passed). 출력 항목은 positive "HBM 가격 인상 전망" 1개다. citation은 p1 원문 문장이고, 전망 표시가 유지됐다. 나머지 16건은 결과와 실패 항목이 같다.
+- 채택 기준 대조: 1 충족(8→9, 손실 없음), 2 충족(5/5), 3 충족(rate 1.0), 4 충족(회귀 0, 잘못된 거절 4→3). 기준 5(test-v2 최종 확인)는 아직 실행하지 않았다.
+- `./scripts/check.sh` 통과 (2026-11-26, 변형 A 적용 상태): backend 794 passed, frontend 17 passed, lint, build.
+
+**변형 A 채택과 일반화 보강 (2026-11-26, 사용자 결정: A 채택, B 미시도)**
+- 일반화 테스트를 먼저 추가했다.
+  - 하락 방향: "가격 인하 … ASP 하락", "가격 하락 … ASPs 약세"가 negative로 나온다. 처음부터 통과했다.
+  - 복수형: "ASPs"를 판매가 문맥으로 본다. 처음부터 통과했다.
+  - 다른 영문 단어 속 ASP: ASPECT, WASP, GASPED 3건이 실패했다. 단어 경계 없는 검사 때문에 판매가 문맥으로 잘못 적용되고 있었다.
+- 보강: 문맥 검사를 `(?<![A-Za-z])ASPs?(?![A-Za-z])`(대소문자 무시)로 바꿨다. 복수형 `ASPs`와 OCR 표기 `ASPS`는 계속 잡히고, 다른 단어 속 ASP는 제외된다. 구현 뒤 backend 800 passed.
+- 동작이 바뀌었으므로 dev packet을 다시 측정했다. 출력 `evals/results/analysis-packet-dev-20261126-varA2/`. 케이스별 포함 여부, 관점 일치, packet 크기와 페이지가 변형 A 1차 측정과 모두 같다(9/12, 8/12, insufficient 모두 0). packet이 같으므로 생성 평가는 다시 돌리지 않았다.
+- [x] **dev 개발**: 관점 쪽 변형 A 채택. 시도한 변형 1개(A), 미실행 2개(0, B).
+
+### 별도 항목: `test_provider_consent` 간헐 실패 (미수정)
+- [ ] `tests/test_provider_consent.py::test_stream_all_modes_share_grounding_and_citations[LOCAL_ONLY-False-ollama]`가 2026-11-26 전체 backend 실행 1회에서 실패했다. 변형 A 코드가 아직 적용되지 않은 시점이었다.
+- 그 뒤 전체 실행 여러 번과 단독 실행 3회에서는 재현되지 않았다. 실패 출력은 저장하지 않았고 원인은 확인하지 않았다.
+- 다음에 재현되면 실패 출력 전체를 저장하고, 실행 순서·타이밍 의존(공유 상태, 스트리밍 이벤트 순서) 여부부터 확인한다. 사용자 결정으로 지금은 고치지 않는다.
+- `./scripts/check.sh` 통과 (2026-11-26, 경계 보강 후): backend 800 passed, frontend 17 passed, lint, build.

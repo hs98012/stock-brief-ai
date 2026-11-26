@@ -94,7 +94,12 @@ def economic_facts(quote: str) -> list[dict]:
                 elif name.casefold() in {"가격", "asp"}:
                     # Price can be a cost or revenue driver; require its role or
                     # an explicit profitability link instead of guessing a sign.
-                    if re.search(r"판매|제품|판가|이익|수익성", clause):
+                    # ASP(s) is itself a selling price, unless the clause also names a cost price.
+                    # Letter boundaries keep words such as ASPECT or WASP out.
+                    selling_context = re.search(r"판매|제품|판가|이익|수익성", clause) or (
+                        re.search(r"(?<![A-Za-z])ASPs?(?![A-Za-z])", clause, re.I)
+                        and not re.search(r"원재료|매입|원가", clause))
+                    if selling_context:
                         polarity = "positive" if direction in UP else "negative" if direction in DOWN else "ambiguous"
                     elif re.search(r"원재료|매입|원가", clause):
                         polarity = "negative" if direction in UP else "positive" if direction in DOWN else "ambiguous"
