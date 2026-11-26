@@ -12,6 +12,12 @@ const result: AnalysisResult = {
 };
 
 describe("analysis states", () => {
+  it("does not claim a model is generating during retrieval", () => {
+    const { unmount } = render(<AnalysisState loading error={null} />);
+    expect(screen.getByRole("status")).not.toHaveTextContent("Ollama");
+    expect(screen.getByRole("status")).toHaveTextContent("검색");
+    unmount();
+  });
   it("renders loading state", () => { render(<AnalysisState loading error={null} />); expect(screen.getByRole("status")).toHaveTextContent("검토"); });
   it("renders error state", () => { render(<AnalysisState loading={false} error="Ollama 서버 오류" />); expect(screen.getByRole("alert")).toHaveTextContent("Ollama 서버 오류"); });
   it("renders successful grounded result", () => {
@@ -22,17 +28,18 @@ describe("analysis states", () => {
     expect(screen.getByText("PDF 7페이지")).toBeInTheDocument();
     expect(screen.getByText("DB에서 복원한 원문 인용문")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "원문 PDF 7페이지 보기" })).toHaveAttribute("href",
-      "http://localhost:8001/api/v1/documents/document-1/file?page_number=7#page=7");
+      "/source/document-1?page=7");
   });
   it("hides raw numeric table fragments and shows the page guidance", () => {
-    const tableResult = { ...result, citations: [{ ...result.citations[0], display_kind: "table" as const,
+    const tableResult = { ...result, citations: [{ ...result.citations[0], display_kind: "table_fallback" as const,
+      citation_type: "table_fallback" as const,
       display_quote: null, table_labels: [], display_note: "표 수치는 원문 PDF 3페이지에서 확인할 수 있습니다.",
       page_number: 3, quote: "영업이익 53.7 89.2 117.2 Foundry/LS -1.4 -2.2 -0.9" }] };
     render(<AnalysisResultView result={tableResult} documentId="document-1" />);
     expect(screen.queryByText(/53\.7 89\.2/)).not.toBeInTheDocument();
     expect(screen.getByText("표 수치는 원문 PDF 3페이지에서 확인할 수 있습니다.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "원문 PDF 3페이지 보기" })).toHaveAttribute("href",
-      "http://localhost:8001/api/v1/documents/document-1/file?page_number=3#page=3");
+      "/source/document-1?page=3");
   });
   it("renders verified table facts as an accessible key figures card", () => {
     const tableResult = { ...result, citations: [{ ...result.citations[0], citation_type: "table" as const,
@@ -52,5 +59,14 @@ describe("analysis states", () => {
     expect(screen.getByText("확인할 수 없습니다")).toBeInTheDocument();
     expect(screen.getByRole("note")).toHaveTextContent("추가 항목을 제시하지 않았습니다");
     expect(screen.getByText("확인된 호재 근거가 없습니다.")).toBeInTheDocument();
+  });
+
+  it("renders extraction-limited polarity with a PDF page link", () => {
+    render(<AnalysisResultView documentId="document-1" result={{ ...result, positives: [],
+      positive_empty_state: { reason: "extraction_limited",
+        message: "표시 가능한 호재 근거를 원문에서 신뢰성 있게 추출하지 못했습니다.", page_number: 1 } }} />);
+    expect(screen.getByText("표시 가능한 호재 근거를 원문에서 신뢰성 있게 추출하지 못했습니다.")).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: "원문 PDF 1페이지 보기" });
+    expect(link).toHaveAttribute("href", expect.stringContaining("/source/document-1?page=1"));
   });
 });
